@@ -1,54 +1,54 @@
 package types
 
-type Result[T, E any] struct {
+type Result[T any] struct {
 	value Optional[T]
-	err   Optional[E]
+	err   error
 }
 
-func ResultErr[T, E any](err E) Result[T, E] {
-	return Result[T, E]{value: OptionalEmpty[T](), err: OptionalOf(err)}
+func ResultErr[T any](err error) Result[T] {
+	return Result[T]{value: OptionalEmpty[T](), err: err}
 }
-func ResultOk[T, E any](value T) Result[T, E] {
-	return Result[T, E]{value: OptionalOf(value), err: OptionalEmpty[E]()}
+func ResultOk[T any](value T) Result[T] {
+	return Result[T]{value: OptionalOf(value), err: nil}
 }
-func ResultOf[T, E any](value T, err E, condition bool) Result[T, E] {
+func ResultOf[T any](value T, err error, condition bool) Result[T] {
 	if condition {
-		return ResultOk[T, E](value)
+		return ResultOk(value)
 	}
 	return ResultErr[T](err)
 }
 
-func (r Result[T, E]) IsOk() bool {
-	return !r.err.IsPresent()
+func (r Result[T]) IsOk() bool {
+	return r.err == nil
 }
 
-func (r Result[T, E]) IsErr() bool {
-	return r.err.IsPresent()
+func (r Result[T]) IsErr() bool {
+	return r.err != nil
 }
 
-func (r *Result[T, E]) Value() T {
+func (r *Result[T]) Value() T {
 	return r.value.Get()
 }
-func (r *Result[T, E]) ValueOr(value T) T {
+func (r *Result[T]) ValueOr(value T) T {
 	if r.IsOk() {
 		return r.Value()
 	}
 	return value
 }
 
-func (r *Result[T, E]) Error() E {
-	return r.err.Get()
+func (r *Result[T]) Error() error {
+	return r.err
 }
-func (r *Result[T, E]) ErrorOr(err E) E {
+func (r *Result[T]) ErrorOr(err error) error {
 	if r.IsErr() {
 		return r.Error()
 	}
 	return err
 }
 
-func (r *Result[T, E]) GetRaw() (T, E) {
+func (r *Result[T]) GetRaw() (T, error) {
 	return r.Value(), r.Error()
 }
-func (r *Result[T, E]) Get() (Optional[T], Optional[E]) {
+func (r *Result[T]) Get() (Optional[T], error) {
 	return r.value, r.err
 }
