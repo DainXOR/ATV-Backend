@@ -1,0 +1,438 @@
+[INFO] 2025/04/22 16:17:32 logger.go:298: Initializing logger
+[INFO] 2025/04/22 16:17:32 logger.go:298: Logger initialized
+[INFO] 2025/04/22 16:45:52 logger.go:298: Initializing logger
+[INFO] 2025/04/22 16:45:52 logger.go:298: Logger initialized
+[INFO] 2025/04/22 21:55:45 logger.go:298: Initializing logger
+[INFO] 2025/04/22 21:55:45 logger.go:298: Logger initialized
+[INFO] 2025/04/22 21:55:45 logger.go:298: Loading configurations
+[INFO] 2025/04/22 21:55:45 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/22 21:55:45 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/22 21:55:45 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/22 21:55:45 logger.go:298: Disabling log levels:
+[INFO] 2025/04/22 21:55:45 logger.go:298:  -  NONE
+[INFO] 2025/04/22 21:55:45 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/22 21:55:45 logger.go:298: Console logging set to true
+[INFO] 2025/04/22 21:55:45 logger.go:298: File logging set to true
+[INFO] 2025/04/22 21:55:45 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/22 21:55:45 logger.go:298: Using testing database
+[INFO] 2025/04/22 21:55:45 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[FATAL] 2025/04/22 21:55:45 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[INFO] 2025/04/23 13:17:04 logger.go:298: Initializing logger
+[INFO] 2025/04/23 13:17:05 logger.go:298: Logger initialized
+[INFO] 2025/04/23 13:17:05 logger.go:298: Loading configurations
+[INFO] 2025/04/23 13:17:05 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 13:17:05 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 13:17:05 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 13:17:05 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 13:17:05 logger.go:298:  -  NONE
+[INFO] 2025/04/23 13:17:05 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 13:17:05 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 13:17:05 logger.go:298: File logging set to true
+[INFO] 2025/04/23 13:17:05 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 13:17:05 logger.go:298: Using testing database
+[INFO] 2025/04/23 13:17:05 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[FATAL] 2025/04/23 13:17:05 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[INFO] 2025/04/23 13:51:41 logger.go:298: Initializing logger
+[INFO] 2025/04/23 13:51:41 logger.go:298: Logger initialized
+[INFO] 2025/04/23 13:51:41 logger.go:298: Loading configurations
+[INFO] 2025/04/23 13:51:41 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 13:51:41 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 13:51:41 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 13:51:41 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 13:51:41 logger.go:298:  -  NONE
+[INFO] 2025/04/23 13:51:41 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 13:51:41 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 13:51:41 logger.go:298: File logging set to true
+[INFO] 2025/04/23 13:51:41 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 13:51:41 logger.go:298: Using testing database
+[INFO] 2025/04/23 13:51:41 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[FATAL] 2025/04/23 13:51:41 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[INFO] 2025/04/23 14:07:45 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:07:45 logger.go:298: Logger initialized
+[INFO] 2025/04/23 14:07:45 logger.go:298: Loading configurations
+[INFO] 2025/04/23 14:07:45 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 14:07:45 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 14:07:45 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 14:07:45 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 14:07:45 logger.go:298:  -  NONE
+[INFO] 2025/04/23 14:07:45 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 14:07:45 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 14:07:45 logger.go:298: File logging set to true
+[INFO] 2025/04/23 14:07:45 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 14:07:45 logger.go:298: Using testing database
+[INFO] 2025/04/23 14:07:45 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 14:09:15 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:09:15 logger.go:298: Logger initialized
+[INFO] 2025/04/23 14:13:00 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:13:00 logger.go:298: Logger initialized
+[INFO] 2025/04/23 14:30:49 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:30:49 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 14:32:06 logger.go:298: Creating user:  {0      0 0 }
+[DEBUG] 2025/04/23 14:32:06 logger.go:298: Username:   
+[ERROR] 2025/04/23 14:38:04 logger.go:298: json: cannot unmarshal string into Go struct field UserCreate.id_number of type uint
+[ERROR] 2025/04/23 14:38:04 logger.go:298: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 14:38:04 logger.go:298: Request body:  &{0xc00032c090 <nil> <nil> false true {{} {0 0}} true false false 0x7ff72383b9e0}
+[ERROR] 2025/04/23 14:38:04 logger.go:298: Expected body:  {username: string, email: string}
+[INFO] 2025/04/23 14:38:20 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:38:20 logger.go:298: Logger initialized
+[ERROR] 2025/04/23 14:38:27 logger.go:298: json: cannot unmarshal string into Go struct field UserCreate.id_number of type uint
+[ERROR] 2025/04/23 14:38:27 logger.go:298: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 14:38:27 logger.go:298: Request body:  &{0xc00032c000 <nil> <nil> false true {{} {0 0}} true false false 0x7ff75ec2b9e0}
+[ERROR] 2025/04/23 14:38:27 logger.go:298: Expected body:  {username: string, email: string}
+[INFO] 2025/04/23 14:40:17 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:40:17 logger.go:298: Logger initialized
+[INFO] 2025/04/23 14:40:17 logger.go:298: Loading configurations
+[INFO] 2025/04/23 14:40:17 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 14:40:17 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 14:40:17 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 14:40:17 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 14:40:17 logger.go:298:  -  NONE
+[INFO] 2025/04/23 14:40:17 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 14:40:17 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 14:40:17 logger.go:298: File logging set to true
+[INFO] 2025/04/23 14:40:17 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 14:40:17 logger.go:298: Using testing database
+[INFO] 2025/04/23 14:40:17 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 14:40:22 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:40:22 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 14:40:24 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 14:40:24 logger.go:298: Username:  daniel leon
+[INFO] 2025/04/23 14:42:47 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:42:47 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 14:42:52 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 14:42:52 logger.go:298: Username:  daniel leon
+[INFO] 2025/04/23 14:56:34 logger.go:298: Initializing logger
+[INFO] 2025/04/23 14:56:34 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:08:30 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:08:30 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 16:08:50 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:08:50 logger.go:298: Username:  daniel leon
+[INFO] 2025/04/23 16:14:43 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:14:43 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 16:14:49 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:14:49 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:14:49 logger.go:298: Creating user
+[INFO] 2025/04/23 16:17:01 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:17:01 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 16:17:07 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:17:07 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:17:07 logger.go:298: Creating user
+[INFO] 2025/04/23 16:25:28 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:25:28 logger.go:298: Logger initialized
+[DEBUG] 2025/04/23 16:25:55 logger.go:298: Getting user by ID:  1
+[DEBUG] 2025/04/23 16:29:39 logger.go:298: Getting user by ID:  1
+[DEBUG] 2025/04/23 16:29:52 logger.go:298: Getting user by ID:  1
+[INFO] 2025/04/23 16:33:54 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:33:54 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:33:54 logger.go:298: Loading configurations
+[INFO] 2025/04/23 16:33:54 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 16:33:54 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 16:33:54 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 16:33:54 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 16:33:54 logger.go:298:  -  NONE
+[INFO] 2025/04/23 16:33:54 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 16:33:54 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 16:33:54 logger.go:298: File logging set to true
+[INFO] 2025/04/23 16:33:54 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 16:33:54 logger.go:298: Using testing database
+[INFO] 2025/04/23 16:33:54 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 16:41:52 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:41:52 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:41:52 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 16:41:52 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 16:41:52 logger.go:298: Starting server
+[DEBUG] 2025/04/23 16:42:05 logger.go:298: Getting user by ID:  1
+[DEBUG] 2025/04/23 16:42:25 logger.go:298: Getting user by ID:  1
+[ERROR] 2025/04/23 16:42:34 logger.go:298: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 16:42:34 logger.go:298: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 16:42:34 logger.go:298: Request body:  &{0xc000008ff0 <nil> <nil> false true {{} {0 0}} true false false 0x7ff6d5a1a260}
+[ERROR] 2025/04/23 16:42:34 logger.go:298: Expected body:  {username: string, email: string}
+[DEBUG] 2025/04/23 16:45:16 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:45:16 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:45:16 logger.go:298: Creating user
+[INFO] 2025/04/23 16:46:40 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:46:40 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:46:40 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 16:46:40 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 16:46:40 logger.go:298: Starting server
+[DEBUG] 2025/04/23 16:46:46 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:46:46 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:46:46 logger.go:298: Creating user
+[DEBUG] 2025/04/23 16:46:46 logger.go:298: User id:  0
+[DEBUG] 2025/04/23 16:48:51 logger.go:298: Getting user by ID:  1
+[INFO] 2025/04/23 16:50:06 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:50:06 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:50:06 logger.go:298: Loading configurations
+[INFO] 2025/04/23 16:50:06 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 16:50:06 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 16:50:06 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 16:50:06 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 16:50:06 logger.go:298:  -  NONE
+[INFO] 2025/04/23 16:50:06 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 16:50:06 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 16:50:06 logger.go:298: File logging set to true
+[INFO] 2025/04/23 16:50:06 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 16:50:06 logger.go:298: Using testing database
+[INFO] 2025/04/23 16:50:06 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 16:50:21 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:50:21 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:50:21 logger.go:298: Loading configurations
+[INFO] 2025/04/23 16:50:21 logger.go:298: Setting minimum log level to ALL
+[INFO] 2025/04/23 16:50:21 logger.go:298: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 16:50:21 logger.go:298: Logging options set to ALL
+[INFO] 2025/04/23 16:50:21 logger.go:298: Disabling log levels:
+[INFO] 2025/04/23 16:50:21 logger.go:298:  -  NONE
+[INFO] 2025/04/23 16:50:21 logger.go:298: Disabled logging options:  
+[INFO] 2025/04/23 16:50:21 logger.go:298: Console logging set to true
+[INFO] 2025/04/23 16:50:21 logger.go:298: File logging set to true
+[INFO] 2025/04/23 16:50:21 logger.go:298: Connecting to Postgres database
+[INFO] 2025/04/23 16:50:21 logger.go:298: Using testing database
+[INFO] 2025/04/23 16:50:21 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 16:51:03 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:51:03 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:51:03 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 16:51:03 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 16:51:03 logger.go:298: Starting server
+[DEBUG] 2025/04/23 16:51:05 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:51:05 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:51:05 logger.go:298: Creating user
+[DEBUG] 2025/04/23 16:51:05 logger.go:298: User id:  0
+[DEBUG] 2025/04/23 16:51:40 logger.go:298: Getting user by ID:  1
+[INFO] 2025/04/23 16:57:04 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:57:04 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:57:04 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 16:57:04 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 16:57:04 logger.go:298: Starting server
+[DEBUG] 2025/04/23 16:57:14 logger.go:298: Getting user by ID:  1
+[INFO] 2025/04/23 16:57:40 logger.go:298: Initializing logger
+[INFO] 2025/04/23 16:57:40 logger.go:298: Logger initialized
+[INFO] 2025/04/23 16:57:40 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 16:57:40 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 16:57:40 logger.go:298: Starting server
+[DEBUG] 2025/04/23 16:57:58 logger.go:298: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 16:57:58 logger.go:298: Username:  daniel leon
+[DEBUG] 2025/04/23 16:57:58 logger.go:298: Creating user
+[DEBUG] 2025/04/23 16:57:58 logger.go:298: User id:  0
+[DEBUG] 2025/04/23 16:58:11 logger.go:298: Getting user by ID:  1
+[INFO] 2025/04/23 17:01:25 logger.go:298: Initializing logger
+[INFO] 2025/04/23 17:01:25 logger.go:298: Logger initialized
+[INFO] 2025/04/23 17:01:25 logger.go:298: Use default database:  true
+[INFO] 2025/04/23 17:01:25 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 17:01:25 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 17:01:25 logger.go:298: Starting server
+[INFO] 2025/04/23 17:01:55 logger.go:298: Initializing logger
+[INFO] 2025/04/23 17:01:55 logger.go:298: Logger initialized
+[INFO] 2025/04/23 17:01:55 logger.go:298: Use default database:  
+[INFO] 2025/04/23 17:01:55 logger.go:298: Connecting to SQLite database
+[INFO] 2025/04/23 17:01:55 logger.go:298: Env configurations loaded
+[INFO] 2025/04/23 17:01:55 logger.go:298: Starting server
+[INFO] 2025/04/23 17:04:28 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:04:28 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:04:28 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:04:28 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:04:28 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:04:28 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:04:28 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:04:28 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:04:28 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:04:28 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:04:28 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:04:28 logger.go:299: Use default database:  POSTGRES
+[INFO] 2025/04/23 17:04:28 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:04:28 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:04:28 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:04:28 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:04:28 logger.go:299: Starting server
+[INFO] 2025/04/23 17:05:43 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:05:43 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:05:43 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:05:43 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:05:43 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:05:43 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:05:43 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:05:43 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:05:43 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:05:43 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:05:43 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:05:43 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:05:43 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:05:43 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:05:43 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:05:44 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:05:44 logger.go:299: Starting server
+[DEBUG] 2025/04/23 17:06:54 logger.go:299: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:06:54 logger.go:299: Username:  daniel leon
+[DEBUG] 2025/04/23 17:06:54 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:06:54 logger.go:299: User id:  1
+[DEBUG] 2025/04/23 17:07:04 logger.go:299: Getting user by ID:  1
+[DEBUG] 2025/04/23 17:09:00 logger.go:299: Getting user by ID:  1
+[DEBUG] 2025/04/23 17:14:00 logger.go:299: Creating user:  {123456789  leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:14:00 logger.go:299: Username:   leon
+[DEBUG] 2025/04/23 17:14:00 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:14:00 logger.go:299: User id:  0
+[DEBUG] 2025/04/23 17:14:23 logger.go:299: Creating user:  {123456789 daniel leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:14:23 logger.go:299: Username:  daniel leon
+[DEBUG] 2025/04/23 17:14:23 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:14:23 logger.go:299: User id:  0
+[DEBUG] 2025/04/23 17:14:37 logger.go:299: Creating user:  {13456789  leon da@dnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:14:37 logger.go:299: Username:   leon
+[DEBUG] 2025/04/23 17:14:37 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:14:37 logger.go:299: User id:  0
+[DEBUG] 2025/04/23 17:15:01 logger.go:299: Creating user:  {13456789  leon da@ddnaois dasdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:15:01 logger.go:299: Username:   leon
+[DEBUG] 2025/04/23 17:15:01 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:15:01 logger.go:299: User id:  0
+[DEBUG] 2025/04/23 17:15:10 logger.go:299: Creating user:  {13456789  leon da@ddnaois dsdsadsad assssss 4 1 3821973812}
+[DEBUG] 2025/04/23 17:15:10 logger.go:299: Username:   leon
+[DEBUG] 2025/04/23 17:15:10 logger.go:299: Creating user
+[DEBUG] 2025/04/23 17:15:10 logger.go:299: User id:  6
+[ERROR] 2025/04/23 17:30:44 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:30:44 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:30:44 logger.go:299: Request body:  &{0xc0001649a8 <nil> <nil> false true {{} {0 0}} true false false 0x7ff674d7ac80}
+[ERROR] 2025/04/23 17:30:44 logger.go:299: Expected body:  {username: string, email: string}
+[INFO] 2025/04/23 17:30:59 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:30:59 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:30:59 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:30:59 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:30:59 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:30:59 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:30:59 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:30:59 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:30:59 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:30:59 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:30:59 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:30:59 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:30:59 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:30:59 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:30:59 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:31:00 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:31:00 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:31:03 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:31:03 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:31:03 logger.go:299: Request body:  &{0xc000374000 <nil> <nil> false true {{} {0 0}} true false false 0x7ff615aeac80}
+[ERROR] 2025/04/23 17:31:03 logger.go:299: Expected body:  models.UserCreate
+[INFO] 2025/04/23 17:39:36 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:39:36 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:39:36 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:39:36 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:39:36 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:39:36 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:39:36 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:39:36 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:39:36 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:39:36 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:39:36 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:39:36 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:39:36 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:39:36 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:39:36 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:39:36 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:39:36 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:39:53 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:39:53 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:39:53 logger.go:299: Request body:  &{0xc000326000 <nil> <nil> false true {{} {0 0}} true false false 0x7ff64482ac80}
+[ERROR] 2025/04/23 17:39:53 logger.go:299: Expected body:  UserCreate {
+  IDNumber string,
+  FirstName string,
+  LastName string,
+  PersonalEmail string,
+  InstitutionEmail string,
+  ResidenceAddress string,
+  Semester uint,
+  UniversityID string,
+  PhoneNumber string
+}
+[INFO] 2025/04/23 17:52:21 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:52:21 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:52:21 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:52:21 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:52:21 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:52:21 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:52:21 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:52:21 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:52:21 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:52:21 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:52:21 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:52:21 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:52:21 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:52:21 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:52:21 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:52:21 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:52:21 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:52:29 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:52:29 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:52:29 logger.go:299: Request body:  &{0xc000134090 <nil> <nil> false true {{} {0 0}} true false false 0x7ff659fbac80}
+[ERROR] 2025/04/23 17:52:29 logger.go:299: Expected body:  UserCreate {
+  id_number: string,
+  first_name: string,
+  last_name: string,
+  email: string,
+  institution_email: string,
+  residence_address: string,
+  semester: uint,
+  university_id: string,
+  phone_number: string
+}
+[INFO] 2025/04/23 17:55:25 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:55:25 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:55:25 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:55:25 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:55:25 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:55:25 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:55:25 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:55:25 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:55:25 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:55:25 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:55:25 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:55:25 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:55:25 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:55:25 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:55:25 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:55:25 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:55:25 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:55:35 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:55:35 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:55:35 logger.go:299: Request body:  &{0xc000134000 <nil> <nil> false true {{} {0 0}} true false false 0x7ff69353ac80}
+[ERROR] 2025/04/23 17:55:35 logger.go:299: Expected body:  UserCreate {id_number: string,first_name: string,last_name: string,email: string,institution_email: string,residence_address: string,semester: uint,university_id: string,phone_number: string}
+[INFO] 2025/04/23 17:56:49 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:56:49 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:56:49 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:56:49 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:56:49 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:56:49 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:56:49 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:56:49 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:56:49 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:56:49 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:56:49 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:56:49 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:56:49 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:56:49 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:56:49 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:56:49 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:56:49 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:56:52 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:56:52 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:56:52 logger.go:299: Request body:  &{0xc000142000 <nil> <nil> false true {{} {0 0}} true false false 0x7ff7fc69ac80}
+[ERROR] 2025/04/23 17:56:52 logger.go:299: Expected body:  UserCreate {id_number: string, first_name: string, last_name: string, email: string, institution_email: string, residence_address: string, semester: uint, university_id: string, phone_number: string}
+[INFO] 2025/04/23 17:57:21 logger.go:299: Logger initialized
+[INFO] 2025/04/23 17:57:21 logger.go:299: Loading environment variables for logger
+[INFO] 2025/04/23 17:57:21 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/04/23 17:57:21 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/04/23 17:57:21 logger.go:299: Logging options set to ALL
+[INFO] 2025/04/23 17:57:21 logger.go:299: Disabling log levels:
+[INFO] 2025/04/23 17:57:21 logger.go:299:  -  NONE
+[INFO] 2025/04/23 17:57:21 logger.go:299: Disabled logging options:  
+[INFO] 2025/04/23 17:57:21 logger.go:299: Console logging set to true
+[INFO] 2025/04/23 17:57:21 logger.go:299: File logging set to true
+[INFO] 2025/04/23 17:57:21 logger.go:299: Logger environment variables loaded
+[INFO] 2025/04/23 17:57:21 logger.go:299: Use default database:  false
+[INFO] 2025/04/23 17:57:21 logger.go:299: Connecting to Postgres database
+[INFO] 2025/04/23 17:57:21 logger.go:299: Using testing database
+[INFO] 2025/04/23 17:57:21 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/04/23 17:57:21 logger.go:299: Env configurations loaded
+[INFO] 2025/04/23 17:57:21 logger.go:299: Starting server
+[ERROR] 2025/04/23 17:57:27 logger.go:299: json: cannot unmarshal number into Go struct field UserCreate.university_id of type string
+[ERROR] 2025/04/23 17:57:27 logger.go:299: Failed to create user: JSON request body is invalid
+[ERROR] 2025/04/23 17:57:27 logger.go:299: Request body:  &{0xc000168018 <nil> <nil> false true {{} {0 0}} true false false 0x7ff78fb7ac80}
+[ERROR] 2025/04/23 17:57:27 logger.go:299: Expected body:  {id_number: string, first_name: string, last_name: string, email: string, institution_email: string, residence_address: string, semester: uint, university_id: string, phone_number: string}

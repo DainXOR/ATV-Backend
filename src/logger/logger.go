@@ -45,24 +45,29 @@ func Init() {
 		FatalLogger:   log.New(os.Stderr, "[FATAL] ", log.LstdFlags|log.Lshortfile),
 	}
 
-	EnvInit()
+	Info("Logger initialized")
 }
 
 func EnvInit() {
+	Info("Loading environment variables for logger")
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
 	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
 	logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
 
 	if existMinLevel {
+		Info("Setting minimum log level to", minLogLevel)
 		SetMinLogLevel(LogLevelValue(minLogLevel))
 	}
 	if existDisableLevels {
 		levels := strings.Split(disableLevels, "|")
 		options := 0
+		Info("Disabling log levels:")
+
 		for _, level := range levels {
 			level = strings.TrimSpace(level)
 			options |= LogLevelValue(level)
+			Info(" - ", level)
 		}
 
 		DisableLogOptions(options)
@@ -71,6 +76,8 @@ func EnvInit() {
 		b, err := strconv.ParseBool(logConsole)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_CONSOLE value")
+			SetLogToConsole(true)
+			Warning("Defaulting to console logging enabled")
 		} else {
 			SetLogToConsole(b)
 		}
@@ -79,10 +86,14 @@ func EnvInit() {
 		b, err := strconv.ParseBool(logFile)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_FILE value")
+			SetLogToFile(true)
+			Warning("Defaulting to file logging enabled")
 		} else {
 			SetLogToFile(b)
 		}
 	}
+
+	Info("Logger environment variables loaded")
 }
 
 func LogsToFile() bool {
