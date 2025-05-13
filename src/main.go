@@ -15,17 +15,11 @@ import (
 func init() {
 	logger.Init()
 
-	//err := godotenv.Load()
-	//if err != nil {
-	//	logger.Error("Error loading .env file")
-	//}
-
 	logger.EnvInit()
 	configs.DB.EnvInit()
+	configs.DB.Migrate(&models.UserDB{})
 	logger.Info("Env configurations loaded")
 	logger.Info("Starting server")
-
-	configs.DB.Migrate(&models.UserDB{})
 
 }
 
@@ -49,5 +43,5 @@ func main() {
 
 	routes.UserRoutes(router)
 
-	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

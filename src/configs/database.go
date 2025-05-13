@@ -126,6 +126,11 @@ func (db) EnvInit() {
 		DB.dbType = "SQLITE"
 		DB.ConnectSQLiteEnv()
 	}
+
+	logger.Info("Database connection established")
+	logger.Info("Database type: ", DB.dbType)
+	DB.CreateDatabase()
+
 }
 
 func (db) ConnectPostgresEnv() {
@@ -259,11 +264,15 @@ func (db) CreatePostgresDatabase() error {
 	log.Printf("Database '%s' created successfully", DB.name)
 	return nil
 }
-
 func (db) CreateMongoDBDatabase() {
+	// MongoDB does not require explicit database creation.
+	// Just connect to the desired database and it will be created on first use.
+	logger.Info("MongoDB database created automatically")
 }
-
 func (db) CreateSQLiteDatabase() {
+	// SQLite databases are created automatically when you open a connection to a non-existent database file.
+	// So, no explicit creation is needed.
+	logger.Info("SQLite database created automatically")
 }
 
 func (db) Migrate(models ...any) {
