@@ -436,3 +436,20 @@
 [ERROR] 2025/04/23 17:57:27 logger.go:299: Failed to create user: JSON request body is invalid
 [ERROR] 2025/04/23 17:57:27 logger.go:299: Request body:  &{0xc000168018 <nil> <nil> false true {{} {0 0}} true false false 0x7ff78fb7ac80}
 [ERROR] 2025/04/23 17:57:27 logger.go:299: Expected body:  {id_number: string, first_name: string, last_name: string, email: string, institution_email: string, residence_address: string, semester: uint, university_id: string, phone_number: string}
+[INFO] 2025/05/07 13:38:56 logger.go:299: Logger initialized
+[INFO] 2025/05/07 13:38:56 logger.go:299: Loading environment variables for logger
+[INFO] 2025/05/07 13:38:56 logger.go:299: Setting minimum log level to ALL
+[INFO] 2025/05/07 13:38:56 logger.go:299: Minimum logging level set to:  | ALL |
+[INFO] 2025/05/07 13:38:56 logger.go:299: Logging options set to ALL
+[INFO] 2025/05/07 13:38:56 logger.go:299: Disabling log levels:
+[INFO] 2025/05/07 13:38:56 logger.go:299:  -  NONE
+[INFO] 2025/05/07 13:38:56 logger.go:299: Disabled logging options:  
+[INFO] 2025/05/07 13:38:56 logger.go:299: Console logging set to true
+[INFO] 2025/05/07 13:38:56 logger.go:299: File logging set to true
+[INFO] 2025/05/07 13:38:56 logger.go:299: Logger environment variables loaded
+[INFO] 2025/05/07 13:38:56 logger.go:299: Use default database:  false
+[INFO] 2025/05/07 13:38:56 logger.go:299: Connecting to Postgres database
+[INFO] 2025/05/07 13:38:56 logger.go:299: Using testing database
+[INFO] 2025/05/07 13:38:56 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/05/07 13:38:56 logger.go:299: Env configurations loaded
+[INFO] 2025/05/07 13:38:56 logger.go:299: Starting server

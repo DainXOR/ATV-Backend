@@ -23,5 +23,6 @@ func init() {
 }
 
 func main() {
-	configs.DataBase.AutoMigrate(&models.UserDB{})
+	//configs.DataBase.AutoMigrate(&models.UserDB{})
+	configs.DB.Migrate(&models.UserDB{})
 }
