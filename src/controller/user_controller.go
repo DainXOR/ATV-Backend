@@ -66,3 +66,77 @@ func (userType) Create(c *gin.Context) {
 	user := result.Value()
 	c.JSON(http.StatusCreated, user.ToResponse())
 }
+
+// Update updates an existing user in the database
+// This will override zeroed fields
+func (userType) Update(c *gin.Context) {
+	var body models.UserCreate
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to update user: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(http.StatusBadRequest,
+			types.Error(
+				types.Http.BadRequest(),
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	logger.Debug("Updating user by ID: ", id)
+
+	result := db.User.UpdateUser(id, body)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code.AsInt(), err)
+		return
+	}
+
+	user := result.Value()
+	c.JSON(http.StatusOK, user.ToResponse())
+}
+
+// Patch updates an existing user in the database
+// This will keep previous value in zeroed fields
+func (userType) Patch(c *gin.Context) {
+	var body models.UserCreate
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to update user: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(http.StatusBadRequest,
+			types.Error(
+				types.Http.BadRequest(),
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	logger.Debug("Patching user by ID: ", id)
+
+	result := db.User.PatchUser(id, body)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code.AsInt(), err)
+		return
+	}
+
+	user := result.Value()
+	c.JSON(http.StatusOK, user.ToResponse())
+}

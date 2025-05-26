@@ -6,23 +6,22 @@ import (
 	"dainxor/atv/middleware"
 	"dainxor/atv/models"
 	"dainxor/atv/routes"
+
 	"os"
 
 	"github.com/gin-gonic/gin"
-	//"github.com/joho/godotenv"
 )
 
 func init() {
-	logger.Init()
-
 	logger.EnvInit()
 	configs.DB.EnvInit()
-	configs.DB.Migrate(&models.UserDB{})
+	configs.DB.Migrate(&models.UserDBGorm{})
 	logger.Info("Env configurations loaded")
 	logger.Info("Starting server")
 
 }
 
+// address returns the server address from the environment variable
 func address() string {
 	address, exist := os.LookupEnv("SERVER_ADDRESS")
 	if !exist {
@@ -37,11 +36,11 @@ func main() {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 
-	routes.MainRoutes(router)
-	routes.InfoRoutes(router)
-	routes.TestRoutes(router)
+	routes.MainRoutes(router) // Main route for the API
+	routes.InfoRoutes(router) // Routes for information about the API
+	routes.TestRoutes(router) // Routes for testing purposes
 
-	routes.UserRoutes(router)
+	routes.UserRoutes(router) // Routes for user management
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

@@ -3,6 +3,7 @@ package configs
 import (
 	"context"
 	"dainxor/atv/logger"
+	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"fmt"
 	"log"
@@ -17,10 +18,14 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
+type mongoType struct {
+	client *mongo.Client
+	db     *mongo.Database
+}
+type gormType struct {
+	db *gorm.DB
+}
 type db struct {
-	gormDB  *gorm.DB
-	mongoDB *mongo.Client
-
 	dbType string
 
 	user string
@@ -32,11 +37,48 @@ type db struct {
 
 var DB db
 var DataBase *gorm.DB
+var mongoT mongoType
+var gormT gormType
 
-func (db) Get() *gorm.DB {
-	return DataBase
+func (db) Gorm() *gormType {
+	return &gormT
+}
+func (db) Mongo() *mongoType {
+	return &mongoT
 }
 
+func (gormType) DB() *gorm.DB {
+	return gormT.db
+}
+
+func (mongoType) DB() *mongo.Database {
+	return mongoT.db
+}
+func (mongoType) Collection(name string) *mongo.Collection {
+	return mongoT.db.Collection(name)
+}
+func (mongoType) Context() context.Context {
+	return context.TODO()
+}
+
+func (db) GetFirst(dest any, id string) types.HttpError {
+	if DB.Type() == "MONGODB" {
+		collectionName := dest.(interface{ TableName() string }).TableName()
+		err := DB.Mongo().DB().Collection(collectionName).FindOne(context.TODO(), map[string]any{"_id": id}).Decode(dest)
+		ret := types.HttpError{}
+		ret.Err = err
+		return ret
+	}
+	if DB.Type() == "POSTGRES" || DB.Type() == "SQLITE" {
+		DB.Gorm().DB().First(dest, id)
+		return types.HttpError{}
+	}
+
+	return types.HttpError{}
+}
+
+// LoadDBConfig loads the database configuration from environment variables
+// and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
 	envUser := "DB_USER"
@@ -103,7 +145,9 @@ func (db) loadDBConfig() {
 	}
 }
 
-func (db) EnvInit() {
+// EnvInit initializes the database connection based on the environment variables
+// It checks for the database type and connects to the appropriate database
+func (db) EnvInit() error {
 	dbType, exist := os.LookupEnv("DB_TYPE")
 	DB.dbType = dbType
 	DB.loadDBConfig()
@@ -129,10 +173,12 @@ func (db) EnvInit() {
 
 	logger.Info("Database connection established")
 	logger.Info("Database type: ", DB.dbType)
-	DB.CreateDatabase()
 
+	return DB.CreateDatabase()
 }
 
+// ConnectPostgresEnv connects to the Postgres database using environment variables
+// It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectPostgresEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
 	if exist && useTesting != "TRUE" {
@@ -154,6 +200,9 @@ func (db) ConnectPostgresEnv() {
 		)
 	}
 }
+
+// ConnectPostgres connects to the Postgres database using the provided credentials
+// It uses the gorm library to establish the connection
 func (db) ConnectPostgres(host string, user string, password string, dbname string, port string) {
 	var err error
 	dsn := "host=" + host +
@@ -163,13 +212,15 @@ func (db) ConnectPostgres(host string, user string, password string, dbname stri
 		" port=" + port +
 		" sslmode=disable"
 	logger.Info("Connecting to database: ", dsn)
-	DataBase, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	gormT.db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		logger.Fatal(err)
 	}
 }
 
+// ConnectSQLiteEnv connects to the SQLite database using environment variables
+// It checks for the database name in the environment variables and uses a default if not found
 func (db) ConnectSQLiteEnv() {
 	dbname, exist := os.LookupEnv("DB_NAME")
 	if exist {
@@ -178,15 +229,20 @@ func (db) ConnectSQLiteEnv() {
 		DB.ConnectSQLite("atvsqlite.db")
 	}
 }
+
+// ConnectSQLite connects to the SQLite database using the provided database name
+// It uses the gorm library to establish the connection
 func (db) ConnectSQLite(dbname string) {
 	var err error
-	DataBase, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
+	gormT.db, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
 	}
 }
 
+// ConnectMongoDBEnv connects to the MongoDB database using environment variables
+// It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
 	if exist && useTesting != "TRUE" {
@@ -196,6 +252,9 @@ func (db) ConnectMongoDBEnv() {
 		DB.ConnectMongoDB(os.Getenv("DB_PORT_TEST"))
 	}
 }
+
+// ConnectMongoDB connects to the MongoDB database using the provided port
+// It uses the mongo driver to establish the connection
 func (db) ConnectMongoDB(port string) {
 	// Create a Client to a MongoDB server and use Ping to verify that the
 	// server is running.
@@ -221,13 +280,20 @@ func (db) ConnectMongoDB(port string) {
 	}
 }
 
-func (db) CreateDatabase() {
+// CreateDatabase creates the database based on the database type
+// It checks if the database already exists and creates it if not
+func (db) CreateDatabase() error {
 	logger.Info("Creating database")
 
 	switch DB.dbType {
 	case "POSTGRES":
 		logger.Info("Creating Postgres database")
-		DB.CreatePostgresDatabase()
+		err := DB.CreatePostgresDatabase()
+
+		if err != nil {
+			logger.Error("Error creating Postgres database: ", err)
+			return err
+		}
 
 	case "MONGODB":
 		logger.Info("Creating MongoDB database")
@@ -239,12 +305,16 @@ func (db) CreateDatabase() {
 		logger.Info("Creating SQLite database")
 		DB.CreateSQLiteDatabase()
 	}
+
+	return nil
 }
 
+// CreatePostgresDatabase creates the Postgres database if it does not exist
+// It uses a raw SQL query to check for the existence of the database
 func (db) CreatePostgresDatabase() error {
 	var exists bool
 	checkQuery := "SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = ?)"
-	if err := DB.Get().Raw(checkQuery, DB.name).Scan(&exists).Error; err != nil {
+	if err := DB.Gorm().DB().Raw(checkQuery, DB.name).Scan(&exists).Error; err != nil {
 		logger.Error("Error checking database existence: ", err)
 		return err
 	}
@@ -257,36 +327,70 @@ func (db) CreatePostgresDatabase() error {
 
 	// Create the new database
 	createQuery := fmt.Sprintf("CREATE DATABASE \"%s\"", DB.name)
-	if err := DB.Get().Exec(createQuery).Error; err != nil {
+	if err := DB.Gorm().DB().Exec(createQuery).Error; err != nil {
 		return fmt.Errorf("failed to create database '%s': %w", DB.name, err)
 	}
 
 	log.Printf("Database '%s' created successfully", DB.name)
 	return nil
 }
+
+// CreateMongoDBDatabase creates the MongoDB database if it does not exist
+// MongoDB does not require explicit database creation, it is created on first use
 func (db) CreateMongoDBDatabase() {
-	// MongoDB does not require explicit database creation.
-	// Just connect to the desired database and it will be created on first use.
 	logger.Info("MongoDB database created automatically")
 }
+
+// CreateSQLiteDatabase creates the SQLite database if it does not exist
+// SQLite databases are created automatically when you open a connection to a non-existent database file
 func (db) CreateSQLiteDatabase() {
 	// SQLite databases are created automatically when you open a connection to a non-existent database file.
 	// So, no explicit creation is needed.
 	logger.Info("SQLite database created automatically")
 }
 
+// Migrate performs database migrations for the provided models
+// It uses the gorm library to automatically migrate the models to the database
 func (db) Migrate(models ...any) {
 	logger.Info("Starting migrations")
 
-	for _, model := range models {
-		err := DataBase.AutoMigrate(model)
+	if DB.dbType == "POSTGRES" {
+		for _, model := range models {
+			err := gormT.DB().AutoMigrate(model)
 
-		if err != nil {
-			logger.Error("Error migrating model: ", err)
-			logger.Error("Model: ", utils.StructToString(model))
-			logger.Fatal("Migration failed")
+			if err != nil {
+				logger.Error("Error migrating model: ", err)
+				logger.Error("Model: ", utils.StructToString(model))
+				logger.Fatal("Migration failed")
+			}
 		}
-	}
 
-	logger.Info("Migrations completed")
+		logger.Info("Migrations completed")
+
+	} else {
+		logger.Info("No migrations needed for SQLite or MongoDB")
+	}
+}
+
+// Close closes the database connection
+func (db) Close() {
+	if DB.dbType == "POSTGRES" {
+		sqlDB, err := gormT.DB().DB()
+		if err != nil {
+			logger.Error("Error getting SQL DB: ", err)
+			return
+		}
+		sqlDB.Close()
+	} else if DB.dbType == "MONGODB" {
+		if err := mongoT.DB().Client().Disconnect(context.Background()); err != nil {
+			logger.Error("Error disconnecting from MongoDB: ", err)
+		}
+	} else {
+		logger.Info("No need to close SQLite connection")
+	}
+}
+
+// GetDBType returns the database type in use
+func (db) Type() string {
+	return DB.dbType
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // Function to get the structure of a struct as a string
-func StructToString(obj interface{}) string {
+func StructToString(obj any) string {
 	t := reflect.TypeOf(obj)
 	//v := reflect.ValueOf(obj)
 
@@ -30,4 +30,29 @@ func StructToString(obj interface{}) string {
 
 	sb.WriteString("}")
 	return sb.String()
+}
+
+// Function to convert a struct to a map[string]any
+// It takes a filter function to determine which fields to include in the map
+func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) map[string]any {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+
+	result := make(map[string]any)
+
+	for i := range t.NumField() {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		if filter != nil && filter(field, value) {
+			result[string(field.Tag.Get("json"))] = value.Interface()
+		}
+
+	}
+
+	return result
 }
