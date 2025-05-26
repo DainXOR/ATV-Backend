@@ -21,4 +21,4 @@
 go.work
 
 # Sensitive files
-.env
+*.env
