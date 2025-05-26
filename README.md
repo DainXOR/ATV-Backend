@@ -2,11 +2,17 @@
  
 ## Run
 
-- Place yourself inside the 'src' directory
+Place yourself inside the `src` directory
+```
 cd src
+```
 
-- Run using docker compose
+Run using docker compose
+```
 docker-compose up -d --build
+```
 
-- To stop, use compose down
+To stop, use compose down
+```
 docker-compose down
+```
