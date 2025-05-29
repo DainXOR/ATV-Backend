@@ -93,6 +93,22 @@ func (user UserCreate) ToDBGorm() UserDBGorm {
 	}
 }
 
+// ToDB converts a UserCreate struct to a UserDBMongo struct
+// This is used to prepare the data for insertion or patch into the MongoDB database
+func (user UserCreate) ToDBMongo() UserDBMongo {
+	return UserDBMongo{
+		IDNumber:         user.IDNumber,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		PersonalEmail:    user.PersonalEmail,
+		InstitutionEmail: user.InstitutionEmail,
+		ResidenceAddress: user.ResidenceAddress,
+		Semester:         user.Semester,
+		UniversityID:     user.UniversityID,
+		PhoneNumber:      user.PhoneNumber,
+	}
+}
+
 // ToPutDB converts a UserCreate struct to a map[string]any
 // This is used to prepare the data for updating a user in the database
 // It filters out fields that are not needed for the update or should not be zeroed
@@ -119,6 +135,22 @@ func (user UserCreate) ToPutDB() map[string]any {
 func (user UserDBGorm) ToResponse() UserResponse {
 	return UserResponse{
 		ID:               user.ID,
+		IDNumber:         user.IDNumber,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		PersonalEmail:    user.PersonalEmail,
+		InstitutionEmail: user.InstitutionEmail,
+		ResidenceAddress: user.ResidenceAddress,
+		Semester:         user.Semester,
+		UniversityID:     user.UniversityID,
+		PhoneNumber:      user.PhoneNumber,
+		CreatedAt:        user.CreatedAt,
+		UpdatedAt:        user.UpdatedAt,
+	}
+}
+func (user UserDBMongo) ToResponse() UserResponse {
+	return UserResponse{
+		ID:               uint(user.ID.Timestamp().UnixNano()),
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,

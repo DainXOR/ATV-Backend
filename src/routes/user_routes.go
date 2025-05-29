@@ -12,8 +12,14 @@ func UserRoutes(router *gin.Engine) {
 	// Grouping can also be done inside other groups
 	userRouter := router.Group("api/v0/user")
 	{
-		userRouter.GET("/:id", controller.User.GetByID)
+		userRouter.GET("/:id", controller.User.GetByIDGorm)
 
-		userRouter.POST("/", controller.User.Create)
+		userRouter.POST("/", controller.User.CreateGorm)
+	}
+	userRouter = router.Group("api/v1/user")
+	{
+		userRouter.GET("/:id", controller.User.GetByIDMongo)
+
+		userRouter.POST("/", controller.User.CreateGorm)
 	}
 }

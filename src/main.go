@@ -10,9 +10,15 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func init() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file: " + err.Error())
+	}
+
 	logger.EnvInit()
 	configs.DB.EnvInit()
 	configs.DB.Migrate(&models.UserDBGorm{})

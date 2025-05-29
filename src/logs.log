@@ -453,3 +453,76 @@
 [INFO] 2025/05/07 13:38:56 logger.go:299: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
 [INFO] 2025/05/07 13:38:56 logger.go:299: Env configurations loaded
 [INFO] 2025/05/07 13:38:56 logger.go:299: Starting server
+[INFO] 2025/05/28 18:29:21 logger.go:300: Logger initialized
+[INFO] 2025/05/28 18:29:21 logger.go:300: Loading environment variables for logger
+[INFO] 2025/05/28 18:29:21 logger.go:300: Logger environment variables loaded
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_TYPE not found, using default
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_HOST not found, using default
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_USER not found, using default
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_PASSWORD not found, using default
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_NAME not found, using default
+[WARNING] 2025/05/28 18:29:21 logger.go:300: DB_PORT not found, using default
+[INFO] 2025/05/28 18:29:21 logger.go:300: Use default database:  true
+[INFO] 2025/05/28 18:29:21 logger.go:300: Using Postgres database
+[INFO] 2025/05/28 18:29:21 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:29:21 logger.go:300: Connecting to database:  host= user= password= dbname= port= sslmode=disable
+[FATAL] 2025/05/28 18:29:21 logger.go:300: cannot parse `host= user= password=xxxxx dbname= port= sslmode=disable`: invalid port (strconv.ParseUint: parsing "sslmode=disable": invalid syntax)
+[INFO] 2025/05/28 18:32:57 logger.go:300: Logger initialized
+[INFO] 2025/05/28 18:32:57 logger.go:300: Loading environment variables for logger
+[INFO] 2025/05/28 18:32:57 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/05/28 18:32:57 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/05/28 18:32:57 logger.go:300: Logging options set to ALL
+[INFO] 2025/05/28 18:32:57 logger.go:300: Disabling log levels:
+[INFO] 2025/05/28 18:32:57 logger.go:300:  -  NONE
+[INFO] 2025/05/28 18:32:57 logger.go:300: Disabled logging options:  
+[INFO] 2025/05/28 18:32:57 logger.go:300: Console logging set to true
+[INFO] 2025/05/28 18:32:57 logger.go:300: File logging set to true
+[INFO] 2025/05/28 18:32:57 logger.go:300: Logger environment variables loaded
+[INFO] 2025/05/28 18:32:57 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:32:57 logger.go:300: Use default database:  false
+[INFO] 2025/05/28 18:32:57 logger.go:300: Using Postgres database
+[INFO] 2025/05/28 18:32:57 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:32:57 logger.go:300: Connecting to database:  host=db user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[FATAL] 2025/05/28 18:32:59 logger.go:300: failed to connect to `host=db user=postgres database=atv-test`: hostname resolving error (lookup db: no such host)
+[INFO] 2025/05/28 18:34:16 logger.go:300: Logger initialized
+[INFO] 2025/05/28 18:34:16 logger.go:300: Loading environment variables for logger
+[INFO] 2025/05/28 18:34:16 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/05/28 18:34:16 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/05/28 18:34:16 logger.go:300: Logging options set to ALL
+[INFO] 2025/05/28 18:34:16 logger.go:300: Disabling log levels:
+[INFO] 2025/05/28 18:34:16 logger.go:300:  -  NONE
+[INFO] 2025/05/28 18:34:16 logger.go:300: Disabled logging options:  
+[INFO] 2025/05/28 18:34:16 logger.go:300: Console logging set to true
+[INFO] 2025/05/28 18:34:16 logger.go:300: File logging set to true
+[INFO] 2025/05/28 18:34:16 logger.go:300: Logger environment variables loaded
+[INFO] 2025/05/28 18:34:16 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:34:16 logger.go:300: Use default database:  false
+[INFO] 2025/05/28 18:34:16 logger.go:300: Using Postgres database
+[INFO] 2025/05/28 18:34:16 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:34:16 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[FATAL] 2025/05/28 18:34:16 logger.go:300: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[INFO] 2025/05/28 18:50:54 logger.go:300: Logger initialized
+[INFO] 2025/05/28 18:50:54 logger.go:300: Loading environment variables for logger
+[INFO] 2025/05/28 18:50:54 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/05/28 18:50:54 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/05/28 18:50:54 logger.go:300: Logging options set to ALL
+[INFO] 2025/05/28 18:50:54 logger.go:300: Disabling log levels:
+[INFO] 2025/05/28 18:50:54 logger.go:300:  -  NONE
+[INFO] 2025/05/28 18:50:54 logger.go:300: Disabled logging options:  
+[INFO] 2025/05/28 18:50:54 logger.go:300: Console logging set to true
+[INFO] 2025/05/28 18:50:54 logger.go:300: File logging set to true
+[INFO] 2025/05/28 18:50:54 logger.go:300: Logger environment variables loaded
+[INFO] 2025/05/28 18:50:54 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:50:54 logger.go:300: Use default database:  false
+[INFO] 2025/05/28 18:50:54 logger.go:300: Using Postgres database
+[INFO] 2025/05/28 18:50:54 logger.go:300: Using testing database
+[INFO] 2025/05/28 18:50:54 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
+[INFO] 2025/05/28 18:50:54 logger.go:300: Database connection established
+[INFO] 2025/05/28 18:50:54 logger.go:300: Database type:  POSTGRES
+[INFO] 2025/05/28 18:50:54 logger.go:300: Creating database
+[INFO] 2025/05/28 18:50:54 logger.go:300: Creating Postgres database
+[INFO] 2025/05/28 18:50:54 logger.go:300: Database atv-test already exists
+[INFO] 2025/05/28 18:50:54 logger.go:300: Starting migrations
+[INFO] 2025/05/28 18:50:54 logger.go:300: Migrations completed
+[INFO] 2025/05/28 18:50:54 logger.go:300: Env configurations loaded
+[INFO] 2025/05/28 18:50:54 logger.go:300: Starting server

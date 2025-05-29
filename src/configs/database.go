@@ -28,6 +28,8 @@ type gormType struct {
 type db struct {
 	dbType string
 
+	conectionString string
+
 	user string
 	pass string
 	name string
@@ -64,13 +66,13 @@ func (mongoType) Context() context.Context {
 func (db) GetFirst(dest any, id string) types.HttpError {
 	if DB.Type() == "MONGODB" {
 		collectionName := dest.(interface{ TableName() string }).TableName()
-		err := DB.Mongo().DB().Collection(collectionName).FindOne(context.TODO(), map[string]any{"_id": id}).Decode(dest)
+		err := DB.Mongo().DB().Collection(collectionName).FindOne(DB.Mongo().Context(), map[string]any{"_id": id}).Decode(&dest)
 		ret := types.HttpError{}
 		ret.Err = err
 		return ret
 	}
 	if DB.Type() == "POSTGRES" || DB.Type() == "SQLITE" {
-		DB.Gorm().DB().First(dest, id)
+		DB.Gorm().DB().First(&dest, id)
 		return types.HttpError{}
 	}
 
@@ -246,20 +248,21 @@ func (db) ConnectSQLite(dbname string) {
 func (db) ConnectMongoDBEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
 	if exist && useTesting != "TRUE" {
-		DB.ConnectMongoDB(os.Getenv("DB_PORT"))
+		DB.ConnectMongoDB(os.Getenv("CONECTION_STRING"))
 	} else {
 		logger.Info("Using testing database")
-		DB.ConnectMongoDB(os.Getenv("DB_PORT_TEST"))
+		DB.ConnectMongoDB(os.Getenv("CONECTION_STRING_TEST"))
 	}
 }
 
 // ConnectMongoDB connects to the MongoDB database using the provided port
 // It uses the mongo driver to establish the connection
-func (db) ConnectMongoDB(port string) {
+func (db) ConnectMongoDB(conectionString string) {
 	// Create a Client to a MongoDB server and use Ping to verify that the
 	// server is running.
 
-	clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOpts := options.Client().ApplyURI(conectionString)
+
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
 		logger.Fatal(err)

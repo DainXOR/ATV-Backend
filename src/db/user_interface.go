@@ -6,6 +6,7 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -13,15 +14,75 @@ type userType struct{}
 
 var User userType
 
-func (userType) GetUserByID(id string) types.Result[models.UserDBGorm] {
-	var user models.UserDBGorm
-	configs.DataBase.First(&user, id)
+func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
+	var user models.UserDBMongo
+	configs.DB.Mongo().Collection("users").FindOne(
+		configs.DB.Mongo().Context(),
+		bson.M{"_id": id},
+	).Decode(&user)
 
 	err := types.ErrorNotFound(
 		"User not found",
 		"User with ID "+id+" not found",
 	)
-	return types.ResultOf(user, &err, user.ID != 0)
+
+	return types.ResultOf(user, &err, user.ID != primitive.NilObjectID)
+}
+func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
+	var user models.UserDBGorm
+	configs.DataBase.First(&user, id)
+	if user.ID == 0 {
+		err := types.ErrorNotFound(
+			"User not found",
+			"User with ID "+id+" not found",
+		)
+		return types.ResultErr[models.UserDBGorm](&err)
+	}
+	return types.ResultOk(user)
+}
+func (userType) GetByEmail(email string) types.Result[models.UserDBMongo] {
+	var user models.UserDBMongo
+	configs.DB.Mongo().Collection("users").FindOne(
+		configs.DB.Mongo().Context(),
+		bson.M{"email": email},
+	).Decode(&user)
+
+	err := types.ErrorNotFound(
+		"User not found",
+		"User with email "+email+" not found",
+	)
+	return types.ResultOf(user, &err, user.ID != primitive.NilObjectID)
+}
+
+func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
+	var users []models.UserDBGorm
+
+	configs.DataBase.Find(&users)
+
+	if len(users) == 0 {
+		err := types.ErrorNotFound(
+			"No users found",
+			"No users found in the database",
+		)
+		return types.ResultErr[[]models.UserDBGorm](&err)
+	}
+	return types.ResultOk(users)
+}
+func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
+	var users []models.UserDBMongo
+	configs.DB.Mongo().Collection("users").Find(
+		configs.DB.Mongo().Context(),
+		bson.M{},
+	)
+
+	if len(users) == 0 {
+		err := types.ErrorNotFound(
+			"No users found",
+			"No users found in the database",
+		)
+		return types.ResultErr[[]models.UserDBMongo](&err)
+	}
+	return types.ResultOk(users)
 }
 
 func (userType) CreateUser(user models.UserCreate) types.Result[models.UserDBGorm] {
@@ -52,6 +113,26 @@ func (userType) CreateUser(user models.UserCreate) types.Result[models.UserDBGor
 	}
 
 	return types.ResultOk(newUser)
+}
+func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] {
+	var userDB models.UserDBMongo
+	userDB = user.ToDBMongo()
+
+	logger.Debug("Creating user in MongoDB")
+
+	_, err := configs.DB.Mongo().Collection("users").InsertOne(
+		configs.DB.Mongo().Context(),
+		userDB,
+	)
+
+	if err != nil {
+		logger.Error("Failed to create user in MongoDB: ", err)
+		return types.ResultErr[models.UserDBMongo](err)
+	}
+
+	logger.Debug("User created with ID: ", userDB.ID)
+
+	return types.ResultOk(userDB)
 }
 
 func (userType) UpdateUser(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
@@ -86,19 +167,4 @@ func (userType) PatchUser(id string, user models.UserCreate) types.Result[models
 	configs.DataBase.Model(&userDB).Updates(user.ToDBGorm())
 
 	return types.ResultOk(userDB)
-}
-
-func (userType) GetByID(id string) types.Result[models.UserDBGorm] {
-	var user models.UserDBGorm
-
-	configs.DB.Mongo().Collection("users").FindOne(
-		configs.DB.Mongo().Context(),
-		bson.M{"_id": id},
-	).Decode(&user)
-	err := types.ErrorNotFound(
-		"User not found",
-		"User with ID "+id+" not found",
-	)
-
-	return types.ResultOf(user, &err, user.ID != 0)
 }
