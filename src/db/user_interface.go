@@ -30,7 +30,7 @@ func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
 }
 func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 	var user models.UserDBGorm
-	configs.DataBase.First(&user, id)
+	configs.DB.Gorm().DB().First(&user, id)
 	if user.ID == 0 {
 		err := types.ErrorNotFound(
 			"User not found",
@@ -57,7 +57,7 @@ func (userType) GetByEmail(email string) types.Result[models.UserDBMongo] {
 func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 	var users []models.UserDBGorm
 
-	configs.DataBase.Find(&users)
+	configs.DB.Gorm().DB().Find(&users)
 
 	if len(users) == 0 {
 		err := types.ErrorNotFound(
@@ -98,7 +98,7 @@ func (userType) CreateUser(user models.UserCreate) types.Result[models.UserDBGor
 
 	logger.Debug("Creating user")
 
-	configs.DataBase.Create(&newUser)
+	configs.DB.Gorm().DB().Create(&newUser)
 
 	logger.Debug("User id: ", newUser.ID)
 
@@ -137,7 +137,7 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 
 func (userType) UpdateUser(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
-	configs.DataBase.First(&userDB, id)
+	configs.DB.Gorm().DB().First(&userDB, id)
 
 	if userDB.ID == 0 {
 		err := types.ErrorNotFound(
@@ -147,14 +147,14 @@ func (userType) UpdateUser(id string, user models.UserCreate) types.Result[model
 		return types.ResultErr[models.UserDBGorm](&err)
 	}
 
-	configs.DataBase.Model(&userDB).Updates(user.ToPutDB())
+	configs.DB.Gorm().DB().Model(&userDB).Updates(user.ToPutDB())
 
 	return types.ResultOk(userDB)
 }
 
 func (userType) PatchUser(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
-	configs.DataBase.First(&userDB, id)
+	configs.DB.Gorm().DB().First(&userDB, id)
 
 	if userDB.ID == 0 {
 		err := types.ErrorNotFound(
@@ -164,7 +164,7 @@ func (userType) PatchUser(id string, user models.UserCreate) types.Result[models
 		return types.ResultErr[models.UserDBGorm](&err)
 	}
 
-	configs.DataBase.Model(&userDB).Updates(user.ToDBGorm())
+	configs.DB.Gorm().DB().Model(&userDB).Updates(user.ToDBGorm())
 
 	return types.ResultOk(userDB)
 }

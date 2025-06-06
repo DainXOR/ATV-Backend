@@ -16,6 +16,7 @@ type userType struct{}
 var User userType
 
 func (userType) GetByIDGorm(c *gin.Context) {
+	logger.Debug("Getting user by ID from GORM database")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
