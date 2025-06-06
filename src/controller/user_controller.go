@@ -16,7 +16,7 @@ type userType struct{}
 var User userType
 
 func (userType) GetByIDGorm(c *gin.Context) {
-	logger.Debug("Getting user by ID from GORM database")
+	logger.Debug("Using GORM")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
@@ -50,7 +50,7 @@ func (userType) GetByIDMongo(c *gin.Context) {
 }
 
 func (userType) GetAllGorm(c *gin.Context) {
-	logger.Debug("Getting all users from GORM database")
+	logger.Debug("Using GORM")
 
 	result := db.User.GetAllGorm()
 
@@ -75,6 +75,7 @@ func (userType) GetAllGorm(c *gin.Context) {
 }
 
 func (userType) CreateGorm(c *gin.Context) {
+	logger.Debug("Using GORM")
 	var body models.UserCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -96,7 +97,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	logger.Debug("Creating user: ", body)
 	logger.Debug("Username: ", body.FirstName, body.LastName)
 
-	result := db.User.CreateUser(body)
+	result := db.User.CreateGorm(body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -166,7 +167,7 @@ func (userType) Update(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Updating user by ID: ", id)
 
-	result := db.User.UpdateUser(id, body)
+	result := db.User.UpdateGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -203,7 +204,7 @@ func (userType) Patch(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Patching user by ID: ", id)
 
-	result := db.User.PatchUser(id, body)
+	result := db.User.PatchGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()
