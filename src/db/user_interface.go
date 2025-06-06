@@ -85,7 +85,7 @@ func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
 	return types.ResultOk(users)
 }
 
-func (userType) CreateUser(user models.UserCreate) types.Result[models.UserDBGorm] {
+func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGorm] {
 	//if User.GetUserByEmail(user.Email).IsOk() {
 	//	return types.ResultErr[models.UserDB](models.Error(
 	//		types.Http.Conflict(),
@@ -135,7 +135,7 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 	return types.ResultOk(userDB)
 }
 
-func (userType) UpdateUser(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
+func (userType) UpdateGorm(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
 	configs.DB.Gorm().DB().First(&userDB, id)
 
@@ -152,7 +152,7 @@ func (userType) UpdateUser(id string, user models.UserCreate) types.Result[model
 	return types.ResultOk(userDB)
 }
 
-func (userType) PatchUser(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
+func (userType) PatchGorm(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
 	configs.DB.Gorm().DB().First(&userDB, id)
 
