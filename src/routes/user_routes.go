@@ -13,6 +13,7 @@ func UserRoutes(router *gin.Engine) {
 	userRouter := router.Group("api/v0/user")
 	{
 		userRouter.GET("/:id", controller.User.GetByIDGorm)
+		userRouter.GET("/all", controller.User.GetAllGorm)
 
 		userRouter.POST("/", controller.User.CreateGorm)
 	}

@@ -526,3 +526,117 @@
 [INFO] 2025/05/28 18:50:54 logger.go:300: Migrations completed
 [INFO] 2025/05/28 18:50:54 logger.go:300: Env configurations loaded
 [INFO] 2025/05/28 18:50:54 logger.go:300: Starting server
+[INFO] 2025/06/06 08:31:48 logger.go:300: Logger initialized
+[INFO] 2025/06/06 08:31:48 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 08:31:48 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 08:31:48 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 08:31:48 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 08:31:48 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 08:31:48 logger.go:300:  -  NONE
+[INFO] 2025/06/06 08:31:48 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 08:31:48 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 08:31:48 logger.go:300: File logging set to true
+[INFO] 2025/06/06 08:31:48 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 08:31:48 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:31:48 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 08:31:48 logger.go:300: Using Postgres database
+[INFO] 2025/06/06 08:31:48 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:31:48 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+[INFO] 2025/06/06 08:31:48 logger.go:300: Database connection established
+[INFO] 2025/06/06 08:31:48 logger.go:300: Database type:  POSTGRES
+[INFO] 2025/06/06 08:31:48 logger.go:300: Creating database
+[INFO] 2025/06/06 08:31:48 logger.go:300: Creating Postgres database
+[INFO] 2025/06/06 08:31:48 logger.go:300: Database atv-test already exists
+[INFO] 2025/06/06 08:31:48 logger.go:300: Starting migrations
+[INFO] 2025/06/06 08:31:48 logger.go:300: Migrations completed
+[INFO] 2025/06/06 08:31:48 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 08:31:48 logger.go:300: Starting server
+[DEBUG] 2025/06/06 08:33:09 logger.go:300: Getting user by ID:  1
+[INFO] 2025/06/06 08:35:12 logger.go:300: Logger initialized
+[INFO] 2025/06/06 08:35:12 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 08:35:12 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 08:35:12 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 08:35:12 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 08:35:12 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 08:35:12 logger.go:300:  -  NONE
+[INFO] 2025/06/06 08:35:12 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 08:35:12 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 08:35:12 logger.go:300: File logging set to true
+[INFO] 2025/06/06 08:35:12 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 08:35:12 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:35:12 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 08:35:12 logger.go:300: Using Postgres database
+[INFO] 2025/06/06 08:35:12 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:35:12 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+[INFO] 2025/06/06 08:35:12 logger.go:300: Database connection established
+[INFO] 2025/06/06 08:35:12 logger.go:300: Database type:  POSTGRES
+[INFO] 2025/06/06 08:35:12 logger.go:300: Creating database
+[INFO] 2025/06/06 08:35:12 logger.go:300: Creating Postgres database
+[INFO] 2025/06/06 08:35:12 logger.go:300: Database atv-test already exists
+[INFO] 2025/06/06 08:35:12 logger.go:300: Starting migrations
+[INFO] 2025/06/06 08:35:12 logger.go:300: Migrations completed
+[INFO] 2025/06/06 08:35:12 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 08:35:12 logger.go:300: Starting server
+[DEBUG] 2025/06/06 08:35:21 logger.go:300: Getting user by ID from GORM database
+[DEBUG] 2025/06/06 08:35:21 logger.go:300: Getting user by ID:  1
+[INFO] 2025/06/06 08:39:04 logger.go:300: Logger initialized
+[INFO] 2025/06/06 08:39:04 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 08:39:04 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 08:39:04 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 08:39:04 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 08:39:04 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 08:39:04 logger.go:300:  -  NONE
+[INFO] 2025/06/06 08:39:04 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 08:39:04 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 08:39:04 logger.go:300: File logging set to true
+[INFO] 2025/06/06 08:39:04 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 08:39:04 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:39:04 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 08:39:04 logger.go:300: Using Postgres database
+[INFO] 2025/06/06 08:39:04 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:39:04 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+[INFO] 2025/06/06 08:39:04 logger.go:300: Database connection established
+[INFO] 2025/06/06 08:39:04 logger.go:300: Database type:  POSTGRES
+[INFO] 2025/06/06 08:39:04 logger.go:300: Creating database
+[INFO] 2025/06/06 08:39:04 logger.go:300: Creating Postgres database
+[INFO] 2025/06/06 08:39:04 logger.go:300: Database atv-test already exists
+[INFO] 2025/06/06 08:39:04 logger.go:300: Starting migrations
+[INFO] 2025/06/06 08:39:04 logger.go:300: Migrations completed
+[INFO] 2025/06/06 08:39:04 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 08:39:04 logger.go:300: Starting server
+[DEBUG] 2025/06/06 08:39:19 logger.go:300: Getting user by ID from GORM database
+[DEBUG] 2025/06/06 08:39:19 logger.go:300: Getting user by ID:  1
+[DEBUG] 2025/06/06 08:39:45 logger.go:300: Getting user by ID from GORM database
+[DEBUG] 2025/06/06 08:39:45 logger.go:300: Getting user by ID:  1
+[DEBUG] 2025/06/06 08:47:51 logger.go:300: Creating user:  {6969696969  Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+[DEBUG] 2025/06/06 08:47:51 logger.go:300: Username:   Ji es, tiene la mancha
+[DEBUG] 2025/06/06 08:47:51 logger.go:300: Creating user
+[DEBUG] 2025/06/06 08:47:51 logger.go:300: User id:  2
+[DEBUG] 2025/06/06 08:48:39 logger.go:300: Getting user by ID from GORM database
+[DEBUG] 2025/06/06 08:48:39 logger.go:300: Getting user by ID:  2
+[INFO] 2025/06/06 08:50:36 logger.go:300: Logger initialized
+[INFO] 2025/06/06 08:50:36 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 08:50:36 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 08:50:36 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 08:50:36 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 08:50:36 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 08:50:36 logger.go:300:  -  NONE
+[INFO] 2025/06/06 08:50:36 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 08:50:36 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 08:50:36 logger.go:300: File logging set to true
+[INFO] 2025/06/06 08:50:36 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 08:50:36 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:50:36 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 08:50:36 logger.go:300: Using Postgres database
+[INFO] 2025/06/06 08:50:36 logger.go:300: Using testing database
+[INFO] 2025/06/06 08:50:36 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+[INFO] 2025/06/06 08:50:36 logger.go:300: Database connection established
+[INFO] 2025/06/06 08:50:36 logger.go:300: Database type:  POSTGRES
+[INFO] 2025/06/06 08:50:36 logger.go:300: Creating database
+[INFO] 2025/06/06 08:50:36 logger.go:300: Creating Postgres database
+[INFO] 2025/06/06 08:50:36 logger.go:300: Database atv-test already exists
+[INFO] 2025/06/06 08:50:36 logger.go:300: Starting migrations
+[INFO] 2025/06/06 08:50:36 logger.go:300: Migrations completed
+[INFO] 2025/06/06 08:50:36 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 08:50:36 logger.go:300: Starting server
+[DEBUG] 2025/06/06 08:50:50 logger.go:300: Getting all users from GORM database
