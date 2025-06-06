@@ -640,3 +640,385 @@
 [INFO] 2025/06/06 08:50:36 logger.go:300: Env configurations loaded
 [INFO] 2025/06/06 08:50:36 logger.go:300: Starting server
 [DEBUG] 2025/06/06 08:50:50 logger.go:300: Getting all users from GORM database
+[INFO] 2025/06/06 11:08:51 logger.go:300: Logger initialized
+[INFO] 2025/06/06 11:08:51 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 11:08:51 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:08:51 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:08:51 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 11:08:51 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 11:08:51 logger.go:300:  -  NONE
+[INFO] 2025/06/06 11:08:51 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 11:08:51 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 11:08:51 logger.go:300: File logging set to true
+[INFO] 2025/06/06 11:08:51 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 11:08:51 logger.go:300: Using testing database
+[INFO] 2025/06/06 11:08:51 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 11:08:51 logger.go:300: Using MongoDB database
+[INFO] 2025/06/06 11:08:51 logger.go:300: Using testing database
+[DEBUG] 2025/06/06 11:08:51 logger.go:300: Connecting to MongoDB:  host\=localhost user\=postgres password\=2407 dbname\=atv-test port\=5433 sslmode\=disable
+[DEBUG] 2025/06/06 11:08:51 logger.go:300: 1
+[FATAL] 2025/06/06 11:08:51 logger.go:300: error parsing uri: scheme must be "mongodb" or "mongodb+srv"
+[INFO] 2025/06/06 11:16:58 logger.go:300: Logger initialized
+[INFO] 2025/06/06 11:16:58 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 11:16:58 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:16:58 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:16:58 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 11:16:58 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 11:16:58 logger.go:300:  -  NONE
+[INFO] 2025/06/06 11:16:58 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 11:16:58 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 11:16:58 logger.go:300: File logging set to true
+[INFO] 2025/06/06 11:16:58 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 11:16:58 logger.go:300: Using testing database
+[INFO] 2025/06/06 11:16:58 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 11:16:58 logger.go:300: Using MongoDB database
+[INFO] 2025/06/06 11:16:58 logger.go:300: Using testing database
+[DEBUG] 2025/06/06 11:16:58 logger.go:300: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[DEBUG] 2025/06/06 11:16:58 logger.go:300: 1
+[DEBUG] 2025/06/06 11:16:58 logger.go:300: 2
+[DEBUG] 2025/06/06 11:16:58 logger.go:300: 3
+[DEBUG] 2025/06/06 11:16:59 logger.go:300: 4
+[INFO] 2025/06/06 11:16:59 logger.go:300: Database connection established
+[INFO] 2025/06/06 11:16:59 logger.go:300: Database type:  MONGO
+[INFO] 2025/06/06 11:16:59 logger.go:300: Creating database
+[INFO] 2025/06/06 11:16:59 logger.go:300: Creating SQLite database
+[INFO] 2025/06/06 11:16:59 logger.go:300: SQLite database created automatically
+[INFO] 2025/06/06 11:16:59 logger.go:300: Starting migrations
+[INFO] 2025/06/06 11:16:59 logger.go:300: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:16:59 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 11:16:59 logger.go:300: Starting server
+[INFO] 2025/06/06 11:19:34 logger.go:300: Logger initialized
+[INFO] 2025/06/06 11:19:34 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 11:19:34 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:19:34 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:19:34 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 11:19:34 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 11:19:34 logger.go:300:  -  NONE
+[INFO] 2025/06/06 11:19:34 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 11:19:34 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 11:19:34 logger.go:300: File logging set to true
+[INFO] 2025/06/06 11:19:34 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 11:19:34 logger.go:300: Using testing database
+[INFO] 2025/06/06 11:19:34 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 11:19:34 logger.go:300: Using MongoDB database
+[INFO] 2025/06/06 11:19:34 logger.go:300: Using testing database
+[DEBUG] 2025/06/06 11:19:34 logger.go:300: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[DEBUG] 2025/06/06 11:19:34 logger.go:300: 1
+[DEBUG] 2025/06/06 11:19:34 logger.go:300: 2
+[DEBUG] 2025/06/06 11:19:34 logger.go:300: 3
+[DEBUG] 2025/06/06 11:19:35 logger.go:300: 4
+[INFO] 2025/06/06 11:19:35 logger.go:300: Database connection established
+[INFO] 2025/06/06 11:19:35 logger.go:300: Database type:  MONGO
+[INFO] 2025/06/06 11:19:35 logger.go:300: Creating database
+[INFO] 2025/06/06 11:19:35 logger.go:300: Creating MongoDB database
+[INFO] 2025/06/06 11:19:35 logger.go:300: MongoDB database created automatically
+[INFO] 2025/06/06 11:19:35 logger.go:300: Starting migrations
+[INFO] 2025/06/06 11:19:35 logger.go:300: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:19:35 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 11:19:35 logger.go:300: Starting server
+[INFO] 2025/06/06 11:25:43 logger.go:300: Logger initialized
+[INFO] 2025/06/06 11:25:43 logger.go:300: Loading environment variables for logger
+[INFO] 2025/06/06 11:25:43 logger.go:300: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:25:43 logger.go:300: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:25:43 logger.go:300: Logging options set to ALL
+[INFO] 2025/06/06 11:25:43 logger.go:300: Disabling log levels:
+[INFO] 2025/06/06 11:25:43 logger.go:300:  -  NONE
+[INFO] 2025/06/06 11:25:43 logger.go:300: Disabled logging options:  
+[INFO] 2025/06/06 11:25:43 logger.go:300: Console logging set to true
+[INFO] 2025/06/06 11:25:43 logger.go:300: File logging set to true
+[INFO] 2025/06/06 11:25:43 logger.go:300: Logger environment variables loaded
+[INFO] 2025/06/06 11:25:43 logger.go:300: Using testing database
+[INFO] 2025/06/06 11:25:43 logger.go:300: Use default database:  false
+[INFO] 2025/06/06 11:25:43 logger.go:300: Using MongoDB database
+[INFO] 2025/06/06 11:25:43 logger.go:300: Using testing database
+[DEBUG] 2025/06/06 11:25:43 logger.go:300: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO] 2025/06/06 11:25:44 logger.go:300: Database connection established
+[INFO] 2025/06/06 11:25:44 logger.go:300: Database type:  MONGO
+[INFO] 2025/06/06 11:25:44 logger.go:300: Creating database
+[INFO] 2025/06/06 11:25:44 logger.go:300: Creating MongoDB database
+[INFO] 2025/06/06 11:25:44 logger.go:300: MongoDB database created automatically
+[INFO] 2025/06/06 11:25:44 logger.go:300: Starting migrations
+[INFO] 2025/06/06 11:25:44 logger.go:300: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:25:44 logger.go:300: Env configurations loaded
+[INFO] 2025/06/06 11:25:44 logger.go:300: Starting server
+[INFO] 2025/06/06 11:31:12 logger.go:301: Logger initialized
+[INFO] 2025/06/06 11:31:12 logger.go:301: Loading environment variables for logger
+[INFO] 2025/06/06 11:31:12 logger.go:301: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:31:12 logger.go:301: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:31:12 logger.go:301: Logging options set to ALL
+[INFO] 2025/06/06 11:31:12 logger.go:301: Disabling log levels:
+[INFO] 2025/06/06 11:31:12 logger.go:301:  -  NONE
+[INFO] 2025/06/06 11:31:12 logger.go:301: Disabled logging options:  
+[INFO] 2025/06/06 11:31:12 logger.go:301: Console logging set to true
+[INFO] 2025/06/06 11:31:12 logger.go:301: File logging set to true
+[INFO] 2025/06/06 11:31:12 logger.go:301: Logger environment variables loaded
+[INFO] 2025/06/06 11:31:12 logger.go:301: Using testing database
+[INFO] 2025/06/06 11:31:12 logger.go:301: Use default database:  false
+[INFO] 2025/06/06 11:31:12 logger.go:301: Using MongoDB database
+[INFO] 2025/06/06 11:31:12 logger.go:301: Using testing database
+[DEBUG] 2025/06/06 11:31:12 logger.go:301: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO] 2025/06/06 11:31:13 logger.go:301: Database connection established
+[INFO] 2025/06/06 11:31:13 logger.go:301: Database type:  MONGO
+[INFO] 2025/06/06 11:31:13 logger.go:301: Creating database
+[INFO] 2025/06/06 11:31:13 logger.go:301: Creating MongoDB database
+[INFO] 2025/06/06 11:31:13 logger.go:301: MongoDB database created automatically
+[INFO] 2025/06/06 11:31:13 logger.go:301: Starting migrations
+[INFO] 2025/06/06 11:31:13 logger.go:301: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:31:13 logger.go:301: Env configurations loaded
+[INFO] 2025/06/06 11:31:13 logger.go:301: Starting server
+[INFO] 2025/06/06 11:32:50 logger.go:302: Logger initialized
+[INFO] 2025/06/06 11:32:50 logger.go:302: Loading environment variables for logger
+[INFO] 2025/06/06 11:32:50 logger.go:302: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:32:50 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:32:50 logger.go:302: Logging options set to ALL
+[INFO] 2025/06/06 11:32:50 logger.go:302: Disabling log levels:
+[INFO] 2025/06/06 11:32:50 logger.go:302:  -  NONE
+[INFO] 2025/06/06 11:32:50 logger.go:302: Disabled logging options:  
+[INFO] 2025/06/06 11:32:50 logger.go:302: Console logging set to true
+[INFO] 2025/06/06 11:32:50 logger.go:302: File logging set to true
+[INFO] 2025/06/06 11:32:50 logger.go:302: Logger environment variables loaded
+[INFO] 2025/06/06 11:32:50 logger.go:302: Using testing database
+[INFO] 2025/06/06 11:32:50 logger.go:302: Use default database:  false
+[INFO] 2025/06/06 11:32:50 logger.go:302: Using MongoDB database
+[INFO] 2025/06/06 11:32:50 logger.go:302: Using testing database
+[DEBUG] 2025/06/06 11:32:50 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO] 2025/06/06 11:32:51 logger.go:302: Database connection established
+[INFO] 2025/06/06 11:32:51 logger.go:302: Database type:  MONGO
+[INFO] 2025/06/06 11:32:51 logger.go:302: Creating database
+[INFO] 2025/06/06 11:32:51 logger.go:302: Creating MongoDB database
+[INFO] 2025/06/06 11:32:51 logger.go:302: MongoDB database created automatically
+[INFO] 2025/06/06 11:32:51 logger.go:302: Starting migrations
+[INFO] 2025/06/06 11:32:51 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:32:51 logger.go:302: Env configurations loaded
+[INFO] 2025/06/06 11:32:51 logger.go:302: Starting server
+[INFO] 2025/06/06 11:35:23 logger.go:302: Logger initialized
+[INFO] 2025/06/06 11:35:23 logger.go:302: Loading environment variables for logger
+[INFO] 2025/06/06 11:35:23 logger.go:302: Setting minimum log level to ALL
+[INFO] 2025/06/06 11:35:23 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO] 2025/06/06 11:35:23 logger.go:302: Logging options set to ALL
+[INFO] 2025/06/06 11:35:23 logger.go:302: Disabling log levels:
+[INFO] 2025/06/06 11:35:23 logger.go:302:  -  NONE
+[INFO] 2025/06/06 11:35:23 logger.go:302: Disabled logging options:  
+[INFO] 2025/06/06 11:35:23 logger.go:302: Console logging set to true
+[INFO] 2025/06/06 11:35:23 logger.go:302: File logging set to true
+[INFO] 2025/06/06 11:35:23 logger.go:302: Logger environment variables loaded
+[INFO] 2025/06/06 11:35:23 logger.go:302: Using testing database
+[INFO] 2025/06/06 11:35:23 logger.go:302: Use default database:  false
+[INFO] 2025/06/06 11:35:23 logger.go:302: Using MongoDB database
+[INFO] 2025/06/06 11:35:23 logger.go:302: Using testing database
+[DEBUG] 2025/06/06 11:35:23 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO] 2025/06/06 11:35:24 logger.go:302: Database connection established
+[INFO] 2025/06/06 11:35:24 logger.go:302: Database type:  MONGO
+[INFO] 2025/06/06 11:35:24 logger.go:302: Creating database
+[INFO] 2025/06/06 11:35:24 logger.go:302: Creating MongoDB database
+[INFO] 2025/06/06 11:35:24 logger.go:302: MongoDB database created automatically
+[INFO] 2025/06/06 11:35:24 logger.go:302: Starting migrations
+[INFO] 2025/06/06 11:35:24 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO] 2025/06/06 11:35:24 logger.go:302: Env configurations loaded
+[INFO] 2025/06/06 11:35:24 logger.go:302: Starting server
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54: 2025/06/06 11:37:47 logger.go:302: Logger initialized
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:37:47 logger.go:302: Loading environment variables for logger
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:37:47 logger.go:302: Setting minimum log level to ALL
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63: 2025/06/06 11:37:47 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243: 2025/06/06 11:37:47 logger.go:302: Logging options set to ALL
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:37:47 logger.go:302: Disabling log levels:
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:37:47 logger.go:302:  -  NONE
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76: 2025/06/06 11:37:47 logger.go:302: Disabled logging options:  
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85: 2025/06/06 11:37:47 logger.go:302: Console logging set to true
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95: 2025/06/06 11:37:47 logger.go:302: File logging set to true
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:37:47 logger.go:302: Logger environment variables loaded
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179: 2025/06/06 11:37:47 logger.go:302: Using testing database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:37:47 logger.go:302: Use default database:  false
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:37:47 logger.go:302: Using MongoDB database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190: 2025/06/06 11:37:47 logger.go:302: Using testing database
+[DEBUG]  E:/dev/Project - ATV/backend/src/configs/database.go:278: 2025/06/06 11:37:47 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:37:48 logger.go:302: Database connection established
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:37:48 logger.go:302: Database type:  MONGO
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203: 2025/06/06 11:37:48 logger.go:302: Creating database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203: 2025/06/06 11:37:48 logger.go:302: Creating MongoDB database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327: 2025/06/06 11:37:48 logger.go:302: MongoDB database created automatically
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24: 2025/06/06 11:37:48 logger.go:302: Starting migrations
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24: 2025/06/06 11:37:48 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350: 2025/06/06 11:37:48 logger.go:302: Env configurations loaded
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350: 2025/06/06 11:37:48 logger.go:302: Starting server
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54: 2025/06/06 11:38:22 logger.go:302: Logger initialized
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:38:22 logger.go:302: Loading environment variables for logger
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:38:22 logger.go:302: Setting minimum log level to ALL
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63: 2025/06/06 11:38:22 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243: 2025/06/06 11:38:22 logger.go:302: Logging options set to ALL
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:38:22 logger.go:302: Disabling log levels:
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:38:22 logger.go:302:  -  NONE
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76: 2025/06/06 11:38:22 logger.go:302: Disabled logging options:  
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85: 2025/06/06 11:38:22 logger.go:302: Console logging set to true
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95: 2025/06/06 11:38:22 logger.go:302: File logging set to true
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22: 2025/06/06 11:38:22 logger.go:302: Logger environment variables loaded
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179: 2025/06/06 11:38:22 logger.go:302: Using testing database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:38:22 logger.go:302: Use default database:  false
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:38:22 logger.go:302: Using MongoDB database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190: 2025/06/06 11:38:22 logger.go:302: Using testing database
+[DEBUG]  E:/dev/Project - ATV/backend/src/configs/database.go:278: 2025/06/06 11:38:22 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:38:23 logger.go:302: Database connection established
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23: 2025/06/06 11:38:23 logger.go:302: Database type:  MONGO
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203: 2025/06/06 11:38:23 logger.go:302: Creating database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203: 2025/06/06 11:38:23 logger.go:302: Creating MongoDB database
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327: 2025/06/06 11:38:23 logger.go:302: MongoDB database created automatically
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24: 2025/06/06 11:38:23 logger.go:302: Starting migrations
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24: 2025/06/06 11:38:23 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350: 2025/06/06 11:38:23 logger.go:302: Env configurations loaded
+[INFO]  E:/dev/Project - ATV/backend/src/logger/logger.go:54:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:63:  E:/dev/Project - ATV/backend/src/logger/logger.go:243:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/logger/logger.go:76:  E:/dev/Project - ATV/backend/src/logger/logger.go:85:  E:/dev/Project - ATV/backend/src/logger/logger.go:95:  E:/dev/Project - ATV/backend/src/main.go:22:  E:/dev/Project - ATV/backend/src/configs/database.go:179:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:190:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/main.go:23:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:203:  E:/dev/Project - ATV/backend/src/configs/database.go:327:  E:/dev/Project - ATV/backend/src/main.go:24:  E:/dev/Project - ATV/backend/src/main.go:24:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350:  C:/Users/USUARIO/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.2.windows-amd64/src/runtime/proc.go:7350: 2025/06/06 11:38:23 logger.go:302: Starting server
+[INFO]  logger.go:54: 2025/06/06 11:46:24 logger.go:302: Logger initialized
+[INFO]  main.go:22: 2025/06/06 11:46:24 logger.go:302: Loading environment variables for logger
+[INFO]  main.go:22: 2025/06/06 11:46:24 logger.go:302: Setting minimum log level to ALL
+[INFO]  logger.go:63: 2025/06/06 11:46:24 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO]  logger.go:243: 2025/06/06 11:46:24 logger.go:302: Logging options set to ALL
+[INFO]  main.go:22: 2025/06/06 11:46:24 logger.go:302: Disabling log levels:
+[INFO]  main.go:22: 2025/06/06 11:46:24 logger.go:302:  -  NONE
+[INFO]  logger.go:76: 2025/06/06 11:46:24 logger.go:302: Disabled logging options:  
+[INFO]  logger.go:85: 2025/06/06 11:46:24 logger.go:302: Console logging set to true
+[INFO]  logger.go:95: 2025/06/06 11:46:24 logger.go:302: File logging set to true
+[INFO]  main.go:22: 2025/06/06 11:46:24 logger.go:302: Logger environment variables loaded
+[INFO]  database.go:179: 2025/06/06 11:46:24 logger.go:302: Using testing database
+[INFO]  main.go:23: 2025/06/06 11:46:24 logger.go:302: Use default database:  false
+[INFO]  main.go:23: 2025/06/06 11:46:24 logger.go:302: Using MongoDB database
+[INFO]  database.go:190: 2025/06/06 11:46:24 logger.go:302: Using testing database
+[DEBUG]  database.go:278: 2025/06/06 11:46:24 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[DEBUG]  database.go:278: 2025/06/06 11:46:25 logger.go:302: 4
+[INFO]  main.go:23: 2025/06/06 11:46:25 logger.go:302: Database connection established
+[INFO]  main.go:23: 2025/06/06 11:46:25 logger.go:302: Database type:  MONGO
+[INFO]  database.go:203: 2025/06/06 11:46:25 logger.go:302: Creating database
+[INFO]  database.go:203: 2025/06/06 11:46:25 logger.go:302: Creating MongoDB database
+[INFO]  database.go:328: 2025/06/06 11:46:25 logger.go:302: MongoDB database created automatically
+[INFO]  main.go:24: 2025/06/06 11:46:25 logger.go:302: Starting migrations
+[INFO]  main.go:24: 2025/06/06 11:46:25 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO]  proc.go:7350: 2025/06/06 11:46:25 logger.go:302: Env configurations loaded
+[INFO]  proc.go:7350: 2025/06/06 11:46:25 logger.go:302: Starting server
+[INFO]  logger.go:54: 2025/06/06 11:50:22 logger.go:302: Logger initialized
+[INFO]  main.go:22: 2025/06/06 11:50:22 logger.go:302: Loading environment variables for logger
+[INFO]  main.go:22: 2025/06/06 11:50:22 logger.go:302: Setting minimum log level to ALL
+[INFO]  logger.go:63: 2025/06/06 11:50:22 logger.go:302: Minimum logging level set to:  | ALL |
+[INFO]  logger.go:243: 2025/06/06 11:50:22 logger.go:302: Logging options set to ALL
+[INFO]  main.go:22: 2025/06/06 11:50:22 logger.go:302: Disabling log levels:
+[INFO]  main.go:22: 2025/06/06 11:50:22 logger.go:302:  -  NONE
+[INFO]  logger.go:76: 2025/06/06 11:50:22 logger.go:302: Disabled logging options:  
+[INFO]  logger.go:85: 2025/06/06 11:50:22 logger.go:302: Console logging set to true
+[INFO]  logger.go:95: 2025/06/06 11:50:22 logger.go:302: File logging set to true
+[INFO]  main.go:22: 2025/06/06 11:50:22 logger.go:302: Logger environment variables loaded
+[INFO]  database.go:179: 2025/06/06 11:50:22 logger.go:302: Using testing database
+[INFO]  main.go:23: 2025/06/06 11:50:22 logger.go:302: Use default database:  false
+[INFO]  main.go:23: 2025/06/06 11:50:22 logger.go:302: Using MongoDB database
+[INFO]  database.go:190: 2025/06/06 11:50:22 logger.go:302: Using testing database
+[DEBUG]  database.go:278: 2025/06/06 11:50:22 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+[DEBUG]  database.go:278: 2025/06/06 11:50:23 logger.go:302: 4
+[INFO]  main.go:23: 2025/06/06 11:50:23 logger.go:302: Database connection established
+[INFO]  main.go:23: 2025/06/06 11:50:23 logger.go:302: Database type:  MONGO
+[INFO]  database.go:203: 2025/06/06 11:50:23 logger.go:302: Creating database
+[INFO]  database.go:203: 2025/06/06 11:50:23 logger.go:302: Creating MongoDB database
+[INFO]  database.go:328: 2025/06/06 11:50:23 logger.go:302: MongoDB database created automatically
+[INFO]  main.go:24: 2025/06/06 11:50:23 logger.go:302: Starting migrations
+[INFO]  main.go:24: 2025/06/06 11:50:23 logger.go:302: No migrations needed for SQLite or MongoDB
+[INFO]  proc.go:7350: 2025/06/06 11:50:23 logger.go:302: Env configurations loaded
+[INFO]  proc.go:7350: 2025/06/06 11:50:23 logger.go:302: Starting server
+logger.go:54: 2025/06/06 11:51:44 logger.go:302: Logger initialized
+main.go:22: 2025/06/06 11:51:44 logger.go:302: Loading environment variables for logger
+main.go:22: 2025/06/06 11:51:44 logger.go:302: Setting minimum log level to ALL
+logger.go:63: 2025/06/06 11:51:44 logger.go:302: Minimum logging level set to:  | ALL |
+logger.go:243: 2025/06/06 11:51:44 logger.go:302: Logging options set to ALL
+main.go:22: 2025/06/06 11:51:44 logger.go:302: Disabling log levels:
+main.go:22: 2025/06/06 11:51:44 logger.go:302:  -  NONE
+logger.go:76: 2025/06/06 11:51:44 logger.go:302: Disabled logging options:  
+logger.go:85: 2025/06/06 11:51:44 logger.go:302: Console logging set to true
+logger.go:95: 2025/06/06 11:51:44 logger.go:302: File logging set to true
+main.go:22: 2025/06/06 11:51:44 logger.go:302: Logger environment variables loaded
+database.go:179: 2025/06/06 11:51:44 logger.go:302: Using testing database
+main.go:23: 2025/06/06 11:51:44 logger.go:302: Use default database:  false
+main.go:23: 2025/06/06 11:51:44 logger.go:302: Using MongoDB database
+database.go:190: 2025/06/06 11:51:44 logger.go:302: Using testing database
+database.go:278: 2025/06/06 11:51:44 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:278: 2025/06/06 11:51:45 logger.go:302: 4
+main.go:23: 2025/06/06 11:51:45 logger.go:302: Database connection established
+main.go:23: 2025/06/06 11:51:45 logger.go:302: Database type:  MONGO
+database.go:203: 2025/06/06 11:51:45 logger.go:302: Creating database
+database.go:203: 2025/06/06 11:51:45 logger.go:302: Creating MongoDB database
+database.go:328: 2025/06/06 11:51:45 logger.go:302: MongoDB database created automatically
+main.go:24: 2025/06/06 11:51:45 logger.go:302: Starting migrations
+main.go:24: 2025/06/06 11:51:45 logger.go:302: No migrations needed for SQLite or MongoDB
+proc.go:7350: 2025/06/06 11:51:45 logger.go:302: Env configurations loaded
+proc.go:7350: 2025/06/06 11:51:45 logger.go:302: Starting server
+logger.go:54: 2025/06/06 11:52:59 logger.go:302: Logger initialized
+main.go:22: 2025/06/06 11:52:59 logger.go:302: Loading environment variables for logger
+main.go:22: 2025/06/06 11:52:59 logger.go:302: Setting minimum log level to ALL
+logger.go:63: 2025/06/06 11:52:59 logger.go:302: Minimum logging level set to:  | ALL |
+logger.go:243: 2025/06/06 11:52:59 logger.go:302: Logging options set to ALL
+main.go:22: 2025/06/06 11:52:59 logger.go:302: Disabling log levels:
+main.go:22: 2025/06/06 11:52:59 logger.go:302:  -  NONE
+logger.go:76: 2025/06/06 11:52:59 logger.go:302: Disabled logging options:  
+logger.go:85: 2025/06/06 11:52:59 logger.go:302: Console logging set to true
+logger.go:95: 2025/06/06 11:52:59 logger.go:302: File logging set to true
+main.go:22: 2025/06/06 11:52:59 logger.go:302: Logger environment variables loaded
+database.go:179: 2025/06/06 11:52:59 logger.go:302: Using testing database
+main.go:23: 2025/06/06 11:52:59 logger.go:302: Use default database:  false
+main.go:23: 2025/06/06 11:52:59 logger.go:302: Using MongoDB database
+database.go:190: 2025/06/06 11:52:59 logger.go:302: Using testing database
+database.go:278: 2025/06/06 11:52:59 logger.go:302: Connecting to MongoDB:  mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:278: 2025/06/06 11:53:00 logger.go:302: 4
+main.go:23: 2025/06/06 11:53:00 logger.go:302: Database connection established
+main.go:23: 2025/06/06 11:53:00 logger.go:302: Database type:  MONGO
+database.go:203: 2025/06/06 11:53:00 logger.go:302: Creating database
+database.go:203: 2025/06/06 11:53:00 logger.go:302: Creating MongoDB database
+database.go:328: 2025/06/06 11:53:00 logger.go:302: MongoDB database created automatically
+main.go:24: 2025/06/06 11:53:00 logger.go:302: Starting migrations
+main.go:24: 2025/06/06 11:53:00 logger.go:302: No migrations needed for SQLite or MongoDB
+proc.go:7350: 2025/06/06 11:53:00 logger.go:302: Env configurations loaded
+proc.go:7350: 2025/06/06 11:53:00 logger.go:302: Starting server
+logger.go:54: 2025/06/06 12:00:21 logger.go:302: Logger initialized
+main.go:22: 2025/06/06 12:00:21 logger.go:302: Loading environment variables for logger
+main.go:22: 2025/06/06 12:00:21 logger.go:302: Setting minimum log level toALL
+logger.go:63: 2025/06/06 12:00:21 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:243: 2025/06/06 12:00:21 logger.go:302: Logging options set to ALL
+main.go:22: 2025/06/06 12:00:21 logger.go:302: Disabling log levels:
+main.go:22: 2025/06/06 12:00:21 logger.go:302:  - NONE
+logger.go:76: 2025/06/06 12:00:21 logger.go:302: Disabled logging options: 
+logger.go:85: 2025/06/06 12:00:21 logger.go:302: Console logging set totrue
+logger.go:95: 2025/06/06 12:00:21 logger.go:302: File logging set totrue
+main.go:22: 2025/06/06 12:00:21 logger.go:302: Logger environment variables loaded
+database.go:179: 2025/06/06 12:00:21 logger.go:302: Using testing database
+main.go:23: 2025/06/06 12:00:21 logger.go:302: Use default database: false
+main.go:23: 2025/06/06 12:00:21 logger.go:302: Using MongoDB database
+database.go:190: 2025/06/06 12:00:21 logger.go:302: Using testing database
+database.go:278: 2025/06/06 12:00:21 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:278: 2025/06/06 12:00:22 logger.go:302: 4
+main.go:23: 2025/06/06 12:00:22 logger.go:302: Database connection established
+main.go:23: 2025/06/06 12:00:22 logger.go:302: Database type: MONGO
+database.go:203: 2025/06/06 12:00:22 logger.go:302: Creating database
+database.go:203: 2025/06/06 12:00:22 logger.go:302: Creating MongoDB database
+database.go:328: 2025/06/06 12:00:22 logger.go:302: MongoDB database created automatically
+main.go:24: 2025/06/06 12:00:22 logger.go:302: Starting migrations
+main.go:24: 2025/06/06 12:00:22 logger.go:302: No migrations needed for SQLite or MongoDB
+proc.go:7350: 2025/06/06 12:00:22 logger.go:302: Env configurations loaded
+proc.go:7350: 2025/06/06 12:00:22 logger.go:302: Starting server
+logger.go:54: 2025/06/06 12:01:38 logger.go:302: Logger initialized
+main.go:22: 2025/06/06 12:01:38 logger.go:302: Loading environment variables for logger
+main.go:22: 2025/06/06 12:01:38 logger.go:302: Setting minimum log level toALL
+logger.go:63: 2025/06/06 12:01:38 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:243: 2025/06/06 12:01:38 logger.go:302: Logging options set to ALL
+main.go:22: 2025/06/06 12:01:38 logger.go:302: Disabling log levels:
+main.go:22: 2025/06/06 12:01:38 logger.go:302:  - NONE
+logger.go:76: 2025/06/06 12:01:38 logger.go:302: Disabled logging options: 
+logger.go:85: 2025/06/06 12:01:38 logger.go:302: Console logging set totrue
+logger.go:95: 2025/06/06 12:01:38 logger.go:302: File logging set totrue
+main.go:22: 2025/06/06 12:01:38 logger.go:302: Logger environment variables loaded
+database.go:179: 2025/06/06 12:01:38 logger.go:302: Using testing database
+main.go:23: 2025/06/06 12:01:38 logger.go:302: Use default database: false
+main.go:23: 2025/06/06 12:01:38 logger.go:302: Using MongoDB database
+database.go:190: 2025/06/06 12:01:38 logger.go:302: Using testing database
+database.go:278: 2025/06/06 12:01:38 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:278: 2025/06/06 12:01:40 logger.go:302: 4
+main.go:23: 2025/06/06 12:01:40 logger.go:302: Database connection established
+main.go:23: 2025/06/06 12:01:40 logger.go:302: Database type: MONGO
+database.go:203: 2025/06/06 12:01:40 logger.go:302: Creating database
+database.go:203: 2025/06/06 12:01:40 logger.go:302: Creating MongoDB database
+database.go:328: 2025/06/06 12:01:40 logger.go:302: MongoDB database created automatically
+main.go:24: 2025/06/06 12:01:40 logger.go:302: Starting migrations
+main.go:24: 2025/06/06 12:01:40 logger.go:302: No migrations needed for SQLite or MongoDB
+proc.go:7350: 2025/06/06 12:01:40 logger.go:302: Env configurations loaded
+proc.go:7350: 2025/06/06 12:01:40 logger.go:302: Starting server

@@ -5,9 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-	"fmt"
-	"log"
-	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -16,6 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
+
+	"fmt"
+	"os"
 )
 
 type mongoType struct {
@@ -25,6 +25,19 @@ type mongoType struct {
 type gormType struct {
 	db *gorm.DB
 }
+type dbTypes struct {
+}
+
+func (dbTypes) Postgres() string {
+	return "POSTGRES"
+}
+func (dbTypes) MongoDB() string {
+	return "MONGO"
+}
+func (dbTypes) SQLite() string {
+	return "SQLITE"
+}
+
 type db struct {
 	dbType string
 
@@ -38,9 +51,15 @@ type db struct {
 }
 
 var DB db
-var DataBase *gorm.DB
 var mongoT mongoType
 var gormT gormType
+
+func (db) Type() string {
+	return DB.dbType
+}
+func (db) Types() dbTypes {
+	return dbTypes{}
+}
 
 func (db) Gorm() *gormType {
 	return &gormT
@@ -96,14 +115,19 @@ func (db) loadDBConfig() {
 		envName += "_TEST"
 		envHost += "_TEST"
 		envPort += "_TEST"
+
+		DB.conectionString = os.Getenv("CONECTION_STRING_TEST")
+	} else {
+		logger.Info("Using production database")
+		DB.conectionString = os.Getenv("CONECTION_STRING")
 	}
 
 	dbType, exist := os.LookupEnv("DB_TYPE")
 	if exist {
 		DB.dbType = dbType
 	} else {
-		logger.Warning("DB_TYPE not found, using default")
-		DB.dbType = "POSTGRES"
+		logger.Warning("DB_TYPE not found, using default: ", DB.Types().SQLite())
+		DB.dbType = DB.Types().SQLite()
 	}
 
 	host, exist := os.LookupEnv(envHost)
@@ -156,25 +180,25 @@ func (db) EnvInit() error {
 
 	logger.Info("Use default database: ", !exist)
 
-	switch DB.dbType {
-	case "POSTGRES":
+	switch DB.Type() {
+	case DB.Types().Postgres():
 		logger.Info("Using Postgres database")
 		DB.ConnectPostgresEnv()
 
-	case "MONGODB":
+	case DB.Types().MongoDB():
 		logger.Info("Using MongoDB database")
 		DB.ConnectMongoDBEnv()
 
-	case "SQLITE":
+	case DB.Types().SQLite():
 		fallthrough
 	default:
 		logger.Info("Using SQLite database")
-		DB.dbType = "SQLITE"
+		DB.dbType = DB.Types().SQLite()
 		DB.ConnectSQLiteEnv()
 	}
 
 	logger.Info("Database connection established")
-	logger.Info("Database type: ", DB.dbType)
+	logger.Info("Database type: ", DB.Type())
 
 	return DB.CreateDatabase()
 }
@@ -247,12 +271,11 @@ func (db) ConnectSQLite(dbname string) {
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	if exist && useTesting != "TRUE" {
-		DB.ConnectMongoDB(os.Getenv("CONECTION_STRING"))
-	} else {
+	if !exist || useTesting == "TRUE" {
 		logger.Info("Using testing database")
-		DB.ConnectMongoDB(os.Getenv("CONECTION_STRING_TEST"))
 	}
+
+	DB.ConnectMongoDB(DB.conectionString)
 }
 
 // ConnectMongoDB connects to the MongoDB database using the provided port
@@ -261,9 +284,10 @@ func (db) ConnectMongoDB(conectionString string) {
 	// Create a Client to a MongoDB server and use Ping to verify that the
 	// server is running.
 
+	logger.Debug("Connecting to MongoDB: ", conectionString)
 	clientOpts := options.Client().ApplyURI(conectionString)
-
 	client, err := mongo.Connect(clientOpts)
+
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -281,6 +305,7 @@ func (db) ConnectMongoDB(conectionString string) {
 	if err = client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		logger.Fatal(err)
 	}
+	logger.Debug("4")
 }
 
 // CreateDatabase creates the database based on the database type
@@ -288,8 +313,8 @@ func (db) ConnectMongoDB(conectionString string) {
 func (db) CreateDatabase() error {
 	logger.Info("Creating database")
 
-	switch DB.dbType {
-	case "POSTGRES":
+	switch DB.Type() {
+	case DB.Types().Postgres():
 		logger.Info("Creating Postgres database")
 		err := DB.CreatePostgresDatabase()
 
@@ -298,11 +323,11 @@ func (db) CreateDatabase() error {
 			return err
 		}
 
-	case "MONGODB":
+	case DB.Types().MongoDB():
 		logger.Info("Creating MongoDB database")
 		DB.CreateMongoDBDatabase()
 
-	case "SQLITE":
+	case DB.Types().SQLite():
 		fallthrough
 	default:
 		logger.Info("Creating SQLite database")
@@ -323,7 +348,6 @@ func (db) CreatePostgresDatabase() error {
 	}
 
 	if exists {
-		log.Printf("Database '%s' already exists", DB.name)
 		logger.Info("Database", DB.name, "already exists")
 		return nil
 	}
@@ -331,10 +355,11 @@ func (db) CreatePostgresDatabase() error {
 	// Create the new database
 	createQuery := fmt.Sprintf("CREATE DATABASE \"%s\"", DB.name)
 	if err := DB.Gorm().DB().Exec(createQuery).Error; err != nil {
+		logger.Error("failed to create database", DB.name, ": ", err)
 		return fmt.Errorf("failed to create database '%s': %w", DB.name, err)
 	}
 
-	log.Printf("Database '%s' created successfully", DB.name)
+	logger.Info("Database", DB.name, "created successfully")
 	return nil
 }
 
@@ -357,7 +382,7 @@ func (db) CreateSQLiteDatabase() {
 func (db) Migrate(models ...any) {
 	logger.Info("Starting migrations")
 
-	if DB.dbType == "POSTGRES" {
+	if DB.dbType == DB.Types().Postgres() {
 		for _, model := range models {
 			err := gormT.DB().AutoMigrate(model)
 
@@ -376,24 +401,36 @@ func (db) Migrate(models ...any) {
 }
 
 // Close closes the database connection
-func (db) Close() {
-	if DB.dbType == "POSTGRES" {
-		sqlDB, err := gormT.DB().DB()
-		if err != nil {
-			logger.Error("Error getting SQL DB: ", err)
-			return
-		}
-		sqlDB.Close()
-	} else if DB.dbType == "MONGODB" {
-		if err := mongoT.DB().Client().Disconnect(context.Background()); err != nil {
+func (db) ClosePostgres() {
+	sqlDB, err := gormT.DB().DB()
+	if err != nil {
+		logger.Error("Error getting SQL DB: ", err)
+		return
+	}
+	sqlDB.Close()
+}
+func (db) CloseMongoDB() {
+	if mongoT.client != nil {
+		if err := mongoT.client.Disconnect(context.Background()); err != nil {
 			logger.Error("Error disconnecting from MongoDB: ", err)
 		}
 	} else {
-		logger.Info("No need to close SQLite connection")
+		logger.Info("MongoDB client is nil, no need to close")
 	}
 }
 
-// GetDBType returns the database type in use
-func (db) Type() string {
-	return DB.dbType
+func (db) Close() {
+	switch DB.Type() {
+	case DB.Types().Postgres():
+		DB.ClosePostgres()
+
+	case DB.Types().MongoDB():
+		DB.CloseMongoDB()
+
+	case DB.Types().SQLite():
+		logger.Info("No need to close SQLite connection")
+
+	default:
+		logger.Warning("Unknown database type, no specific close method available")
+	}
 }

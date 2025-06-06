@@ -21,6 +21,6 @@ func UserRoutes(router *gin.Engine) {
 	{
 		userRouter.GET("/:id", controller.User.GetByIDMongo)
 
-		userRouter.POST("/", controller.User.CreateGorm)
+		userRouter.POST("/", controller.User.CreateMongo)
 	}
 }
