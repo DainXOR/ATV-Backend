@@ -135,10 +135,21 @@ func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
 	ctx, cancel := configs.DB.Mongo().Context()
 	defer cancel()
 
-	configs.DB.Mongo().Collection("users").Find(
+	cursor, err := configs.DB.Mongo().CollectionOf(models.UserDBMongo{}).Find(
 		ctx,
 		bson.M{},
 	)
+
+	if err != nil {
+		logger.Error("Failed to get all users from MongoDB: ", err)
+		return types.ResultErr[[]models.UserDBMongo](err)
+	}
+
+	err = cursor.All(ctx, &users)
+	if err != nil {
+		logger.Error("Failed to get all users from MongoDB: ", err)
+		return types.ResultErr[[]models.UserDBMongo](err)
+	}
 
 	if len(users) == 0 {
 		err := types.ErrorNotFound(

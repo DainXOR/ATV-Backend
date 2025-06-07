@@ -70,21 +70,26 @@ func (db) Mongo() *mongoType {
 }
 
 func (gormType) DB() *gorm.DB {
-	return gormT.db
+	return DB.Gorm().db
 }
 
 func (mongoType) DB() *mongo.Database {
-	return mongoT.db
+	return DB.Mongo().db
 }
 func (mongoType) Collection(name string) *mongo.Collection {
-	return mongoT.db.Collection(name)
+	return DB.Mongo().DB().Collection(name)
+}
+func (mongoType) CollectionOf(v any) *mongo.Collection {
+	// Use reflection to get the collection name from the struct
+	collectionName := v.(interface{ TableName() string }).TableName()
+	return DB.Mongo().Collection(collectionName)
 }
 func (mongoType) Context() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 2*time.Second)
 }
 func (mongoType) Disconect() {
-	if mongoT.disconectFunc != nil {
-		mongoT.disconectFunc()
+	if DB.Mongo().disconectFunc != nil {
+		DB.Mongo().disconectFunc()
 	} else {
 		logger.Warning("MongoDB disconect function is nil, nothing to do")
 	}
@@ -230,7 +235,7 @@ func (db) ConnectPostgres(host string, user string, password string, dbname stri
 		" port=" + port +
 		" sslmode=disable"
 	logger.Info("Connecting to database: ", dsn)
-	gormT.db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB.Gorm().db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		logger.Fatal(err)
@@ -252,7 +257,7 @@ func (db) ConnectSQLiteEnv() {
 // It uses the gorm library to establish the connection
 func (db) ConnectSQLite(dbname string) {
 	var err error
-	gormT.db, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
+	DB.Gorm().db, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
@@ -378,7 +383,7 @@ func (db) Migrate(models ...any) {
 
 	if DB.dbType == DB.Types().Postgres() {
 		for _, model := range models {
-			err := gormT.DB().AutoMigrate(model)
+			err := DB.Gorm().DB().AutoMigrate(model)
 
 			if err != nil {
 				logger.Error("Error migrating model: ", err)
@@ -396,7 +401,7 @@ func (db) Migrate(models ...any) {
 
 // Close closes the database connection
 func (db) ClosePostgres() {
-	sqlDB, err := gormT.DB().DB()
+	sqlDB, err := DB.Gorm().DB().DB()
 	if err != nil {
 		logger.Error("Error getting SQL DB: ", err)
 		return
