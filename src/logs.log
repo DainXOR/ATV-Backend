@@ -1022,3 +1022,579 @@ main.go:24: 2025/06/06 12:01:40 logger.go:302: Starting migrations
 main.go:24: 2025/06/06 12:01:40 logger.go:302: No migrations needed for SQLite or MongoDB
 proc.go:7350: 2025/06/06 12:01:40 logger.go:302: Env configurations loaded
 proc.go:7350: 2025/06/06 12:01:40 logger.go:302: Starting server
+logger.go:54: 2025/06/06 14:05:34 logger.go:302: Logger initialized
+main.go:22: 2025/06/06 14:05:34 logger.go:302: Loading environment variables for logger
+main.go:22: 2025/06/06 14:05:34 logger.go:302: Setting minimum log level toALL
+logger.go:63: 2025/06/06 14:05:34 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:243: 2025/06/06 14:05:34 logger.go:302: Logging options set to ALL
+main.go:22: 2025/06/06 14:05:34 logger.go:302: Disabling log levels:
+main.go:22: 2025/06/06 14:05:34 logger.go:302:  - NONE
+logger.go:76: 2025/06/06 14:05:34 logger.go:302: Disabled logging options: 
+logger.go:85: 2025/06/06 14:05:34 logger.go:302: Console logging set totrue
+logger.go:95: 2025/06/06 14:05:34 logger.go:302: File logging set totrue
+main.go:22: 2025/06/06 14:05:34 logger.go:302: Logger environment variables loaded
+database.go:179: 2025/06/06 14:05:34 logger.go:302: Using testing database
+main.go:23: 2025/06/06 14:05:34 logger.go:302: Use default database: false
+main.go:23: 2025/06/06 14:05:34 logger.go:302: Using MongoDB database
+database.go:190: 2025/06/06 14:05:34 logger.go:302: Using testing database
+database.go:278: 2025/06/06 14:05:34 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:278: 2025/06/06 14:05:35 logger.go:302: 4
+main.go:23: 2025/06/06 14:05:35 logger.go:302: Database connection established
+main.go:23: 2025/06/06 14:05:35 logger.go:302: Database type: MONGO
+database.go:203: 2025/06/06 14:05:35 logger.go:302: Creating database
+database.go:203: 2025/06/06 14:05:35 logger.go:302: Creating MongoDB database
+database.go:328: 2025/06/06 14:05:35 logger.go:302: MongoDB database created automatically
+main.go:24: 2025/06/06 14:05:35 logger.go:302: Starting migrations
+main.go:24: 2025/06/06 14:05:35 logger.go:302: No migrations needed for SQLite or MongoDB
+proc.go:7350: 2025/06/06 14:05:35 logger.go:302: Env configurations loaded
+proc.go:7350: 2025/06/06 14:05:35 logger.go:302: Starting server
+context.go:185: 2025/06/06 14:08:07 logger.go:302: Using MongoDB
+context.go:185: 2025/06/06 14:08:07 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_controller.go:135: 2025/06/06 14:08:07 logger.go:302: Creating user in MongoDB
+logger.go:50: 2025/06/06 16:12:31 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 16:12:31 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 16:12:31 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 16:12:31 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 16:12:31 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 16:12:31 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 16:12:31 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 16:12:31 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 16:12:31 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 16:12:31 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 16:12:31 logger.go:302: Logger environment variables loaded
+database.go:116: 2025/06/06 16:12:31 logger.go:302: Using testing database
+database.go:185: 2025/06/06 16:12:31 logger.go:302: Use default database: false
+database.go:193: 2025/06/06 16:12:31 logger.go:302: Using MongoDB database
+database.go:279: 2025/06/06 16:12:31 logger.go:302: Using testing database
+database.go:291: 2025/06/06 16:12:31 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:312: 2025/06/06 16:12:32 logger.go:302: 4
+database.go:204: 2025/06/06 16:12:32 logger.go:302: Database connection established
+database.go:205: 2025/06/06 16:12:32 logger.go:302: Database type: MONGO
+database.go:318: 2025/06/06 16:12:32 logger.go:302: Creating database
+database.go:331: 2025/06/06 16:12:32 logger.go:302: Creating MongoDB database
+database.go:373: 2025/06/06 16:12:32 logger.go:302: MongoDB database created automatically
+database.go:387: 2025/06/06 16:12:32 logger.go:302: Starting migrations
+database.go:403: 2025/06/06 16:12:32 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 16:12:32 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 16:12:32 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 16:13:21 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 16:13:21 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:121: 2025/06/06 16:13:21 logger.go:302: Creating user in MongoDB
+logger.go:50: 2025/06/06 16:21:02 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 16:21:02 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 16:21:02 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 16:21:02 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 16:21:02 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 16:21:02 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 16:21:02 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 16:21:02 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 16:21:02 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 16:21:02 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 16:21:02 logger.go:302: Logger environment variables loaded
+database.go:116: 2025/06/06 16:21:02 logger.go:302: Using testing database
+database.go:185: 2025/06/06 16:21:02 logger.go:302: Use default database: false
+database.go:193: 2025/06/06 16:21:02 logger.go:302: Using MongoDB database
+database.go:279: 2025/06/06 16:21:02 logger.go:302: Using testing database
+database.go:291: 2025/06/06 16:21:02 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:312: 2025/06/06 16:21:03 logger.go:302: 4
+database.go:204: 2025/06/06 16:21:03 logger.go:302: Database connection established
+database.go:205: 2025/06/06 16:21:03 logger.go:302: Database type: MONGO
+database.go:318: 2025/06/06 16:21:03 logger.go:302: Creating database
+database.go:331: 2025/06/06 16:21:03 logger.go:302: Creating MongoDB database
+database.go:373: 2025/06/06 16:21:03 logger.go:302: MongoDB database created automatically
+database.go:387: 2025/06/06 16:21:03 logger.go:302: Starting migrations
+database.go:403: 2025/06/06 16:21:03 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 16:21:03 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 16:21:03 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 16:21:44 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 16:21:44 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+logger.go:50: 2025/06/06 16:40:08 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 16:40:08 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 16:40:08 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 16:40:08 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 16:40:08 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 16:40:08 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 16:40:08 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 16:40:08 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 16:40:08 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 16:40:08 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 16:40:08 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 16:40:08 logger.go:302: Using testing database
+database.go:173: 2025/06/06 16:40:08 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 16:40:08 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 16:40:08 logger.go:302: Using testing database
+database.go:279: 2025/06/06 16:40:08 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 16:40:09 logger.go:302: Database connection established
+database.go:193: 2025/06/06 16:40:09 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 16:40:09 logger.go:302: Creating database
+database.go:321: 2025/06/06 16:40:10 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 16:40:10 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 16:40:10 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 16:40:10 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 16:40:10 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 16:40:10 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 16:40:17 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 16:40:17 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:146: 2025/06/06 16:40:17 logger.go:302: User created with ID: ObjectID("000000000000000000000000")
+logger.go:50: 2025/06/06 16:43:52 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 16:43:52 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 16:43:52 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 16:43:52 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 16:43:52 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 16:43:52 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 16:43:52 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 16:43:52 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 16:43:52 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 16:43:52 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 16:43:52 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 16:43:52 logger.go:302: Using testing database
+database.go:173: 2025/06/06 16:43:52 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 16:43:52 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 16:43:52 logger.go:302: Using testing database
+database.go:279: 2025/06/06 16:43:52 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 16:43:53 logger.go:302: Database connection established
+database.go:193: 2025/06/06 16:43:53 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 16:43:53 logger.go:302: Creating database
+database.go:321: 2025/06/06 16:43:53 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 16:43:53 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 16:43:53 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 16:43:53 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 16:43:53 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 16:43:53 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 16:43:56 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 16:43:56 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:146: 2025/06/06 16:43:56 logger.go:302: User created with ID: ObjectID("6843611cf3ab0646e52a4727")
+logger.go:50: 2025/06/06 17:02:39 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:02:39 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:02:39 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:02:39 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:02:39 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:02:39 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:02:39 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:02:39 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:02:39 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:02:39 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:02:39 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:02:39 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:02:39 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:02:39 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:02:39 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:02:39 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:02:40 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:02:40 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:02:40 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:02:40 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:02:40 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:02:40 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:02:40 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:02:40 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:02:40 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:03:20 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:03:20 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_controller.go:114: 2025/06/06 17:03:44 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:03:44 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+logger.go:50: 2025/06/06 17:11:01 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:11:01 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:11:01 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:11:01 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:11:01 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:11:01 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:11:01 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:11:01 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:11:01 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:11:01 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:11:01 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:11:01 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:11:01 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:11:01 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:11:01 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:11:01 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:11:02 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:11:02 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:11:02 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:11:02 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:11:02 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:11:02 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:11:02 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:11:02 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:11:02 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:11:06 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:11:06 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:167: 2025/06/06 17:11:06 logger.go:302: User created with ID: ObjectID("6843677a6f56838423590678")
+logger.go:50: 2025/06/06 17:11:34 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:11:34 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:11:34 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:11:34 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:11:34 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:11:34 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:11:34 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:11:34 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:11:34 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:11:34 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:11:34 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:11:34 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:11:34 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:11:34 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:11:34 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:11:34 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:11:35 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:11:35 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:11:35 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:11:35 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:11:35 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:11:35 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:11:35 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:11:35 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:11:35 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:11:45 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:11:45 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:167: 2025/06/06 17:11:46 logger.go:302: User created with ID: ObjectID("684367a1b8220574614c04b4")
+logger.go:50: 2025/06/06 17:12:07 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:12:07 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:12:07 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:12:07 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:12:07 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:12:07 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:12:07 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:12:07 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:12:07 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:12:07 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:12:07 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:12:07 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:12:07 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:12:07 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:12:07 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:12:07 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:12:08 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:12:08 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:12:08 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:12:08 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:12:08 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:12:08 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:12:08 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:12:08 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:12:08 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:12:13 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:12:13 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:167: 2025/06/06 17:12:13 logger.go:302: User created with ID: ObjectID("684367bd4248c62bdcd408fb")
+logger.go:50: 2025/06/06 17:25:30 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:25:30 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:25:30 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:25:30 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:25:30 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:25:30 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:25:30 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:25:30 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:25:30 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:25:30 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:25:30 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:25:30 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:25:30 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:25:30 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:25:30 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:25:30 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:25:31 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:25:31 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:25:31 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:25:31 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:25:31 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:25:31 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:25:31 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:25:31 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:25:31 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:25:35 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:25:35 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:167: 2025/06/06 17:25:35 logger.go:302: User created with ID: ObjectID("68436adf68baf97934ebc953")
+user_interface.go:168: 2025/06/06 17:25:35 logger.go:302: Test: 68436adf68baf97934ebc953
+logger.go:50: 2025/06/06 17:32:27 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:32:27 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:32:27 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:32:27 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:32:27 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:32:27 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:32:27 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:32:27 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:32:27 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:32:27 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:32:27 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:32:27 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:32:27 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:32:27 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:32:27 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:32:27 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:32:28 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:32:28 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:32:28 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:32:28 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:32:28 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:32:28 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:32:28 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:32:28 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:32:28 logger.go:302: Starting server
+user_controller.go:114: 2025/06/06 17:32:33 logger.go:302: Using MongoDB
+user_controller.go:133: 2025/06/06 17:32:33 logger.go:302: Creating user in MongoDB: {6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890}
+user_interface.go:167: 2025/06/06 17:32:33 logger.go:302: User created with ID: ObjectID("68436c81856fd0678d46090a")
+user_interface.go:168: 2025/06/06 17:32:33 logger.go:302: Test: 68436c81856fd0678d46090a
+user_controller.go:19: 2025/06/06 17:33:15 logger.go:302: Using GORM
+user_controller.go:21: 2025/06/06 17:33:15 logger.go:302: Getting user by ID: 1
+user_controller.go:36: 2025/06/06 17:33:35 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 17:33:35 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:30: 2025/06/06 17:33:36 logger.go:302: Failed to get user by ID: mongo: no documents in result
+logger.go:50: 2025/06/06 17:36:06 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:36:06 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:36:06 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:36:06 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:36:06 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:36:06 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:36:06 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:36:06 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:36:06 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:36:06 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:36:06 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:36:06 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:36:06 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:36:06 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:36:06 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:36:06 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:36:07 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:36:07 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:36:07 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:36:07 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:36:07 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:36:07 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:36:07 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:36:07 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:36:07 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 17:36:18 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 17:36:18 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:43: 2025/06/06 17:36:18 logger.go:302: Failed to get user by ID: mongo: no documents in result
+user_controller.go:36: 2025/06/06 17:36:41 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 17:36:41 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:43: 2025/06/06 17:36:41 logger.go:302: Failed to get user by ID: mongo: no documents in result
+user_controller.go:36: 2025/06/06 17:37:21 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 17:37:21 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:43: 2025/06/06 17:37:21 logger.go:302: Failed to get user by ID: mongo: no documents in result
+logger.go:50: 2025/06/06 17:45:38 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 17:45:38 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 17:45:38 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 17:45:38 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 17:45:38 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 17:45:38 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 17:45:38 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 17:45:38 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 17:45:38 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 17:45:38 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 17:45:38 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 17:45:38 logger.go:302: Using testing database
+database.go:173: 2025/06/06 17:45:38 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 17:45:38 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 17:45:38 logger.go:302: Using testing database
+database.go:279: 2025/06/06 17:45:38 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 17:45:39 logger.go:302: Database connection established
+database.go:193: 2025/06/06 17:45:39 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 17:45:39 logger.go:302: Creating database
+database.go:321: 2025/06/06 17:45:39 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 17:45:39 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 17:45:39 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 17:45:39 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 17:45:39 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 17:45:39 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 17:45:47 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 17:45:47 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:45: 2025/06/06 17:45:47 logger.go:302: Failed to get user by ID: mongo: no documents in result
+logger.go:50: 2025/06/06 18:08:24 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 18:08:24 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 18:08:24 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 18:08:24 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 18:08:24 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 18:08:24 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 18:08:24 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 18:08:24 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 18:08:24 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 18:08:24 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 18:08:24 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 18:08:24 logger.go:302: Using testing database
+database.go:173: 2025/06/06 18:08:24 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 18:08:24 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 18:08:24 logger.go:302: Using testing database
+database.go:279: 2025/06/06 18:08:24 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 18:08:25 logger.go:302: Database connection established
+database.go:193: 2025/06/06 18:08:25 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 18:08:25 logger.go:302: Creating database
+database.go:321: 2025/06/06 18:08:25 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 18:08:25 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 18:08:25 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 18:08:25 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 18:08:25 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 18:08:25 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 18:08:33 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 18:08:33 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:45: 2025/06/06 18:08:33 logger.go:302: Failed to get user by ID: mongo: no documents in result
+logger.go:50: 2025/06/06 18:12:01 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 18:12:01 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 18:12:01 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 18:12:01 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 18:12:01 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 18:12:01 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 18:12:01 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 18:12:01 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 18:12:01 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 18:12:01 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 18:12:01 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 18:12:01 logger.go:302: Using testing database
+database.go:173: 2025/06/06 18:12:01 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 18:12:01 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 18:12:01 logger.go:302: Using testing database
+database.go:279: 2025/06/06 18:12:01 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 18:12:02 logger.go:302: Database connection established
+database.go:193: 2025/06/06 18:12:02 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 18:12:02 logger.go:302: Creating database
+database.go:321: 2025/06/06 18:12:02 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 18:12:02 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 18:12:02 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 18:12:02 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 18:12:02 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 18:12:02 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 18:12:05 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 18:12:05 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:45: 2025/06/06 18:12:05 logger.go:302: Failed to get user by ID: cannot marshal type primitive.ObjectID to a BSON Document: WriteBinaryWithSubtype can only write while positioned on a Element or Value but is positioned on a TopLevel
+logger.go:50: 2025/06/06 18:13:20 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 18:13:20 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 18:13:20 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 18:13:20 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 18:13:20 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 18:13:20 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 18:13:20 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 18:13:20 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 18:13:20 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 18:13:20 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 18:13:20 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 18:13:20 logger.go:302: Using testing database
+database.go:173: 2025/06/06 18:13:20 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 18:13:20 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 18:13:20 logger.go:302: Using testing database
+database.go:279: 2025/06/06 18:13:20 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 18:13:22 logger.go:302: Database connection established
+database.go:193: 2025/06/06 18:13:22 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 18:13:22 logger.go:302: Creating database
+database.go:321: 2025/06/06 18:13:22 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 18:13:22 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 18:13:22 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 18:13:22 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 18:13:22 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 18:13:22 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 18:13:28 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 18:13:28 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:45: 2025/06/06 18:13:28 logger.go:302: Failed to get user by ID: mongo: no documents in result
+logger.go:50: 2025/06/06 18:21:48 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 18:21:48 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 18:21:48 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 18:21:48 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 18:21:48 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 18:21:48 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 18:21:48 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 18:21:48 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 18:21:48 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 18:21:48 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 18:21:48 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 18:21:48 logger.go:302: Using testing database
+database.go:173: 2025/06/06 18:21:48 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 18:21:48 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 18:21:48 logger.go:302: Using testing database
+database.go:279: 2025/06/06 18:21:48 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 18:21:49 logger.go:302: Database connection established
+database.go:193: 2025/06/06 18:21:49 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 18:21:49 logger.go:302: Creating database
+database.go:321: 2025/06/06 18:21:49 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 18:21:49 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 18:21:49 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 18:21:49 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 18:21:49 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 18:21:49 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 18:21:52 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 18:21:52 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:59: 2025/06/06 18:21:53 logger.go:302: Failed to get user by ID: error decoding key _id: cannot decode objectID into an array
+logger.go:50: 2025/06/06 18:39:09 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 18:39:09 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 18:39:09 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 18:39:09 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 18:39:09 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 18:39:09 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 18:39:09 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 18:39:09 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 18:39:09 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 18:39:09 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 18:39:09 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 18:39:09 logger.go:302: Using testing database
+database.go:173: 2025/06/06 18:39:09 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 18:39:09 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 18:39:09 logger.go:302: Using testing database
+database.go:279: 2025/06/06 18:39:09 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 18:39:11 logger.go:302: Database connection established
+database.go:193: 2025/06/06 18:39:11 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 18:39:11 logger.go:302: Creating database
+database.go:321: 2025/06/06 18:39:11 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 18:39:11 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 18:39:11 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 18:39:11 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 18:39:11 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 18:39:11 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 18:39:16 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 18:39:16 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:58: 2025/06/06 18:39:16 logger.go:302: Failed to get user by ID: error decoding key _id: cannot decode objectID into an array
+logger.go:50: 2025/06/06 20:02:34 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 20:02:34 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 20:02:34 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 20:02:34 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 20:02:34 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 20:02:34 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 20:02:34 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 20:02:34 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 20:02:34 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 20:02:34 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 20:02:34 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 20:02:34 logger.go:302: Using testing database
+database.go:173: 2025/06/06 20:02:34 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 20:02:34 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 20:02:34 logger.go:302: Using testing database
+database.go:279: 2025/06/06 20:02:34 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 20:02:36 logger.go:302: Database connection established
+database.go:193: 2025/06/06 20:02:36 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 20:02:36 logger.go:302: Creating database
+database.go:321: 2025/06/06 20:02:36 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 20:02:36 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 20:02:36 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 20:02:36 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 20:02:36 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 20:02:36 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 20:02:39 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 20:02:39 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:58: 2025/06/06 20:02:39 logger.go:302: Failed to get user by ID: error decoding key _id: cannot decode objectID into an array
+logger.go:50: 2025/06/06 20:28:13 logger.go:302: Logger initialized
+logger.go:55: 2025/06/06 20:28:13 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/06 20:28:13 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/06 20:28:13 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/06 20:28:13 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/06 20:28:13 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/06 20:28:13 logger.go:302:  - NONE
+logger.go:209: 2025/06/06 20:28:13 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/06 20:28:13 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/06 20:28:13 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/06 20:28:13 logger.go:302: Logger environment variables loaded
+database.go:104: 2025/06/06 20:28:13 logger.go:302: Using testing database
+database.go:173: 2025/06/06 20:28:13 logger.go:302: Use default database: false
+database.go:181: 2025/06/06 20:28:13 logger.go:302: Using MongoDB database
+database.go:267: 2025/06/06 20:28:13 logger.go:302: Using testing database
+database.go:279: 2025/06/06 20:28:13 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:192: 2025/06/06 20:28:14 logger.go:302: Database connection established
+database.go:193: 2025/06/06 20:28:14 logger.go:302: Database type: MONGO
+database.go:308: 2025/06/06 20:28:14 logger.go:302: Creating database
+database.go:321: 2025/06/06 20:28:14 logger.go:302: Creating MongoDB database
+database.go:363: 2025/06/06 20:28:14 logger.go:302: MongoDB database created automatically
+database.go:377: 2025/06/06 20:28:14 logger.go:302: Starting migrations
+database.go:393: 2025/06/06 20:28:14 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/06 20:28:14 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/06 20:28:14 logger.go:302: Starting server
+user_controller.go:36: 2025/06/06 20:28:20 logger.go:302: Using MongoDB
+user_controller.go:38: 2025/06/06 20:28:20 logger.go:302: Getting user by ID: 68436c81856fd0678d46090a
+user_interface.go:84: 2025/06/06 20:28:20 logger.go:302: User found: {"_id":{"$binary":{"base64":"aENsgYVv0GeNRgkK","subType":"00"}},"id_number":"6969696969","first_name":"Avr","last_name":"Ji es, tiene la mancha","email":"eltoro@mail.com","institution_email":"otro@mail.com","residence_address":"Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran","semester":7,"university_id":"2","phone_number":"1234567890","created_at":{"$date":{"$numberLong":"-62135596800000"}},"updated_at":{"$date":{"$numberLong":"-62135596800000"}},"deleted_at":null}

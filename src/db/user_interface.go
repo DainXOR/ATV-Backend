@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type userType struct{}
@@ -16,17 +17,73 @@ var User userType
 
 func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
 	var user models.UserDBMongo
-	configs.DB.Mongo().Collection("users").FindOne(
-		configs.DB.Mongo().Context(),
-		bson.M{"_id": id},
-	).Decode(&user)
+	var httpErr types.HttpError
 
-	err := types.ErrorNotFound(
-		"User not found",
-		"User with ID "+id+" not found",
-	)
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
 
-	return types.ResultOf(user, &err, user.ID != primitive.NilObjectID)
+	oid, err := bson.ObjectIDFromHex(id)
+
+	if err != nil {
+		logger.Error("Failed to convert ID to ObjectID: ", err)
+		httpErr = types.Error(
+			types.Http.UnprocessableEntity(),
+			"unprocessable_entity",
+			"Invalid ID format: "+err.Error(),
+			"User ID: "+id,
+		)
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	var userT models.UserDBMongoT
+
+	err = configs.DB.Mongo().Collection(user.TableName()).FindOne(
+		ctx,
+		filter,
+	).Decode(&userT)
+
+	t, _ := primitive.ObjectIDFromHex(id)
+	user = models.UserDBMongo{
+		ID:               t,
+		IDNumber:         userT.IDNumber,
+		FirstName:        userT.FirstName,
+		LastName:         userT.LastName,
+		PersonalEmail:    userT.PersonalEmail,
+		InstitutionEmail: userT.InstitutionEmail,
+		ResidenceAddress: userT.ResidenceAddress,
+		Semester:         userT.Semester,
+		UniversityID:     userT.UniversityID,
+		PhoneNumber:      userT.PhoneNumber,
+		CreatedAt:        userT.CreatedAt,
+		UpdatedAt:        userT.UpdatedAt,
+		DeletedAt:        userT.DeletedAt,
+	}
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			logger.Error("Failed to get user by ID: ", err)
+			httpErr = types.ErrorNotFound(
+				"User not found",
+				"User with ID "+id+" not found",
+			)
+		} else {
+			logger.Error("Failed to get user by ID: ", err)
+			httpErr = types.Error(
+				types.Http.UnprocessableEntity(),
+				"unprocessable_entity",
+				err.Error(),
+				"User ID: "+id,
+			)
+		}
+
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	res, _ := bson.MarshalExtJSON(user, false, true)
+	logger.Debug("User found: ", string(res))
+
+	return types.ResultOk(user)
 }
 func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 	var user models.UserDBGorm
@@ -42,8 +99,12 @@ func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 }
 func (userType) GetByEmail(email string) types.Result[models.UserDBMongo] {
 	var user models.UserDBMongo
+
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
 	configs.DB.Mongo().Collection("users").FindOne(
-		configs.DB.Mongo().Context(),
+		ctx,
 		bson.M{"email": email},
 	).Decode(&user)
 
@@ -70,8 +131,12 @@ func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 }
 func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
 	var users []models.UserDBMongo
+
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
 	configs.DB.Mongo().Collection("users").Find(
-		configs.DB.Mongo().Context(),
+		ctx,
 		bson.M{},
 	)
 
@@ -118,10 +183,11 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 	var userDB models.UserDBMongo
 	userDB = user.ToDBMongo()
 
-	logger.Debug("Creating user in MongoDB")
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
 
-	_, err := configs.DB.Mongo().Collection("users").InsertOne(
-		configs.DB.Mongo().Context(),
+	result, err := configs.DB.Mongo().Collection(userDB.TableName()).InsertOne(
+		ctx,
 		userDB,
 	)
 
@@ -130,7 +196,21 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 		return types.ResultErr[models.UserDBMongo](err)
 	}
 
-	logger.Debug("User created with ID: ", userDB.ID)
+	logger.Debug("User created with ID: ", result.InsertedID)
+	logger.Debug("Test: ", result.InsertedID.(bson.ObjectID).Hex())
+	userDB.ID, err = primitive.ObjectIDFromHex(result.InsertedID.(bson.ObjectID).Hex())
+
+	if err != nil {
+		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
+		newErr := types.Error(
+			types.Http.InternalServerError(),
+			"Failed to convert inserted ID to ObjectID",
+			"Error: "+err.Error(),
+		)
+
+		return types.ResultErr[models.UserDBMongo](&newErr)
+	}
+	//logger.Debug("User created with ID: ", userDB.ID.String())
 
 	return types.ResultOk(userDB)
 }

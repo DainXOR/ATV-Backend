@@ -309,7 +309,7 @@ func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
 
 	orignalPrefix := logger.Prefix()
 	extraPrefix := ""
-	_, file, line, ok := runtime.Caller(4)
+	_, file, line, ok := runtime.Caller(3)
 	if ok {
 		//fmt.Println(file + ":" + strconv.Itoa(line))
 		splitPath := strings.Split(file, "/")

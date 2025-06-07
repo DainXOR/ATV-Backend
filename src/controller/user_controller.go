@@ -33,6 +33,7 @@ func (userType) GetByIDGorm(c *gin.Context) {
 	c.JSON(http.StatusOK, user.ToResponse())
 }
 func (userType) GetByIDMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
@@ -110,6 +111,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	c.JSON(http.StatusCreated, user.ToResponse())
 }
 func (userType) CreateMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	var body models.UserCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
