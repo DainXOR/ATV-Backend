@@ -25,3 +25,9 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	}
 	return result
 }
+
+func Apply[T, R any](fn func(T) R, value T) func() R {
+	return func() R {
+		return fn(value)
+	}
+}

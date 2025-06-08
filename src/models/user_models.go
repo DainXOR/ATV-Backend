@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"gorm.io/gorm"
 )
 
@@ -30,8 +31,8 @@ type UserDBGorm struct {
 	// NotNull forces the field to be not null in the database for each record
 	// JSON tags are used to specify the JSON key names for the fields inside de db and in JSON schema
 }
-type UserDBMongo struct {
-	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+type UserDBMongoT struct {
+	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string             `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string             `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string             `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -43,10 +44,11 @@ type UserDBMongo struct {
 	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
 	CreatedAt        time.Time          `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time          `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
-	DeletedAt        *time.Time         `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
+	DeletedAt        *time.Time         `json:"deleted_at" bson:"deleted_at"`
 }
 
-type UserDBMongoT struct {
+type UserDBMongoF struct {
+	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string     `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -111,8 +113,8 @@ func (user UserCreate) ToDBGorm() UserDBGorm {
 
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
-func (user UserCreate) ToDBMongo() UserDBMongo {
-	return UserDBMongo{
+func (user UserCreate) ToDBMongo() UserDBMongoT {
+	return UserDBMongoT{
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -127,11 +129,35 @@ func (user UserCreate) ToDBMongo() UserDBMongo {
 		DeletedAt:        nil, // DeletedAt is nil by default, indicating the user is not deleted
 	}
 }
+func (user UserDBMongoF) ToDBMongo(id string) UserDBMongoT {
+	var t primitive.ObjectID
 
-// ToPutDB converts a UserCreate struct to a map[string]any
+	if id == "" {
+		t, _ = primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
+	} else {
+		t, _ = primitive.ObjectIDFromHex(id)
+	}
+
+	return UserDBMongoT{
+		ID:               t,
+		IDNumber:         user.IDNumber,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		PersonalEmail:    user.PersonalEmail,
+		InstitutionEmail: user.InstitutionEmail,
+		ResidenceAddress: user.ResidenceAddress,
+		Semester:         user.Semester,
+		UniversityID:     user.UniversityID,
+		PhoneNumber:      user.PhoneNumber,
+		CreatedAt:        user.CreatedAt,
+		UpdatedAt:        user.UpdatedAt,
+	}
+}
+
+// ToPutDBGorm converts a UserCreate struct to a map[string]any
 // This is used to prepare the data for updating a user in the database
 // It filters out fields that are not needed for the update or should not be zeroed
-func (user UserCreate) ToPutDB() map[string]any {
+func (user UserCreate) ToPutDBGorm() map[string]any {
 	filter := func(key reflect.StructField, value reflect.Value) bool {
 		excludeFields := []string{"id", "created_at", "updated_at", "deleted_at"}
 		if slices.Contains(excludeFields, key.Tag.Get("json")) {
@@ -167,7 +193,7 @@ func (user UserDBGorm) ToResponse() UserResponse {
 		UpdatedAt:        user.UpdatedAt,
 	}
 }
-func (user UserDBMongo) ToResponse() UserResponse {
+func (user UserDBMongoT) ToResponse() UserResponse {
 	return UserResponse{
 		ID:               user.ID.Hex(),
 		IDNumber:         user.IDNumber,
@@ -189,6 +215,9 @@ func (user UserDBMongo) ToResponse() UserResponse {
 func (UserDBGorm) TableName() string {
 	return "users"
 }
-func (UserDBMongo) TableName() string {
+func (UserDBMongoT) TableName() string {
+	return "users"
+}
+func (UserDBMongoF) TableName() string {
 	return "users"
 }

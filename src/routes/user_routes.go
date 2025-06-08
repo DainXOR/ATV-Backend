@@ -20,6 +20,7 @@ func UserRoutes(router *gin.Engine) {
 	userRouter = router.Group("api/v1/user")
 	{
 		userRouter.GET("/:id", controller.User.GetByIDMongo)
+		userRouter.GET("/all", controller.User.GetAllMongo)
 
 		userRouter.POST("/", controller.User.CreateMongo)
 	}

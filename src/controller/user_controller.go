@@ -74,6 +74,30 @@ func (userType) GetAllGorm(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, users)
 }
+func (userType) GetAllMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
+
+	result := db.User.GetAllMongo()
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code.AsInt(), err)
+		return
+	}
+
+	users := types.Map(result.Value(), models.UserDBMongoT.ToResponse)
+	if len(users) == 0 {
+		logger.Warning("No users found in MongoDB database")
+		c.JSON(http.StatusNotFound, types.Error(
+			types.Http.NotFound(),
+			"No users found",
+			"No users found in the MongoDB database",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
 
 func (userType) CreateGorm(c *gin.Context) {
 	logger.Debug("Using GORM")
