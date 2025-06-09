@@ -86,7 +86,7 @@ func (userType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	users := types.Map(result.Value(), models.UserDBMongoT.ToResponse)
+	users := types.Map(result.Value(), models.UserDBMongo.ToResponse)
 	if len(users) == 0 {
 		logger.Warning("No users found in MongoDB database")
 		c.JSON(http.StatusNotFound, types.Error(

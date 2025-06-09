@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -55,4 +56,40 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 	}
 
 	return result
+}
+
+//func FromSlice(slice any) any {
+//	reflect.MakeSlice(reflect.TypeOf(slice), 0, 0)
+//	val := reflect.ValueOf(slice)
+//	if val.Kind() != reflect.Slice || val.Len() == 0 {
+//		return nil
+//	}
+//	//reflect.New(reflect.TypeOf(slice).Elem()).Interface()
+//	return val.Index(0).Interface()
+//}
+
+func SliceElemInstance(slice any) any {
+	if slice == nil {
+		return fmt.Errorf("Input is nil, expected a slice or pointer to slice")
+	}
+
+	t := reflect.TypeOf(slice)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	if t.Kind() != reflect.Slice {
+		return fmt.Errorf("Expected a slice or pointer to slice, got: %s", t.Kind())
+	}
+
+	elemType := t.Elem()
+
+	var instance reflect.Value
+	if elemType.Kind() == reflect.Ptr {
+		instance = reflect.New(elemType.Elem())
+	} else {
+		instance = reflect.New(elemType)
+	}
+
+	return instance.Interface()
 }

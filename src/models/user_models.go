@@ -1,6 +1,7 @@
 package models
 
 import (
+	"dainxor/atv/logger"
 	"dainxor/atv/utils"
 	"fmt"
 	"reflect"
@@ -31,7 +32,7 @@ type UserDBGorm struct {
 	// NotNull forces the field to be not null in the database for each record
 	// JSON tags are used to specify the JSON key names for the fields inside de db and in JSON schema
 }
-type UserDBMongoT struct {
+type UserDBMongo struct {
 	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string             `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string             `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -47,7 +48,7 @@ type UserDBMongoT struct {
 	DeletedAt        *time.Time         `json:"deleted_at" bson:"deleted_at"`
 }
 
-type UserDBMongoF struct {
+type UserDBMongoReceiver struct {
 	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string     `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -61,6 +62,13 @@ type UserDBMongoF struct {
 	CreatedAt        time.Time  `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time  `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 	DeletedAt        *time.Time `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
+}
+
+func (UserDBMongo) Receiver() UserDBMongoReceiver {
+	return UserDBMongoReceiver{}
+}
+func (UserDBMongo) ReceiverList() []UserDBMongoReceiver {
+	return make([]UserDBMongoReceiver, 1)
 }
 
 // UserCreate represents the request body for creating a new user or updating an existing user
@@ -113,8 +121,8 @@ func (user UserCreate) ToDBGorm() UserDBGorm {
 
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
-func (user UserCreate) ToDBMongo() UserDBMongoT {
-	return UserDBMongoT{
+func (user UserCreate) ToDBMongo() UserDBMongo {
+	return UserDBMongo{
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -129,17 +137,13 @@ func (user UserCreate) ToDBMongo() UserDBMongoT {
 		DeletedAt:        nil, // DeletedAt is nil by default, indicating the user is not deleted
 	}
 }
-func (user UserDBMongoF) ToDBMongo(id string) UserDBMongoT {
-	var t primitive.ObjectID
+func (user UserDBMongoReceiver) ToDB() UserDBMongo {
+	logger.Debug("Converting UserDBMongoReceiver to UserDBMongo")
+	logger.Debug("UserDBMongoReceiver ID: ", user)
+	id, _ := primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
 
-	if id == "" {
-		t, _ = primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
-	} else {
-		t, _ = primitive.ObjectIDFromHex(id)
-	}
-
-	return UserDBMongoT{
-		ID:               t,
+	return UserDBMongo{
+		ID:               id,
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -193,7 +197,7 @@ func (user UserDBGorm) ToResponse() UserResponse {
 		UpdatedAt:        user.UpdatedAt,
 	}
 }
-func (user UserDBMongoT) ToResponse() UserResponse {
+func (user UserDBMongo) ToResponse() UserResponse {
 	return UserResponse{
 		ID:               user.ID.Hex(),
 		IDNumber:         user.IDNumber,
@@ -215,9 +219,9 @@ func (user UserDBMongoT) ToResponse() UserResponse {
 func (UserDBGorm) TableName() string {
 	return "users"
 }
-func (UserDBMongoT) TableName() string {
+func (UserDBMongo) TableName() string {
 	return "users"
 }
-func (UserDBMongoF) TableName() string {
-	return "users"
+func (UserDBMongoReceiver) TableName() string {
+	return UserDBMongo{}.TableName()
 }

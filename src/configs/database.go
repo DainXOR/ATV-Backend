@@ -76,13 +76,18 @@ func (gormType) DB() *gorm.DB {
 func (mongoType) DB() *mongo.Database {
 	return DB.Mongo().db
 }
-func (mongoType) Collection(name string) *mongo.Collection {
+func (mongoType) In(name string) *mongo.Collection {
 	return DB.Mongo().DB().Collection(name)
 }
-func (mongoType) CollectionOf(v any) *mongo.Collection {
+func (mongoType) From(v any) *mongo.Collection {
 	// Use reflection to get the collection name from the struct
-	collectionName := v.(interface{ TableName() string }).TableName()
-	return DB.Mongo().Collection(collectionName)
+	if v, ok := v.(interface{ TableName() string }); ok {
+		collectionName := v.TableName()
+		return DB.Mongo().In(collectionName)
+	} else {
+		logger.Error("Provided type does not implement TableName() method")
+		return nil
+	}
 }
 func (mongoType) Context() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 2*time.Second)
@@ -93,6 +98,27 @@ func (mongoType) Disconect() {
 	} else {
 		logger.Warning("MongoDB disconect function is nil, nothing to do")
 	}
+}
+
+func (mongoType) FindOne(filter any, result any) error {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	return DB.Mongo().From(result).FindOne(ctx, filter).Decode(result)
+}
+func (mongoType) FindAll(filter any, result any) error {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	eType := utils.SliceElemInstance(result)
+
+	cursor, err := DB.Mongo().From(eType).Find(ctx, filter)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	return cursor.All(ctx, result)
 }
 
 // LoadDBConfig loads the database configuration from environment variables
