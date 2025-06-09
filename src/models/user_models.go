@@ -1,7 +1,6 @@
 package models
 
 import (
-	"dainxor/atv/logger"
 	"dainxor/atv/utils"
 	"fmt"
 	"reflect"
@@ -138,8 +137,6 @@ func (user UserCreate) ToDBMongo() UserDBMongo {
 	}
 }
 func (user UserDBMongoReceiver) ToDB() UserDBMongo {
-	logger.Debug("Converting UserDBMongoReceiver to UserDBMongo")
-	logger.Debug("UserDBMongoReceiver ID: ", user)
 	id, _ := primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
 
 	return UserDBMongo{

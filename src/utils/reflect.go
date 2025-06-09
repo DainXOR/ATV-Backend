@@ -68,9 +68,9 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 //	return val.Index(0).Interface()
 //}
 
-func SliceElemInstance(slice any) any {
+func SliceElemInstance(slice any) (any, error) {
 	if slice == nil {
-		return fmt.Errorf("Input is nil, expected a slice or pointer to slice")
+		return nil, fmt.Errorf("Input is nil, expected a slice or pointer to slice")
 	}
 
 	t := reflect.TypeOf(slice)
@@ -79,7 +79,7 @@ func SliceElemInstance(slice any) any {
 	}
 
 	if t.Kind() != reflect.Slice {
-		return fmt.Errorf("Expected a slice or pointer to slice, got: %s", t.Kind())
+		return nil, fmt.Errorf("Expected a slice or pointer to slice, got: %s", t.Kind())
 	}
 
 	elemType := t.Elem()
@@ -91,5 +91,5 @@ func SliceElemInstance(slice any) any {
 		instance = reflect.New(elemType)
 	}
 
-	return instance.Interface()
+	return instance.Interface(), nil
 }

@@ -110,10 +110,15 @@ func (mongoType) FindAll(filter any, result any) error {
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
-	eType := utils.SliceElemInstance(result)
+	eType, err := utils.SliceElemInstance(result)
+	if err != nil {
+		logger.Error("Failed to get slice element type: ", err)
+		return err
+	}
 
 	cursor, err := DB.Mongo().From(eType).Find(ctx, filter)
 	if err != nil {
+		logger.Error("Failed to find documents: ", err)
 		return err
 	}
 	defer cursor.Close(ctx)

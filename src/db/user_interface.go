@@ -22,7 +22,7 @@ func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
 			types.Http.UnprocessableEntity(),
-			"unprocessable_entity",
+			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"User ID: "+id,
 		)
@@ -44,9 +44,9 @@ func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
 			)
 		} else {
 			logger.Error("Failed to get user by ID: ", err)
-			httpErr = types.Error(
-				types.Http.InternalServerError(),
-				"decoding_error",
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve user",
+				"Decoding error",
 				err.Error(),
 				"User ID: "+id,
 			)
@@ -102,17 +102,19 @@ func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 	return types.ResultOk(users)
 }
 func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
-	/*
-		ctx, cancel := configs.DB.Mongo().Context()
-		defer cancel()
-	*/
-
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted users
 	usersR := models.UserDBMongo{}.ReceiverList()
 
-	configs.DB.Mongo().FindAll(filter, &usersR)
-	logger.Debug("Found users: ", len(usersR))
-	logger.Debug("Users: ", usersR)
+	err := configs.DB.Mongo().FindAll(filter, &usersR)
+	if err != nil {
+		logger.Error("Failed to get all users from MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to retrieve users",
+			err.Error(),
+		)
+
+		return types.ResultErr[[]models.UserDBMongo](&httpErr)
+	}
 
 	users := types.Map(usersR, models.UserDBMongoReceiver.ToDB)
 
@@ -137,10 +139,8 @@ func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGor
 	logger.Debug("User id: ", newUser.ID)
 
 	if newUser.ID == 0 {
-		err := types.Error(
-			types.Http.InternalServerError(),
-			"internal",
-			"User not created",
+		err := types.ErrorInternal(
+			"Failed to create user",
 		)
 
 		return types.ResultErr[models.UserDBGorm](&err)
@@ -171,8 +171,8 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 
 	if err != nil {
 		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
-		newErr := types.Error(
-			types.Http.InternalServerError(),
+		newErr := types.ErrorInternal(
+			"Failed to create user",
 			"Failed to convert inserted ID to ObjectID",
 			"Error: "+err.Error(),
 		)
