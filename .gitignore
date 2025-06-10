@@ -24,3 +24,4 @@ go.work
 *.env
 src/.env
 src/.env
+*.log

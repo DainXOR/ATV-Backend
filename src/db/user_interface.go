@@ -69,6 +69,46 @@ func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 	}
 	return types.ResultOk(user)
 }
+func (userType) GetByIDNumberGorm(idNumber string) types.Result[models.UserDBGorm] {
+	var user models.UserDBGorm
+	configs.DB.Gorm().DB().Where("id_number = ?", idNumber).First(&user)
+	if user.ID == 0 {
+		err := types.ErrorNotFound(
+			"User not found",
+			"User with ID number "+idNumber+" not found",
+		)
+		return types.ResultErr[models.UserDBGorm](&err)
+	}
+	return types.ResultOk(user)
+}
+func (userType) GetByIDNumberMongo(idNumber string) types.Result[models.UserDBMongo] {
+	filter := bson.D{{Key: "id_number", Value: idNumber}}
+	var user models.UserDBMongoReceiver
+	err := configs.DB.Mongo().FindOne(filter, &user)
+	if err != nil {
+		var httpErr types.HttpError
+		if err == mongo.ErrNoDocuments {
+			logger.Error("Failed to get user by ID number: ", err)
+			httpErr = types.ErrorNotFound(
+				"User not found",
+				"User with ID number "+idNumber+" not found",
+			)
+		} else {
+			logger.Error("Failed to get user by ID number: ", err)
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve user",
+				"Decoding error",
+				err.Error(),
+				"User ID number: "+idNumber,
+			)
+		}
+
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	return types.ResultOk(user.ToDB())
+}
+
 func (userType) GetByEmail(email string) types.Result[models.UserDBMongo] {
 	var user models.UserDBMongo
 
@@ -99,6 +139,8 @@ func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 		)
 		return types.ResultErr[[]models.UserDBGorm](&err)
 	}
+
+	logger.Debug("Retrieved ", len(users), " users from GORM database")
 	return types.ResultOk(users)
 }
 func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
@@ -117,7 +159,7 @@ func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
 	}
 
 	users := types.Map(usersR, models.UserDBMongoReceiver.ToDB)
-
+	logger.Debug("Retrieved ", len(users), " users from MongoDB database")
 	return types.ResultOk(users)
 }
 
@@ -132,21 +174,37 @@ func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGor
 
 	newUser := user.ToDBGorm()
 
-	logger.Debug("Creating user")
-
-	configs.DB.Gorm().DB().Create(&newUser)
-
-	logger.Debug("User id: ", newUser.ID)
-
-	if newUser.ID == 0 {
-		err := types.ErrorInternal(
-			"Failed to create user",
+	if res := User.GetByIDNumberGorm(newUser.IDNumber); res.IsOk() {
+		logger.Error("User with ID number already exists: ", newUser.IDNumber)
+		err := types.Error(
+			types.Http.Conflict(),
+			"User already exists",
+			"User with ID number "+newUser.IDNumber+" already exists",
 		)
 
 		return types.ResultErr[models.UserDBGorm](&err)
-	}
+	} else {
+		if res.Error().(*types.HttpError).Code == types.Http.NotFound() {
+			logger.Debug("Creating user")
 
-	return types.ResultOk(newUser)
+			configs.DB.Gorm().DB().Create(&newUser)
+
+			logger.Debug("User id: ", newUser.ID)
+
+			if newUser.ID == 0 {
+				err := types.ErrorInternal(
+					"Failed to create user",
+				)
+
+				return types.ResultErr[models.UserDBGorm](&err)
+			}
+
+			return types.ResultOk(newUser)
+		} else {
+			logger.Error("Failed to create user: ", res.Error())
+			return types.ResultErr[models.UserDBGorm](res.Error())
+		}
+	}
 }
 func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] {
 	var userDB models.UserDBMongo
