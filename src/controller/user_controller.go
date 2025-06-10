@@ -33,10 +33,11 @@ func (userType) GetByIDGorm(c *gin.Context) {
 	c.JSON(http.StatusOK, user.ToResponse())
 }
 func (userType) GetByIDMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
-	result := db.User.GetByID(id)
+	result := db.User.GetByIDMongo(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -68,6 +69,30 @@ func (userType) GetAllGorm(c *gin.Context) {
 			types.Http.NotFound(),
 			"No users found",
 			"No users found in the GORM database",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+func (userType) GetAllMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
+
+	result := db.User.GetAllMongo()
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code.AsInt(), err)
+		return
+	}
+
+	users := types.Map(result.Value(), models.UserDBMongo.ToResponse)
+	if len(users) == 0 {
+		logger.Warning("No users found in MongoDB database")
+		c.JSON(http.StatusNotFound, types.Error(
+			types.Http.NotFound(),
+			"No users found",
+			"No users found in the MongoDB database",
 		))
 		return
 	}
@@ -110,6 +135,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	c.JSON(http.StatusCreated, user.ToResponse())
 }
 func (userType) CreateMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	var body models.UserCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -130,7 +156,7 @@ func (userType) CreateMongo(c *gin.Context) {
 
 	logger.Debug("Creating user in MongoDB: ", body)
 
-	result := db.User.Create(body)
+	result := db.User.CreateMongo(body)
 
 	if result.IsErr() {
 		err := result.Error()

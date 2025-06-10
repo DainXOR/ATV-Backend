@@ -3,8 +3,8 @@ package configs
 import (
 	"context"
 	"dainxor/atv/logger"
-	"dainxor/atv/types"
 	"dainxor/atv/utils"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -19,8 +19,9 @@ import (
 )
 
 type mongoType struct {
-	client *mongo.Client
-	db     *mongo.Database
+	client        *mongo.Client
+	db            *mongo.Database
+	disconectFunc func()
 }
 type gormType struct {
 	db *gorm.DB
@@ -69,33 +70,67 @@ func (db) Mongo() *mongoType {
 }
 
 func (gormType) DB() *gorm.DB {
-	return gormT.db
+	return DB.Gorm().db
 }
 
 func (mongoType) DB() *mongo.Database {
-	return mongoT.db
+	return DB.Mongo().db
 }
-func (mongoType) Collection(name string) *mongo.Collection {
-	return mongoT.db.Collection(name)
+func (mongoType) In(name string) *mongo.Collection {
+	return DB.Mongo().DB().Collection(name)
 }
-func (mongoType) Context() context.Context {
-	return context.TODO()
+func (mongoType) From(v any) *mongo.Collection {
+	// Use reflection to get the collection name from the struct
+	if v, ok := v.(interface{ TableName() string }); ok {
+		collectionName := v.TableName()
+		return DB.Mongo().In(collectionName)
+	} else {
+		logger.Error("Provided type does not implement TableName() method")
+		return nil
+	}
+}
+func (mongoType) Context() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 2*time.Second)
+}
+func (mongoType) Disconect() {
+	if DB.Mongo().disconectFunc != nil {
+		DB.Mongo().disconectFunc()
+	} else {
+		logger.Warning("MongoDB disconect function is nil, nothing to do")
+	}
 }
 
-func (db) GetFirst(dest any, id string) types.HttpError {
-	if DB.Type() == "MONGODB" {
-		collectionName := dest.(interface{ TableName() string }).TableName()
-		err := DB.Mongo().DB().Collection(collectionName).FindOne(DB.Mongo().Context(), map[string]any{"_id": id}).Decode(&dest)
-		ret := types.HttpError{}
-		ret.Err = err
-		return ret
-	}
-	if DB.Type() == "POSTGRES" || DB.Type() == "SQLITE" {
-		DB.Gorm().DB().First(&dest, id)
-		return types.HttpError{}
+func (mongoType) FindOne(filter any, result any) error {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	return DB.Mongo().From(result).FindOne(ctx, filter).Decode(result)
+}
+func (mongoType) FindAll(filter any, result any) error {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	eType, err := utils.SliceElemInstance(result)
+	if err != nil {
+		logger.Error("Failed to get slice element type: ", err)
+		return err
 	}
 
-	return types.HttpError{}
+	cursor, err := DB.Mongo().From(eType).Find(ctx, filter)
+	if err != nil {
+		logger.Error("Failed to find documents: ", err)
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	return cursor.All(ctx, result)
+}
+
+func (mongoType) InsertOne(document any) (*mongo.InsertOneResult, error) {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	return DB.Mongo().From(document).InsertOne(ctx, document)
 }
 
 // LoadDBConfig loads the database configuration from environment variables
@@ -238,7 +273,7 @@ func (db) ConnectPostgres(host string, user string, password string, dbname stri
 		" port=" + port +
 		" sslmode=disable"
 	logger.Info("Connecting to database: ", dsn)
-	gormT.db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB.Gorm().db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		logger.Fatal(err)
@@ -260,7 +295,7 @@ func (db) ConnectSQLiteEnv() {
 // It uses the gorm library to establish the connection
 func (db) ConnectSQLite(dbname string) {
 	var err error
-	gormT.db, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
+	DB.Gorm().db, err = gorm.Open(sqlite.Open("atvsqlite.db"), &gorm.Config{})
 
 	if err != nil {
 		panic("failed to connect database")
@@ -292,12 +327,6 @@ func (db) ConnectMongoDB(conectionString string) {
 		logger.Fatal(err)
 	}
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			logger.Fatal(err)
-		}
-	}()
-
 	// Call Ping to verify that the deployment is up and the Client was
 	// configured successfully. As mentioned in the Ping documentation, this
 	// reduces application resiliency as the server may be temporarily
@@ -305,7 +334,15 @@ func (db) ConnectMongoDB(conectionString string) {
 	if err = client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		logger.Fatal(err)
 	}
-	logger.Debug("4")
+
+	DB.Mongo().client = client
+	DB.Mongo().db = client.Database(DB.name)
+
+	DB.Mongo().disconectFunc = func() {
+		if err = DB.Mongo().client.Disconnect(context.Background()); err != nil {
+			logger.Fatal("Error disconnecting from MongoDB: ", err)
+		}
+	}
 }
 
 // CreateDatabase creates the database based on the database type
@@ -384,7 +421,7 @@ func (db) Migrate(models ...any) {
 
 	if DB.dbType == DB.Types().Postgres() {
 		for _, model := range models {
-			err := gormT.DB().AutoMigrate(model)
+			err := DB.Gorm().DB().AutoMigrate(model)
 
 			if err != nil {
 				logger.Error("Error migrating model: ", err)
@@ -402,7 +439,7 @@ func (db) Migrate(models ...any) {
 
 // Close closes the database connection
 func (db) ClosePostgres() {
-	sqlDB, err := gormT.DB().DB()
+	sqlDB, err := DB.Gorm().DB().DB()
 	if err != nil {
 		logger.Error("Error getting SQL DB: ", err)
 		return
@@ -410,13 +447,7 @@ func (db) ClosePostgres() {
 	sqlDB.Close()
 }
 func (db) CloseMongoDB() {
-	if mongoT.client != nil {
-		if err := mongoT.client.Disconnect(context.Background()); err != nil {
-			logger.Error("Error disconnecting from MongoDB: ", err)
-		}
-	} else {
-		logger.Info("MongoDB client is nil, no need to close")
-	}
+	DB.Mongo().Disconect()
 }
 
 func (db) Close() {

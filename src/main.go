@@ -42,10 +42,14 @@ func main() {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 
-	routes.MainRoutes(router) // Main route for the API
+	// Root level routes
+	routes.MainRoutes(router)
+
+	// Api routes
 	routes.InfoRoutes(router) // Routes for information about the API
 	routes.TestRoutes(router) // Routes for testing purposes
 
+	// Versioned API routes
 	routes.UserRoutes(router) // Routes for user management
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
