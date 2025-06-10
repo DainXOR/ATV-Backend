@@ -126,6 +126,13 @@ func (mongoType) FindAll(filter any, result any) error {
 	return cursor.All(ctx, result)
 }
 
+func (mongoType) InsertOne(document any) (*mongo.InsertOneResult, error) {
+	ctx, cancel := DB.Mongo().Context()
+	defer cancel()
+
+	return DB.Mongo().From(document).InsertOne(ctx, document)
+}
+
 // LoadDBConfig loads the database configuration from environment variables
 // and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {

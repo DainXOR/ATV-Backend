@@ -16,7 +16,7 @@
 [INFO] 2025/04/22 21:55:45 logger.go:298: Connecting to Postgres database
 [INFO] 2025/04/22 21:55:45 logger.go:298: Using testing database
 [INFO] 2025/04/22 21:55:45 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
-[FATAL] 2025/04/22 21:55:45 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[FATAL] 2025/04/22 21:55:45 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos ï¿½atv-testï¿½ (SQLSTATE 3D000))
 [INFO] 2025/04/23 13:17:04 logger.go:298: Initializing logger
 [INFO] 2025/04/23 13:17:05 logger.go:298: Logger initialized
 [INFO] 2025/04/23 13:17:05 logger.go:298: Loading configurations
@@ -31,7 +31,7 @@
 [INFO] 2025/04/23 13:17:05 logger.go:298: Connecting to Postgres database
 [INFO] 2025/04/23 13:17:05 logger.go:298: Using testing database
 [INFO] 2025/04/23 13:17:05 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
-[FATAL] 2025/04/23 13:17:05 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[FATAL] 2025/04/23 13:17:05 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos ï¿½atv-testï¿½ (SQLSTATE 3D000))
 [INFO] 2025/04/23 13:51:41 logger.go:298: Initializing logger
 [INFO] 2025/04/23 13:51:41 logger.go:298: Logger initialized
 [INFO] 2025/04/23 13:51:41 logger.go:298: Loading configurations
@@ -46,7 +46,7 @@
 [INFO] 2025/04/23 13:51:41 logger.go:298: Connecting to Postgres database
 [INFO] 2025/04/23 13:51:41 logger.go:298: Using testing database
 [INFO] 2025/04/23 13:51:41 logger.go:298: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
-[FATAL] 2025/04/23 13:51:41 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[FATAL] 2025/04/23 13:51:41 logger.go:298: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos ï¿½atv-testï¿½ (SQLSTATE 3D000))
 [INFO] 2025/04/23 14:07:45 logger.go:298: Initializing logger
 [INFO] 2025/04/23 14:07:45 logger.go:298: Logger initialized
 [INFO] 2025/04/23 14:07:45 logger.go:298: Loading configurations
@@ -500,7 +500,7 @@
 [INFO] 2025/05/28 18:34:16 logger.go:300: Using Postgres database
 [INFO] 2025/05/28 18:34:16 logger.go:300: Using testing database
 [INFO] 2025/05/28 18:34:16 logger.go:300: Connecting to database:  host=localhost user=postgres password=2407 dbname=atv-test port=5432 sslmode=disable
-[FATAL] 2025/05/28 18:34:16 logger.go:300: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos «atv-test» (SQLSTATE 3D000))
+[FATAL] 2025/05/28 18:34:16 logger.go:300: failed to connect to `host=localhost user=postgres database=atv-test`: server error (FATAL: no existe la base de datos ï¿½atv-testï¿½ (SQLSTATE 3D000))
 [INFO] 2025/05/28 18:50:54 logger.go:300: Logger initialized
 [INFO] 2025/05/28 18:50:54 logger.go:300: Loading environment variables for logger
 [INFO] 2025/05/28 18:50:54 logger.go:300: Setting minimum log level to ALL
@@ -2269,6 +2269,35 @@ user_models.go:141: 2025/06/08 23:48:06 logger.go:302: Converting UserDBMongoRec
 user_models.go:142: 2025/06/08 23:48:06 logger.go:302: UserDBMongoReceiver ID: {ObjectID("68436adf68baf97934ebc953") 6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC <nil>}
 user_models.go:141: 2025/06/08 23:48:06 logger.go:302: Converting UserDBMongoReceiver to UserDBMongo
 user_models.go:142: 2025/06/08 23:48:06 logger.go:302: UserDBMongoReceiver ID: {ObjectID("68436c81856fd0678d46090a") 6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC <nil>}
+logger.go:50: 2025/06/09 19:02:15 logger.go:302: Logger initialized
+logger.go:55: 2025/06/09 19:02:15 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/09 19:02:15 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/09 19:02:15 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/09 19:02:15 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/09 19:02:15 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/09 19:02:15 logger.go:302:  - NONE
+logger.go:209: 2025/06/09 19:02:15 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/09 19:02:15 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/09 19:02:15 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/09 19:02:15 logger.go:302: Logger environment variables loaded
+database.go:147: 2025/06/09 19:02:15 logger.go:302: Using testing database
+database.go:216: 2025/06/09 19:02:15 logger.go:302: Use default database: false
+database.go:224: 2025/06/09 19:02:15 logger.go:302: Using MongoDB database
+database.go:310: 2025/06/09 19:02:15 logger.go:302: Using testing database
+database.go:322: 2025/06/09 19:02:15 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:235: 2025/06/09 19:02:16 logger.go:302: Database connection established
+database.go:236: 2025/06/09 19:02:16 logger.go:302: Database type: MONGO
+database.go:351: 2025/06/09 19:02:16 logger.go:302: Creating database
+database.go:364: 2025/06/09 19:02:16 logger.go:302: Creating MongoDB database
+database.go:406: 2025/06/09 19:02:16 logger.go:302: MongoDB database created automatically
+database.go:420: 2025/06/09 19:02:16 logger.go:302: Starting migrations
+database.go:436: 2025/06/09 19:02:16 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/09 19:02:16 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/09 19:02:16 logger.go:302: Starting server
+user_controller.go:19: 2025/06/09 19:30:33 logger.go:302: Using GORM
+user_controller.go:21: 2025/06/09 19:30:33 logger.go:302: Getting user by ID: 1
+user_controller.go:19: 2025/06/09 19:30:34 logger.go:302: Using GORM
+user_controller.go:21: 2025/06/09 19:30:34 logger.go:302: Getting user by ID: 1
 logger.go:50: 2025/06/09 19:33:44 logger.go:302: Logger initialized
 logger.go:55: 2025/06/09 19:33:44 logger.go:302: Loading environment variables for logger
 logger.go:62: 2025/06/09 19:33:44 logger.go:302: Setting minimum log level toALL

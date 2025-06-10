@@ -15,7 +15,7 @@ type userType struct{}
 
 var User userType
 
-func (userType) GetByID(id string) types.Result[models.UserDBMongo] {
+func (userType) GetByIDMongo(id string) types.Result[models.UserDBMongo] {
 	oid, err := bson.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -109,22 +109,34 @@ func (userType) GetByIDNumberMongo(idNumber string) types.Result[models.UserDBMo
 	return types.ResultOk(user.ToDB())
 }
 
-func (userType) GetByEmail(email string) types.Result[models.UserDBMongo] {
-	var user models.UserDBMongo
+func (userType) GetByEmailMongo(email string) types.Result[models.UserDBMongo] {
+	filter := bson.D{{Key: "email", Value: email}}
+	var userF models.UserDBMongoReceiver
 
-	ctx, cancel := configs.DB.Mongo().Context()
-	defer cancel()
+	err := configs.DB.Mongo().FindOne(filter, &userF)
+	if err != nil {
+		var httpErr types.HttpError
 
-	configs.DB.Mongo().In("users").FindOne(
-		ctx,
-		bson.M{"email": email},
-	).Decode(&user)
+		if err == mongo.ErrNoDocuments {
+			logger.Error("Failed to get user by email: ", err)
+			httpErr = types.ErrorNotFound(
+				"User not found",
+				"User with email "+email+" not found",
+			)
+		} else {
+			logger.Error("Failed to get user by email: ", err)
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve user",
+				"Decoding error",
+				err.Error(),
+				"User email: "+email,
+			)
+		}
 
-	err := types.ErrorNotFound(
-		"User not found",
-		"User with email "+email+" not found",
-	)
-	return types.ResultOf(user, &err, user.ID != primitive.NilObjectID)
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	return types.ResultOk(userF.ToDB())
 }
 
 func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
@@ -206,17 +218,9 @@ func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGor
 		}
 	}
 }
-func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] {
-	var userDB models.UserDBMongo
-	userDB = user.ToDBMongo()
-
-	ctx, cancel := configs.DB.Mongo().Context()
-	defer cancel()
-
-	result, err := configs.DB.Mongo().In(userDB.TableName()).InsertOne(
-		ctx,
-		userDB,
-	)
+func (userType) CreateMongo(user models.UserCreate) types.Result[models.UserDBMongo] {
+	userDB := user.ToDBMongo()
+	result, err := configs.DB.Mongo().InsertOne(userDB)
 
 	if err != nil {
 		logger.Error("Failed to create user in MongoDB: ", err)
@@ -224,7 +228,6 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 	}
 
 	logger.Debug("User created with ID: ", result.InsertedID)
-	logger.Debug("Test: ", result.InsertedID.(bson.ObjectID).Hex())
 	userDB.ID, err = primitive.ObjectIDFromHex(result.InsertedID.(bson.ObjectID).Hex())
 
 	if err != nil {
@@ -237,7 +240,6 @@ func (userType) Create(user models.UserCreate) types.Result[models.UserDBMongo] 
 
 		return types.ResultErr[models.UserDBMongo](&newErr)
 	}
-	//logger.Debug("User created with ID: ", userDB.ID.String())
 
 	return types.ResultOk(userDB)
 }
@@ -257,6 +259,47 @@ func (userType) UpdateGorm(id string, user models.UserCreate) types.Result[model
 	configs.DB.Gorm().DB().Model(&userDB).Updates(user.ToPutDBGorm())
 
 	return types.ResultOk(userDB)
+}
+func (userType) UpdateMongo(id string, user models.UserCreate) types.Result[models.UserDBMongo] {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		logger.Error("Failed to convert ID to ObjectID: ", err)
+		httpErr := types.Error(
+			types.Http.UnprocessableEntity(),
+			"Invalid value",
+			"Invalid ID format: "+err.Error(),
+			"User ID: "+id,
+		)
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	update := bson.D{{Key: "$set", Value: user.ToDBMongo()}}
+
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
+	result, err := configs.DB.Mongo().From(models.UserDBMongo{}).UpdateOne(ctx, filter, update)
+
+	if err != nil {
+		logger.Error("Failed to update user in MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to update user",
+			err.Error(),
+			"User ID: "+id,
+		)
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	if result.MatchedCount == 0 {
+		httpErr := types.ErrorNotFound(
+			"User not found",
+			"User with ID "+id+" not found",
+		)
+		return types.ResultErr[models.UserDBMongo](&httpErr)
+	}
+
+	return User.GetByIDMongo(id)
 }
 
 func (userType) PatchGorm(id string, user models.UserCreate) types.Result[models.UserDBGorm] {

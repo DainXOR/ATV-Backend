@@ -23,5 +23,4 @@ go.work
 # Sensitive files
 *.env
 src/.env
-src/.env
 *.log

@@ -37,7 +37,7 @@ func (userType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
-	result := db.User.GetByID(id)
+	result := db.User.GetByIDMongo(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -156,7 +156,7 @@ func (userType) CreateMongo(c *gin.Context) {
 
 	logger.Debug("Creating user in MongoDB: ", body)
 
-	result := db.User.Create(body)
+	result := db.User.CreateMongo(body)
 
 	if result.IsErr() {
 		err := result.Error()

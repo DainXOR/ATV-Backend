@@ -48,7 +48,7 @@ func InfoRoutes(router *gin.Engine) {
 		})
 		infoRouter.GET("/route-version", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"version": "v0",
+				"version": "0",
 			})
 		})
 	}
