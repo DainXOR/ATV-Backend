@@ -11,11 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-type userType struct{}
+type studentType struct{}
 
-var User userType
+var Student studentType
 
-func (userType) GetByIDMongo(id string) types.Result[models.UserDBMongo] {
+func (studentType) GetByIDMongo(id string) types.Result[models.StudentDBMongo] {
 	oid, err := bson.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -26,38 +26,38 @@ func (userType) GetByIDMongo(id string) types.Result[models.UserDBMongo] {
 			"Invalid ID format: "+err.Error(),
 			"User ID: "+id,
 		)
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var userF models.UserDBMongoReceiver
+	var userF models.StudentDBMongoReceiver
 
 	err = configs.DB.Mongo().FindOne(filter, &userF)
 	if err != nil {
 		var httpErr types.HttpError
 
 		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get user by ID: ", err)
+			logger.Error("Failed to get student by ID: ", err)
 			httpErr = types.ErrorNotFound(
-				"User not found",
-				"User with ID "+id+" not found",
+				"Student not found",
+				"Student with ID "+id+" not found",
 			)
 		} else {
-			logger.Error("Failed to get user by ID: ", err)
+			logger.Error("Failed to get student by ID: ", err)
 			httpErr = types.ErrorInternal(
-				"Failed to retrieve user",
+				"Failed to retrieve student",
 				"Decoding error",
 				err.Error(),
-				"User ID: "+id,
+				"Student ID: "+id,
 			)
 		}
 
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	return types.ResultOk(userF.ToDB())
 }
-func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
+func (studentType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 	var user models.UserDBGorm
 	configs.DB.Gorm().DB().First(&user, id)
 	if user.ID == 0 {
@@ -69,7 +69,7 @@ func (userType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
 	}
 	return types.ResultOk(user)
 }
-func (userType) GetByIDNumberGorm(idNumber string) types.Result[models.UserDBGorm] {
+func (studentType) GetByIDNumberGorm(idNumber string) types.Result[models.UserDBGorm] {
 	var user models.UserDBGorm
 	configs.DB.Gorm().DB().Where("id_number = ?", idNumber).First(&user)
 	if user.ID == 0 {
@@ -81,65 +81,66 @@ func (userType) GetByIDNumberGorm(idNumber string) types.Result[models.UserDBGor
 	}
 	return types.ResultOk(user)
 }
-func (userType) GetByIDNumberMongo(idNumber string) types.Result[models.UserDBMongo] {
+func (studentType) GetByIDNumberMongo(idNumber string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "id_number", Value: idNumber}}
-	var user models.UserDBMongoReceiver
+	var user models.StudentDBMongoReceiver
+
 	err := configs.DB.Mongo().FindOne(filter, &user)
 	if err != nil {
 		var httpErr types.HttpError
 		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get user by ID number: ", err)
+			logger.Error("Failed to get student by ID number: ", err)
 			httpErr = types.ErrorNotFound(
-				"User not found",
-				"User with ID number "+idNumber+" not found",
+				"Student not found",
+				"Student with ID number "+idNumber+" not found",
 			)
 		} else {
-			logger.Error("Failed to get user by ID number: ", err)
+			logger.Error("Failed to get student by ID number: ", err)
 			httpErr = types.ErrorInternal(
-				"Failed to retrieve user",
+				"Failed to retrieve student",
 				"Decoding error",
 				err.Error(),
-				"User ID number: "+idNumber,
+				"Student ID number: "+idNumber,
 			)
 		}
 
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	return types.ResultOk(user.ToDB())
 }
 
-func (userType) GetByEmailMongo(email string) types.Result[models.UserDBMongo] {
+func (studentType) GetByEmailMongo(email string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "email", Value: email}}
-	var userF models.UserDBMongoReceiver
+	var userF models.StudentDBMongoReceiver
 
 	err := configs.DB.Mongo().FindOne(filter, &userF)
 	if err != nil {
 		var httpErr types.HttpError
 
 		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get user by email: ", err)
+			logger.Error("Failed to get student by email: ", err)
 			httpErr = types.ErrorNotFound(
-				"User not found",
-				"User with email "+email+" not found",
+				"Student not found",
+				"Student with email "+email+" not found",
 			)
 		} else {
-			logger.Error("Failed to get user by email: ", err)
+			logger.Error("Failed to get student by email: ", err)
 			httpErr = types.ErrorInternal(
-				"Failed to retrieve user",
+				"Failed to retrieve student",
 				"Decoding error",
 				err.Error(),
-				"User email: "+email,
+				"Student email: "+email,
 			)
 		}
 
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	return types.ResultOk(userF.ToDB())
 }
 
-func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
+func (studentType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 	var users []models.UserDBGorm
 
 	configs.DB.Gorm().DB().Find(&users)
@@ -155,27 +156,27 @@ func (userType) GetAllGorm() types.Result[[]models.UserDBGorm] {
 	logger.Debug("Retrieved ", len(users), " users from GORM database")
 	return types.ResultOk(users)
 }
-func (userType) GetAllMongo() types.Result[[]models.UserDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted users
-	usersR := models.UserDBMongo{}.ReceiverList()
+func (studentType) GetAllMongo() types.Result[[]models.StudentDBMongo] {
+	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
+	usersR := models.StudentDBMongo{}.ReceiverList()
 
 	err := configs.DB.Mongo().FindAll(filter, &usersR)
 	if err != nil {
-		logger.Error("Failed to get all users from MongoDB: ", err)
+		logger.Error("Failed to get all students from MongoDB: ", err)
 		httpErr := types.ErrorInternal(
-			"Failed to retrieve users",
+			"Failed to retrieve students",
 			err.Error(),
 		)
 
-		return types.ResultErr[[]models.UserDBMongo](&httpErr)
+		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
 	}
 
-	users := types.Map(usersR, models.UserDBMongoReceiver.ToDB)
+	users := types.Map(usersR, models.StudentDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved ", len(users), " users from MongoDB database")
 	return types.ResultOk(users)
 }
 
-func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGorm] {
+func (studentType) CreateGorm(user models.StudentCreate) types.Result[models.UserDBGorm] {
 	//if User.GetUserByEmail(user.Email).IsOk() {
 	//	return types.ResultErr[models.UserDB](models.Error(
 	//		types.Http.Conflict(),
@@ -186,7 +187,7 @@ func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGor
 
 	newUser := user.ToDBGorm()
 
-	if res := User.GetByIDNumberGorm(newUser.IDNumber); res.IsOk() {
+	if res := Student.GetByIDNumberGorm(newUser.IDNumber); res.IsOk() {
 		logger.Error("User with ID number already exists: ", newUser.IDNumber)
 		err := types.Error(
 			types.Http.Conflict(),
@@ -218,33 +219,33 @@ func (userType) CreateGorm(user models.UserCreate) types.Result[models.UserDBGor
 		}
 	}
 }
-func (userType) CreateMongo(user models.UserCreate) types.Result[models.UserDBMongo] {
+func (studentType) CreateMongo(user models.StudentCreate) types.Result[models.StudentDBMongo] {
 	userDB := user.ToDBMongo()
 	result, err := configs.DB.Mongo().InsertOne(userDB)
 
 	if err != nil {
-		logger.Error("Failed to create user in MongoDB: ", err)
-		return types.ResultErr[models.UserDBMongo](err)
+		logger.Error("Failed to create student in MongoDB: ", err)
+		return types.ResultErr[models.StudentDBMongo](err)
 	}
 
-	logger.Debug("User created with ID: ", result.InsertedID)
+	logger.Debug("Student created with ID: ", result.InsertedID)
 	userDB.ID, err = primitive.ObjectIDFromHex(result.InsertedID.(bson.ObjectID).Hex())
 
 	if err != nil {
 		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
 		newErr := types.ErrorInternal(
-			"Failed to create user",
+			"Failed to create student",
 			"Failed to convert inserted ID to ObjectID",
 			"Error: "+err.Error(),
 		)
 
-		return types.ResultErr[models.UserDBMongo](&newErr)
+		return types.ResultErr[models.StudentDBMongo](&newErr)
 	}
 
 	return types.ResultOk(userDB)
 }
 
-func (userType) UpdateGorm(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
+func (studentType) UpdateGorm(id string, user models.StudentCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
 	configs.DB.Gorm().DB().First(&userDB, id)
 
@@ -260,7 +261,7 @@ func (userType) UpdateGorm(id string, user models.UserCreate) types.Result[model
 
 	return types.ResultOk(userDB)
 }
-func (userType) UpdateMongo(id string, user models.UserCreate) types.Result[models.UserDBMongo] {
+func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Result[models.StudentDBMongo] {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -268,9 +269,9 @@ func (userType) UpdateMongo(id string, user models.UserCreate) types.Result[mode
 			types.Http.UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
-			"User ID: "+id,
+			"Student ID: "+id,
 		)
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
@@ -279,30 +280,30 @@ func (userType) UpdateMongo(id string, user models.UserCreate) types.Result[mode
 	ctx, cancel := configs.DB.Mongo().Context()
 	defer cancel()
 
-	result, err := configs.DB.Mongo().From(models.UserDBMongo{}).UpdateOne(ctx, filter, update)
+	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
 
 	if err != nil {
-		logger.Error("Failed to update user in MongoDB: ", err)
+		logger.Error("Failed to update student in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
-			"Failed to update user",
+			"Failed to update student",
 			err.Error(),
-			"User ID: "+id,
+			"Student ID: "+id,
 		)
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	if result.MatchedCount == 0 {
 		httpErr := types.ErrorNotFound(
-			"User not found",
-			"User with ID "+id+" not found",
+			"Student not found",
+			"Student with ID "+id+" not found",
 		)
-		return types.ResultErr[models.UserDBMongo](&httpErr)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return User.GetByIDMongo(id)
+	return Student.GetByIDMongo(id)
 }
 
-func (userType) PatchGorm(id string, user models.UserCreate) types.Result[models.UserDBGorm] {
+func (studentType) PatchGorm(id string, user models.StudentCreate) types.Result[models.UserDBGorm] {
 	var userDB models.UserDBGorm
 	configs.DB.Gorm().DB().First(&userDB, id)
 

@@ -11,16 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type userType struct{}
+type studentType struct{}
 
-var User userType
+var Student studentType
 
-func (userType) GetByIDGorm(c *gin.Context) {
+func (studentType) GetByIDGorm(c *gin.Context) {
 	logger.Debug("Using GORM")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
-	result := db.User.GetByIDGorm(id)
+	result := db.Student.GetByIDGorm(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -32,12 +32,12 @@ func (userType) GetByIDGorm(c *gin.Context) {
 	user := result.Value()
 	c.JSON(http.StatusOK, user.ToResponse())
 }
-func (userType) GetByIDMongo(c *gin.Context) {
+func (studentType) GetByIDMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
 	id := c.Param("id")
-	logger.Debug("Getting user by ID: ", id)
+	logger.Debug("Getting student by ID: ", id)
 
-	result := db.User.GetByIDMongo(id)
+	result := db.Student.GetByIDMongo(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -50,10 +50,10 @@ func (userType) GetByIDMongo(c *gin.Context) {
 	c.JSON(http.StatusOK, user.ToResponse())
 }
 
-func (userType) GetAllGorm(c *gin.Context) {
+func (studentType) GetAllGorm(c *gin.Context) {
 	logger.Debug("Using GORM")
 
-	result := db.User.GetAllGorm()
+	result := db.Student.GetAllGorm()
 
 	if result.IsErr() {
 		err := result.Error()
@@ -74,10 +74,10 @@ func (userType) GetAllGorm(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, users)
 }
-func (userType) GetAllMongo(c *gin.Context) {
+func (studentType) GetAllMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
 
-	result := db.User.GetAllMongo()
+	result := db.Student.GetAllMongo()
 
 	if result.IsErr() {
 		err := result.Error()
@@ -86,22 +86,22 @@ func (userType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	users := types.Map(result.Value(), models.UserDBMongo.ToResponse)
-	if len(users) == 0 {
-		logger.Warning("No users found in MongoDB database")
+	students := types.Map(result.Value(), models.StudentDBMongo.ToResponse)
+	if len(students) == 0 {
+		logger.Warning("No students found in MongoDB database")
 		c.JSON(http.StatusNotFound, types.Error(
 			types.Http.NotFound(),
-			"No users found",
-			"No users found in the MongoDB database",
+			"No students found",
+			"No students found in the MongoDB database",
 		))
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, students)
 }
 
-func (userType) CreateGorm(c *gin.Context) {
+func (studentType) CreateGorm(c *gin.Context) {
 	logger.Debug("Using GORM")
-	var body models.UserCreate
+	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
@@ -122,7 +122,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	logger.Debug("Creating user: ", body)
 	logger.Debug("Username: ", body.FirstName, body.LastName)
 
-	result := db.User.CreateGorm(body)
+	result := db.Student.CreateGorm(body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -134,14 +134,14 @@ func (userType) CreateGorm(c *gin.Context) {
 	user := result.Value()
 	c.JSON(http.StatusCreated, user.ToResponse())
 }
-func (userType) CreateMongo(c *gin.Context) {
+func (studentType) CreateMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
-	var body models.UserCreate
+	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to create user: JSON request body is invalid")
+		logger.Error("Failed to create student: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(http.StatusBadRequest,
@@ -154,14 +154,15 @@ func (userType) CreateMongo(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating user in MongoDB: ", body)
+	logger.Debug("Creating student in MongoDB: ", body)
 
-	result := db.User.CreateMongo(body)
+	result := db.Student.CreateMongo(body)
 
 	if result.IsErr() {
+		logger.Error("Failed to create student in MongoDB: ", result.Error())
 		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		httpErr := err.(*types.HttpError)
+		c.JSON(httpErr.Code.AsInt(), err)
 		return
 	}
 
@@ -171,8 +172,8 @@ func (userType) CreateMongo(c *gin.Context) {
 
 // Update updates an existing user in the database
 // This will override zeroed fields
-func (userType) Update(c *gin.Context) {
-	var body models.UserCreate
+func (studentType) Update(c *gin.Context) {
+	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
@@ -193,7 +194,7 @@ func (userType) Update(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Updating user by ID: ", id)
 
-	result := db.User.UpdateGorm(id, body)
+	result := db.Student.UpdateGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -208,8 +209,8 @@ func (userType) Update(c *gin.Context) {
 
 // Patch updates an existing user in the database
 // This will keep previous value in zeroed fields
-func (userType) Patch(c *gin.Context) {
-	var body models.UserCreate
+func (studentType) Patch(c *gin.Context) {
+	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
@@ -230,7 +231,7 @@ func (userType) Patch(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Patching user by ID: ", id)
 
-	result := db.User.PatchGorm(id, body)
+	result := db.Student.PatchGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()

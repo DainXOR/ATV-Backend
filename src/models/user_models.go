@@ -31,7 +31,7 @@ type UserDBGorm struct {
 	// NotNull forces the field to be not null in the database for each record
 	// JSON tags are used to specify the JSON key names for the fields inside de db and in JSON schema
 }
-type UserDBMongo struct {
+type StudentDBMongo struct {
 	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string             `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string             `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -47,7 +47,7 @@ type UserDBMongo struct {
 	DeletedAt        *time.Time         `json:"deleted_at" bson:"deleted_at"`
 }
 
-type UserDBMongoReceiver struct {
+type StudentDBMongoReceiver struct {
 	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string     `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -63,16 +63,16 @@ type UserDBMongoReceiver struct {
 	DeletedAt        *time.Time `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
 }
 
-func (UserDBMongo) Receiver() UserDBMongoReceiver {
-	return UserDBMongoReceiver{}
+func (StudentDBMongo) Receiver() StudentDBMongoReceiver {
+	return StudentDBMongoReceiver{}
 }
-func (UserDBMongo) ReceiverList() []UserDBMongoReceiver {
-	return make([]UserDBMongoReceiver, 1)
+func (StudentDBMongo) ReceiverList() []StudentDBMongoReceiver {
+	return make([]StudentDBMongoReceiver, 1)
 }
 
-// UserCreate represents the request body for creating a new user or updating an existing user
+// StudentCreate represents the request body for creating a new user or updating an existing user
 // It is used to validate the input data before creating or updating a user in the database
-type UserCreate struct {
+type StudentCreate struct {
 	IDNumber         string `json:"id_number" gorm:"unique;not null"`
 	FirstName        string `json:"first_name" gorm:"not null"`
 	LastName         string `json:"last_name" gorm:"not null"`
@@ -84,10 +84,10 @@ type UserCreate struct {
 	PhoneNumber      string `json:"phone_number"`
 }
 
-// UserResponse represents the response body for a user
+// StudentResponse represents the response body for a user
 // It is used to format the data returned to the client after a user is created or retrieved
 // It includes the ID, created_at, and updated_at fields
-type UserResponse struct {
+type StudentResponse struct {
 	ID               string    `json:"id" gorm:"primaryKey;autoIncrement"`
 	IDNumber         string    `json:"id_number" gorm:"unique;not null"`
 	FirstName        string    `json:"first_name" gorm:"not null"`
@@ -104,7 +104,7 @@ type UserResponse struct {
 
 // UserCreateToDB converts a UserCreate struct to a UserDB struct
 // This is used to prepare the data for insertion or patch into the database
-func (user UserCreate) ToDBGorm() UserDBGorm {
+func (user StudentCreate) ToDBGorm() UserDBGorm {
 	return UserDBGorm{
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
@@ -120,8 +120,8 @@ func (user UserCreate) ToDBGorm() UserDBGorm {
 
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
-func (user UserCreate) ToDBMongo() UserDBMongo {
-	return UserDBMongo{
+func (user StudentCreate) ToDBMongo() StudentDBMongo {
+	return StudentDBMongo{
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -136,10 +136,10 @@ func (user UserCreate) ToDBMongo() UserDBMongo {
 		DeletedAt:        nil, // DeletedAt is nil by default, indicating the user is not deleted
 	}
 }
-func (user UserDBMongoReceiver) ToDB() UserDBMongo {
+func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
 	id, _ := primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
 
-	return UserDBMongo{
+	return StudentDBMongo{
 		ID:               id,
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
@@ -158,7 +158,7 @@ func (user UserDBMongoReceiver) ToDB() UserDBMongo {
 // ToPutDBGorm converts a UserCreate struct to a map[string]any
 // This is used to prepare the data for updating a user in the database
 // It filters out fields that are not needed for the update or should not be zeroed
-func (user UserCreate) ToPutDBGorm() map[string]any {
+func (user StudentCreate) ToPutDBGorm() map[string]any {
 	filter := func(key reflect.StructField, value reflect.Value) bool {
 		excludeFields := []string{"id", "created_at", "updated_at", "deleted_at"}
 		if slices.Contains(excludeFields, key.Tag.Get("json")) {
@@ -178,8 +178,8 @@ func (user UserCreate) ToPutDBGorm() map[string]any {
 
 // ToDB converts a UserDB struct to a UserResponse struct
 // This is used to prepare the data for returning to the client
-func (user UserDBGorm) ToResponse() UserResponse {
-	return UserResponse{
+func (user UserDBGorm) ToResponse() StudentResponse {
+	return StudentResponse{
 		ID:               fmt.Sprintf("%d", user.ID),
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
@@ -194,8 +194,8 @@ func (user UserDBGorm) ToResponse() UserResponse {
 		UpdatedAt:        user.UpdatedAt,
 	}
 }
-func (user UserDBMongo) ToResponse() UserResponse {
-	return UserResponse{
+func (user StudentDBMongo) ToResponse() StudentResponse {
+	return StudentResponse{
 		ID:               user.ID.Hex(),
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
@@ -216,9 +216,9 @@ func (user UserDBMongo) ToResponse() UserResponse {
 func (UserDBGorm) TableName() string {
 	return "users"
 }
-func (UserDBMongo) TableName() string {
-	return "users"
+func (StudentDBMongo) TableName() string {
+	return "students"
 }
-func (UserDBMongoReceiver) TableName() string {
-	return UserDBMongo{}.TableName()
+func (StudentDBMongoReceiver) TableName() string {
+	return StudentDBMongo{}.TableName()
 }
