@@ -2269,3 +2269,455 @@ user_models.go:141: 2025/06/08 23:48:06 logger.go:302: Converting UserDBMongoRec
 user_models.go:142: 2025/06/08 23:48:06 logger.go:302: UserDBMongoReceiver ID: {ObjectID("68436adf68baf97934ebc953") 6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC <nil>}
 user_models.go:141: 2025/06/08 23:48:06 logger.go:302: Converting UserDBMongoReceiver to UserDBMongo
 user_models.go:142: 2025/06/08 23:48:06 logger.go:302: UserDBMongoReceiver ID: {ObjectID("68436c81856fd0678d46090a") 6969696969 Avr Ji es, tiene la mancha eltoro@mail.com otro@mail.com Loj hijo de mij hijaj nietoj seran, loj hijoj de mij hijoj en duda ejtaran 7 2 1234567890 0001-01-01 00:00:00 +0000 UTC 0001-01-01 00:00:00 +0000 UTC <nil>}
+logger.go:50: 2025/06/09 19:33:44 logger.go:302: Logger initialized
+logger.go:55: 2025/06/09 19:33:44 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/09 19:33:44 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/09 19:33:44 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/09 19:33:44 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/09 19:33:44 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/09 19:33:44 logger.go:302:  - NONE
+logger.go:209: 2025/06/09 19:33:44 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/09 19:33:44 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/09 19:33:44 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/09 19:33:44 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/09 19:33:44 logger.go:302: Using testing database
+database.go:209: 2025/06/09 19:33:44 logger.go:302: Use default database: false
+database.go:217: 2025/06/09 19:33:44 logger.go:302: Using MongoDB database
+database.go:303: 2025/06/09 19:33:44 logger.go:302: Using testing database
+database.go:315: 2025/06/09 19:33:44 logger.go:302: Connecting to MongoDB: mongodb+srv://danielleond:yMnxMz6v1vtVT0bk@clusteratv.hy8mhsp.mongodb.net/?retryWrites=true&w=majority&appName=ClusterATV
+database.go:228: 2025/06/09 19:33:45 logger.go:302: Database connection established
+database.go:229: 2025/06/09 19:33:45 logger.go:302: Database type: MONGO
+database.go:344: 2025/06/09 19:33:45 logger.go:302: Creating database
+database.go:357: 2025/06/09 19:33:45 logger.go:302: Creating MongoDB database
+database.go:399: 2025/06/09 19:33:45 logger.go:302: MongoDB database created automatically
+database.go:413: 2025/06/09 19:33:45 logger.go:302: Starting migrations
+database.go:429: 2025/06/09 19:33:45 logger.go:302: No migrations needed for SQLite or MongoDB
+main.go:25: 2025/06/09 19:33:45 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/09 19:33:45 logger.go:302: Starting server
+user_controller.go:19: 2025/06/09 19:34:21 logger.go:302: Using GORM
+user_controller.go:21: 2025/06/09 19:34:21 logger.go:302: Getting user by ID: 1
+user_controller.go:54: 2025/06/09 19:35:27 logger.go:302: Using GORM
+user_controller.go:54: 2025/06/09 19:35:28 logger.go:302: Using GORM
+logger.go:50: 2025/06/09 19:37:50 logger.go:302: Logger initialized
+logger.go:55: 2025/06/09 19:37:50 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/09 19:37:50 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/09 19:37:50 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/09 19:37:50 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/09 19:37:50 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/09 19:37:50 logger.go:302:  - NONE
+logger.go:209: 2025/06/09 19:37:50 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/09 19:37:50 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/09 19:37:50 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/09 19:37:50 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/09 19:37:50 logger.go:302: Using testing database
+database.go:209: 2025/06/09 19:37:50 logger.go:302: Use default database: false
+database.go:213: 2025/06/09 19:37:50 logger.go:302: Using Postgres database
+database.go:247: 2025/06/09 19:37:50 logger.go:302: Using testing database
+database.go:268: 2025/06/09 19:37:50 logger.go:302: Connecting to database: host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+database.go:228: 2025/06/09 19:37:50 logger.go:302: Database connection established
+database.go:229: 2025/06/09 19:37:50 logger.go:302: Database type: POSTGRES
+database.go:344: 2025/06/09 19:37:50 logger.go:302: Creating database
+database.go:348: 2025/06/09 19:37:50 logger.go:302: Creating Postgres database
+database.go:381: 2025/06/09 19:37:50 logger.go:302: Databaseatv-testalready exists
+database.go:413: 2025/06/09 19:37:50 logger.go:302: Starting migrations
+database.go:426: 2025/06/09 19:37:50 logger.go:302: Migrations completed
+main.go:25: 2025/06/09 19:37:50 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/09 19:37:50 logger.go:302: Starting server
+user_controller.go:19: 2025/06/09 19:37:59 logger.go:302: Using GORM
+user_controller.go:21: 2025/06/09 19:37:59 logger.go:302: Getting user by ID: 1
+user_controller.go:54: 2025/06/09 19:38:19 logger.go:302: Using GORM
+user_controller.go:54: 2025/06/09 19:38:21 logger.go:302: Using GORM
+user_controller.go:54: 2025/06/09 19:42:29 logger.go:302: Using GORM
+user_controller.go:54: 2025/06/09 19:42:32 logger.go:302: Using GORM
+logger.go:50: 2025/06/09 19:42:41 logger.go:302: Logger initialized
+logger.go:55: 2025/06/09 19:42:41 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/09 19:42:41 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/09 19:42:41 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/09 19:42:41 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/09 19:42:41 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/09 19:42:41 logger.go:302:  - NONE
+logger.go:209: 2025/06/09 19:42:41 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/09 19:42:41 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/09 19:42:41 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/09 19:42:41 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/09 19:42:41 logger.go:302: Using testing database
+database.go:209: 2025/06/09 19:42:41 logger.go:302: Use default database: false
+database.go:213: 2025/06/09 19:42:41 logger.go:302: Using Postgres database
+database.go:247: 2025/06/09 19:42:41 logger.go:302: Using testing database
+database.go:268: 2025/06/09 19:42:41 logger.go:302: Connecting to database: host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+database.go:228: 2025/06/09 19:42:41 logger.go:302: Database connection established
+database.go:229: 2025/06/09 19:42:41 logger.go:302: Database type: POSTGRES
+database.go:344: 2025/06/09 19:42:41 logger.go:302: Creating database
+database.go:348: 2025/06/09 19:42:41 logger.go:302: Creating Postgres database
+database.go:381: 2025/06/09 19:42:41 logger.go:302: Databaseatv-testalready exists
+database.go:413: 2025/06/09 19:42:41 logger.go:302: Starting migrations
+database.go:426: 2025/06/09 19:42:41 logger.go:302: Migrations completed
+main.go:25: 2025/06/09 19:42:41 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/09 19:42:41 logger.go:302: Starting server
+user_controller.go:54: 2025/06/09 19:43:19 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:43:19 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:53:58 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:53:58 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:54:01 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:54:01 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:54:27 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:54:27 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:54:29 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:54:29 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:56:56 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:56:56 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:54: 2025/06/09 19:56:59 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 19:56:59 logger.go:302: Retrieved 2 users from GORM database
+user_controller.go:103: 2025/06/09 20:01:45 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:01:45 logger.go:302: Creating user: {111111111111  AAAAAAAAAAAAAAAAAAAa daniela@mail.com daniela2@mail.com mikasa 7 2 3000000000}
+user_controller.go:123: 2025/06/09 20:01:45 logger.go:302: Username: AAAAAAAAAAAAAAAAAAAa
+user_interface.go:137: 2025/06/09 20:01:45 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:01:45 logger.go:302: User id: 3
+user_controller.go:103: 2025/06/09 20:04:11 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:04:11 logger.go:302: Creating user: {22222222222222  AAAAAAAAAAAAAAAAAAAa h@mail.com h2@mail.com tsukasita 7 2 }
+user_controller.go:123: 2025/06/09 20:04:11 logger.go:302: Username: AAAAAAAAAAAAAAAAAAAa
+user_interface.go:137: 2025/06/09 20:04:11 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:04:11 logger.go:302: User id: 4
+user_controller.go:54: 2025/06/09 20:04:51 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:04:51 logger.go:302: Retrieved 4 users from GORM database
+user_controller.go:54: 2025/06/09 20:04:57 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:04:57 logger.go:302: Retrieved 4 users from GORM database
+user_controller.go:54: 2025/06/09 20:15:13 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:15:13 logger.go:302: Retrieved 4 users from GORM database
+user_controller.go:54: 2025/06/09 20:15:13 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:15:13 logger.go:302: Retrieved 4 users from GORM database
+user_controller.go:103: 2025/06/09 20:19:11 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:19:11 logger.go:302: Creating user: {123 María Gabriela Rodríguez test@gmail.com test@gmail.com Calle 12 #12 Apt 87, Medellín 8 Universidad de Antioquia 123}
+user_controller.go:123: 2025/06/09 20:19:11 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:19:11 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:19:11 logger.go:302: User id: 5
+user_controller.go:103: 2025/06/09 20:19:11 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:19:11 logger.go:302: Creating user: {123 María Gabriela Rodríguez test@gmail.com test@gmail.com Calle 12 #12 Apt 87, Medellín 8 Universidad de Antioquia 123}
+user_controller.go:123: 2025/06/09 20:19:11 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:19:11 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:19:11 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:19:12 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:19:12 logger.go:302: Creating user: {123 María Gabriela Rodríguez test@gmail.com test@gmail.com Calle 12 #12 Apt 87, Medellín 8 Universidad de Antioquia 123}
+user_controller.go:123: 2025/06/09 20:19:12 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:19:12 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:19:12 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:19:12 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:19:12 logger.go:302: Creating user: {123 María Gabriela Rodríguez test@gmail.com test@gmail.com Calle 12 #12 Apt 87, Medellín 8 Universidad de Antioquia 123}
+user_controller.go:123: 2025/06/09 20:19:12 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:19:12 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:19:12 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:19:16 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:19:16 logger.go:302: Creating user: {123 María Gabriela Rodríguez test@gmail.com test@gmail.com Calle 12 #12 Apt 87, Medellín 8 Universidad de Antioquia 123}
+user_controller.go:123: 2025/06/09 20:19:16 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:19:16 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:19:16 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:20:48 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:20:48 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:20:48 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:20:48 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:20:48 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:20:50 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:20:50 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:20:50 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:20:50 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:20:50 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:20:50 logger.go:302: Using GORM
+user_controller.go:103: 2025/06/09 20:20:50 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:20:50 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:122: 2025/06/09 20:20:50 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:20:50 logger.go:302: Username: María GabrielaRodríguez
+user_controller.go:123: 2025/06/09 20:20:50 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:20:50 logger.go:302: Creating user
+user_interface.go:137: 2025/06/09 20:20:50 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:20:50 logger.go:302: User id: 0
+user_interface.go:141: 2025/06/09 20:20:50 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:20:50 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:20:50 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:20:50 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:20:50 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:20:50 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:22:59 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:22:59 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:22:59 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:22:59 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:22:59 logger.go:302: User id: 0
+user_controller.go:54: 2025/06/09 20:31:00 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:31:00 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:54: 2025/06/09 20:31:01 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:31:01 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:54: 2025/06/09 20:33:24 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:33:24 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:54: 2025/06/09 20:33:25 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:33:25 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:54: 2025/06/09 20:34:02 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:34:02 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:54: 2025/06/09 20:34:04 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:34:04 logger.go:302: Retrieved 5 users from GORM database
+user_controller.go:103: 2025/06/09 20:34:22 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:34:22 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:34:22 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:34:22 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:34:22 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:34:22 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:34:22 logger.go:302: Creating user: {123 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 12}
+user_controller.go:123: 2025/06/09 20:34:22 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:34:22 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:34:22 logger.go:302: User id: 0
+user_controller.go:103: 2025/06/09 20:34:59 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/09 20:34:59 logger.go:302: Creating user: {677 María Gabriela Rodríguez 12@gmail.com 12@gmail.com Avenida 12 #12 Apt 12, Medellín 8 Universidad de Antioquia 8956}
+user_controller.go:123: 2025/06/09 20:34:59 logger.go:302: Username: María GabrielaRodríguez
+user_interface.go:137: 2025/06/09 20:34:59 logger.go:302: Creating user
+user_interface.go:141: 2025/06/09 20:34:59 logger.go:302: User id: 18
+user_controller.go:54: 2025/06/09 20:35:52 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:35:52 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:35:54 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:35:54 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:36:07 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:36:07 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:36:08 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:36:08 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:41:35 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:41:35 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:41:36 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:41:36 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:46:35 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:46:35 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:46:35 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:46:35 logger.go:302: Retrieved 6 users from GORM database
+logger.go:50: 2025/06/09 20:46:42 logger.go:302: Logger initialized
+logger.go:55: 2025/06/09 20:46:42 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/09 20:46:42 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/09 20:46:42 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/09 20:46:42 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/09 20:46:42 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/09 20:46:42 logger.go:302:  - NONE
+logger.go:209: 2025/06/09 20:46:42 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/09 20:46:42 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/09 20:46:42 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/09 20:46:42 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/09 20:46:42 logger.go:302: Using testing database
+database.go:209: 2025/06/09 20:46:42 logger.go:302: Use default database: false
+database.go:213: 2025/06/09 20:46:42 logger.go:302: Using Postgres database
+database.go:247: 2025/06/09 20:46:42 logger.go:302: Using testing database
+database.go:268: 2025/06/09 20:46:42 logger.go:302: Connecting to database: host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+database.go:228: 2025/06/09 20:46:42 logger.go:302: Database connection established
+database.go:229: 2025/06/09 20:46:42 logger.go:302: Database type: POSTGRES
+database.go:344: 2025/06/09 20:46:42 logger.go:302: Creating database
+database.go:348: 2025/06/09 20:46:42 logger.go:302: Creating Postgres database
+database.go:381: 2025/06/09 20:46:42 logger.go:302: Databaseatv-testalready exists
+database.go:413: 2025/06/09 20:46:42 logger.go:302: Starting migrations
+database.go:426: 2025/06/09 20:46:42 logger.go:302: Migrations completed
+main.go:25: 2025/06/09 20:46:42 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/09 20:46:42 logger.go:302: Starting server
+user_controller.go:54: 2025/06/09 20:51:50 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:51:50 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:51:51 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:51:51 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:54:10 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:54:10 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 20:54:11 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 20:54:11 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:02:07 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:02:07 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:02:09 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:02:09 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:21:01 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:21:01 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:21:02 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:21:02 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:26:14 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:26:14 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:26:15 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:26:15 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:27:13 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:27:13 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:27:14 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:27:14 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:27:33 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:27:33 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:27:34 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:27:34 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:39:25 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:39:25 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:39:28 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:39:28 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:40:32 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:40:32 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:40:33 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:40:33 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:44:08 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:44:08 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:44:10 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:44:10 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:44:33 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:44:33 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:44:34 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:44:34 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:51:13 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:51:13 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:51:14 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:51:14 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:51:50 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:51:50 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:51:51 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:51:51 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:52:50 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:52:50 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:52:51 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:52:51 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:52:52 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:52:52 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:52:53 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:52:53 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:53:22 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:53:22 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:53:23 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:53:23 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:56:16 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:56:16 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:56:17 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:56:17 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:59:28 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:59:28 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:59:29 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:59:29 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:59:42 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:59:42 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 21:59:42 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 21:59:42 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:02:04 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:02:04 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:02:04 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:02:04 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:02:22 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:02:22 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:02:23 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:02:23 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:03:28 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:03:28 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:03:28 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:03:28 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:06:19 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:06:19 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:06:20 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:06:20 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:07:47 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:07:47 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:07:47 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:07:47 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:39 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:39 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:42 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:42 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:49 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:49 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:50 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:50 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:54 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:54 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:08:57 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:08:57 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:09:36 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:09:36 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:09:37 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:09:37 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:10:22 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:10:22 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:10:23 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:10:23 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:10:53 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:10:53 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:10:53 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:10:53 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:11:03 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:11:03 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:11:03 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:11:03 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:17:18 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:17:18 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:17:19 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:17:19 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:29:10 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:29:10 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:29:11 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:29:11 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:32:29 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:32:29 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:32:29 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:32:29 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:32:35 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:32:35 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:32:35 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:32:35 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:34:31 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:34:31 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:34:32 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:34:32 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:36:46 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:36:46 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:54: 2025/06/09 22:36:47 logger.go:302: Using GORM
+user_interface.go:103: 2025/06/09 22:36:47 logger.go:302: Retrieved 6 users from GORM database
+user_controller.go:103: 2025/06/10 00:23:16 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/10 00:23:16 logger.go:302: Creating user: {22222222222222 hmmm AAAAAAAAAAAAAAAAAAAa h@mail.com h2@mail.com tsukasita 7 2 3000000000}
+user_controller.go:123: 2025/06/10 00:23:16 logger.go:302: Username: hmmmAAAAAAAAAAAAAAAAAAAa
+user_interface.go:22: 2025/06/10 00:23:16 logger.go:302: Failed to convert ID to ObjectID: the provided hex string is not a valid ObjectID
+user_interface.go:164: 2025/06/10 00:23:16 logger.go:302: Failed to create user: Unprocessable Entity (422): Invalid value - Invalid ID format: the provided hex string is not a valid ObjectID
+logger.go:50: 2025/06/10 00:24:33 logger.go:302: Logger initialized
+logger.go:55: 2025/06/10 00:24:33 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/10 00:24:33 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/10 00:24:33 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/10 00:24:33 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/10 00:24:33 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/10 00:24:33 logger.go:302:  - NONE
+logger.go:209: 2025/06/10 00:24:33 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/10 00:24:33 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/10 00:24:33 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/10 00:24:33 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/10 00:24:33 logger.go:302: Using testing database
+database.go:209: 2025/06/10 00:24:33 logger.go:302: Use default database: false
+database.go:213: 2025/06/10 00:24:33 logger.go:302: Using Postgres database
+database.go:247: 2025/06/10 00:24:33 logger.go:302: Using testing database
+database.go:268: 2025/06/10 00:24:33 logger.go:302: Connecting to database: host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+database.go:228: 2025/06/10 00:24:33 logger.go:302: Database connection established
+database.go:229: 2025/06/10 00:24:33 logger.go:302: Database type: POSTGRES
+database.go:344: 2025/06/10 00:24:33 logger.go:302: Creating database
+database.go:348: 2025/06/10 00:24:33 logger.go:302: Creating Postgres database
+database.go:381: 2025/06/10 00:24:33 logger.go:302: Databaseatv-testalready exists
+database.go:413: 2025/06/10 00:24:33 logger.go:302: Starting migrations
+database.go:426: 2025/06/10 00:24:33 logger.go:302: Migrations completed
+main.go:25: 2025/06/10 00:24:33 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/10 00:24:33 logger.go:302: Starting server
+user_controller.go:103: 2025/06/10 00:24:43 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/10 00:24:43 logger.go:302: Creating user: {22222222222222 hmmm AAAAAAAAAAAAAAAAAAAa h@mail.com h2@mail.com tsukasita 7 2 3000000000}
+user_controller.go:123: 2025/06/10 00:24:43 logger.go:302: Username: hmmmAAAAAAAAAAAAAAAAAAAa
+user_interface.go:148: 2025/06/10 00:24:43 logger.go:302: Creating user
+user_interface.go:152: 2025/06/10 00:24:43 logger.go:302: User id: 0
+logger.go:50: 2025/06/10 00:27:21 logger.go:302: Logger initialized
+logger.go:55: 2025/06/10 00:27:21 logger.go:302: Loading environment variables for logger
+logger.go:62: 2025/06/10 00:27:21 logger.go:302: Setting minimum log level toALL
+logger.go:242: 2025/06/10 00:27:21 logger.go:302: Minimum logging level set to: | ALL |
+logger.go:129: 2025/06/10 00:27:21 logger.go:302: Logging options set to ALL
+logger.go:68: 2025/06/10 00:27:21 logger.go:302: Disabling log levels:
+logger.go:73: 2025/06/10 00:27:21 logger.go:302:  - NONE
+logger.go:209: 2025/06/10 00:27:21 logger.go:302: Disabled logging options: 
+logger.go:114: 2025/06/10 00:27:21 logger.go:302: Console logging set totrue
+logger.go:106: 2025/06/10 00:27:21 logger.go:302: File logging set totrue
+logger.go:99: 2025/06/10 00:27:21 logger.go:302: Logger environment variables loaded
+database.go:140: 2025/06/10 00:27:21 logger.go:302: Using testing database
+database.go:209: 2025/06/10 00:27:21 logger.go:302: Use default database: false
+database.go:213: 2025/06/10 00:27:21 logger.go:302: Using Postgres database
+database.go:247: 2025/06/10 00:27:21 logger.go:302: Using testing database
+database.go:268: 2025/06/10 00:27:21 logger.go:302: Connecting to database: host=localhost user=postgres password=2407 dbname=atv-test port=5433 sslmode=disable
+database.go:228: 2025/06/10 00:27:21 logger.go:302: Database connection established
+database.go:229: 2025/06/10 00:27:21 logger.go:302: Database type: POSTGRES
+database.go:344: 2025/06/10 00:27:21 logger.go:302: Creating database
+database.go:348: 2025/06/10 00:27:21 logger.go:302: Creating Postgres database
+database.go:381: 2025/06/10 00:27:21 logger.go:302: Databaseatv-testalready exists
+database.go:413: 2025/06/10 00:27:21 logger.go:302: Starting migrations
+database.go:426: 2025/06/10 00:27:21 logger.go:302: Migrations completed
+main.go:25: 2025/06/10 00:27:21 logger.go:302: Env configurations loaded
+main.go:26: 2025/06/10 00:27:21 logger.go:302: Starting server
+user_controller.go:103: 2025/06/10 00:27:35 logger.go:302: Using GORM
+user_controller.go:122: 2025/06/10 00:27:35 logger.go:302: Creating user: {22222222222222 hmmm AAAAAAAAAAAAAAAAAAAa h@mail.com h2@mail.com tsukasita 7 2 3000000000}
+user_controller.go:123: 2025/06/10 00:27:35 logger.go:302: Username: hmmmAAAAAAAAAAAAAAAAAAAa
+user_interface.go:178: 2025/06/10 00:27:35 logger.go:302: User with ID number already exists: 22222222222222
