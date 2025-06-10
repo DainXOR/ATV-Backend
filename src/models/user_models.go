@@ -2,6 +2,7 @@ package models
 
 import (
 	"dainxor/atv/utils"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"slices"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +32,7 @@ type UserDBGorm struct {
 	// JSON tags are used to specify the JSON key names for the fields inside de db and in JSON schema
 }
 type UserDBMongo struct {
-	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDNumber         string             `json:"id_number,omitempty" bson:"id_number,omitempty"`
 	FirstName        string             `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string             `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -42,7 +44,30 @@ type UserDBMongo struct {
 	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
 	CreatedAt        time.Time          `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time          `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
-	DeletedAt        *time.Time         `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
+	DeletedAt        *time.Time         `json:"deleted_at" bson:"deleted_at"`
+}
+
+type UserDBMongoReceiver struct {
+	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
+	IDNumber         string     `json:"id_number,omitempty" bson:"id_number,omitempty"`
+	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
+	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
+	PersonalEmail    string     `json:"email,omitempty" bson:"email,omitempty"`
+	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
+	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
+	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
+	UniversityID     string     `json:"university_id,omitempty" bson:"university_id,omitempty"`
+	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
+	CreatedAt        time.Time  `json:"created_at,omitzero" bson:"created_at,omitzero"`
+	UpdatedAt        time.Time  `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	DeletedAt        *time.Time `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
+}
+
+func (UserDBMongo) Receiver() UserDBMongoReceiver {
+	return UserDBMongoReceiver{}
+}
+func (UserDBMongo) ReceiverList() []UserDBMongoReceiver {
+	return make([]UserDBMongoReceiver, 1)
 }
 
 // UserCreate represents the request body for creating a new user or updating an existing user
@@ -63,7 +88,7 @@ type UserCreate struct {
 // It is used to format the data returned to the client after a user is created or retrieved
 // It includes the ID, created_at, and updated_at fields
 type UserResponse struct {
-	ID               uint      `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID               string    `json:"id" gorm:"primaryKey;autoIncrement"`
 	IDNumber         string    `json:"id_number" gorm:"unique;not null"`
 	FirstName        string    `json:"first_name" gorm:"not null"`
 	LastName         string    `json:"last_name" gorm:"not null"`
@@ -106,13 +131,34 @@ func (user UserCreate) ToDBMongo() UserDBMongo {
 		Semester:         user.Semester,
 		UniversityID:     user.UniversityID,
 		PhoneNumber:      user.PhoneNumber,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		DeletedAt:        nil, // DeletedAt is nil by default, indicating the user is not deleted
+	}
+}
+func (user UserDBMongoReceiver) ToDB() UserDBMongo {
+	id, _ := primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
+
+	return UserDBMongo{
+		ID:               id,
+		IDNumber:         user.IDNumber,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		PersonalEmail:    user.PersonalEmail,
+		InstitutionEmail: user.InstitutionEmail,
+		ResidenceAddress: user.ResidenceAddress,
+		Semester:         user.Semester,
+		UniversityID:     user.UniversityID,
+		PhoneNumber:      user.PhoneNumber,
+		CreatedAt:        user.CreatedAt,
+		UpdatedAt:        user.UpdatedAt,
 	}
 }
 
-// ToPutDB converts a UserCreate struct to a map[string]any
+// ToPutDBGorm converts a UserCreate struct to a map[string]any
 // This is used to prepare the data for updating a user in the database
 // It filters out fields that are not needed for the update or should not be zeroed
-func (user UserCreate) ToPutDB() map[string]any {
+func (user UserCreate) ToPutDBGorm() map[string]any {
 	filter := func(key reflect.StructField, value reflect.Value) bool {
 		excludeFields := []string{"id", "created_at", "updated_at", "deleted_at"}
 		if slices.Contains(excludeFields, key.Tag.Get("json")) {
@@ -134,7 +180,7 @@ func (user UserCreate) ToPutDB() map[string]any {
 // This is used to prepare the data for returning to the client
 func (user UserDBGorm) ToResponse() UserResponse {
 	return UserResponse{
-		ID:               user.ID,
+		ID:               fmt.Sprintf("%d", user.ID),
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -150,7 +196,7 @@ func (user UserDBGorm) ToResponse() UserResponse {
 }
 func (user UserDBMongo) ToResponse() UserResponse {
 	return UserResponse{
-		ID:               uint(user.ID.Timestamp().UnixNano()),
+		ID:               user.ID.Hex(),
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -169,4 +215,10 @@ func (user UserDBMongo) ToResponse() UserResponse {
 // This is used by GORM to determine the table name for the model
 func (UserDBGorm) TableName() string {
 	return "users"
+}
+func (UserDBMongo) TableName() string {
+	return "users"
+}
+func (UserDBMongoReceiver) TableName() string {
+	return UserDBMongo{}.TableName()
 }

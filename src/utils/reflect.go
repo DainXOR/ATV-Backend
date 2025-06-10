@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -55,4 +56,32 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 	}
 
 	return result
+}
+
+// Function to create an instance of the element type of a slice
+// It returns a pointer to the new instance or an error if the input is not a slice or pointer to slice
+func SliceElemInstance(slice any) (any, error) {
+	if slice == nil {
+		return nil, fmt.Errorf("Input is nil, expected a slice or pointer to slice")
+	}
+
+	t := reflect.TypeOf(slice)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	if t.Kind() != reflect.Slice {
+		return nil, fmt.Errorf("Expected a slice or pointer to slice, got: %s", t.Kind())
+	}
+
+	elemType := t.Elem()
+
+	var instance reflect.Value
+	if elemType.Kind() == reflect.Ptr {
+		instance = reflect.New(elemType.Elem())
+	} else {
+		instance = reflect.New(elemType)
+	}
+
+	return instance.Interface(), nil
 }

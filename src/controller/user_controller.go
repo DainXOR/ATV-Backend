@@ -16,6 +16,7 @@ type userType struct{}
 var User userType
 
 func (userType) GetByIDGorm(c *gin.Context) {
+	logger.Debug("Using GORM")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
@@ -32,10 +33,11 @@ func (userType) GetByIDGorm(c *gin.Context) {
 	c.JSON(http.StatusOK, user.ToResponse())
 }
 func (userType) GetByIDMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	id := c.Param("id")
 	logger.Debug("Getting user by ID: ", id)
 
-	result := db.User.GetByID(id)
+	result := db.User.GetByIDMongo(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -49,7 +51,7 @@ func (userType) GetByIDMongo(c *gin.Context) {
 }
 
 func (userType) GetAllGorm(c *gin.Context) {
-	logger.Debug("Getting all users from GORM database")
+	logger.Debug("Using GORM")
 
 	result := db.User.GetAllGorm()
 
@@ -72,8 +74,33 @@ func (userType) GetAllGorm(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, users)
 }
+func (userType) GetAllMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
+
+	result := db.User.GetAllMongo()
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code.AsInt(), err)
+		return
+	}
+
+	users := types.Map(result.Value(), models.UserDBMongo.ToResponse)
+	if len(users) == 0 {
+		logger.Warning("No users found in MongoDB database")
+		c.JSON(http.StatusNotFound, types.Error(
+			types.Http.NotFound(),
+			"No users found",
+			"No users found in the MongoDB database",
+		))
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
 
 func (userType) CreateGorm(c *gin.Context) {
+	logger.Debug("Using GORM")
 	var body models.UserCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -95,7 +122,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	logger.Debug("Creating user: ", body)
 	logger.Debug("Username: ", body.FirstName, body.LastName)
 
-	result := db.User.CreateUser(body)
+	result := db.User.CreateGorm(body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -108,6 +135,7 @@ func (userType) CreateGorm(c *gin.Context) {
 	c.JSON(http.StatusCreated, user.ToResponse())
 }
 func (userType) CreateMongo(c *gin.Context) {
+	logger.Debug("Using MongoDB")
 	var body models.UserCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -128,7 +156,7 @@ func (userType) CreateMongo(c *gin.Context) {
 
 	logger.Debug("Creating user in MongoDB: ", body)
 
-	result := db.User.Create(body)
+	result := db.User.CreateMongo(body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -165,7 +193,7 @@ func (userType) Update(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Updating user by ID: ", id)
 
-	result := db.User.UpdateUser(id, body)
+	result := db.User.UpdateGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -202,7 +230,7 @@ func (userType) Patch(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Patching user by ID: ", id)
 
-	result := db.User.PatchUser(id, body)
+	result := db.User.PatchGorm(id, body)
 
 	if result.IsErr() {
 		err := result.Error()

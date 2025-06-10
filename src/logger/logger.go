@@ -1,8 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -38,11 +40,11 @@ func Init() {
 		LogToConsole: true,
 		LogOptions:   ALL,
 
-		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags|log.Lshortfile),
-		InfoLogger:    log.New(os.Stdout, "[INFO] ", log.LstdFlags|log.Lshortfile),
-		WarningLogger: log.New(os.Stdout, "[WARNING] ", log.LstdFlags|log.Lshortfile),
-		ErrorLogger:   log.New(os.Stderr, "[ERROR] ", log.LstdFlags|log.Lshortfile),
-		FatalLogger:   log.New(os.Stderr, "[FATAL] ", log.LstdFlags|log.Lshortfile),
+		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags),
+		InfoLogger:    log.New(os.Stdout, "[INFO] ", log.LstdFlags),
+		WarningLogger: log.New(os.Stdout, "[WARNING] ", log.LstdFlags),
+		ErrorLogger:   log.New(os.Stderr, "[ERROR] ", log.LstdFlags),
+		FatalLogger:   log.New(os.Stderr, "[FATAL] ", log.LstdFlags),
 	}
 
 	Info("Logger initialized")
@@ -300,18 +302,35 @@ func writeToFile(prefix string, v ...interface{}) {
 	logger.Println(v...)
 }
 
-func logWith(logger *log.Logger, ForceWriteFile bool, v ...interface{}) {
+func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
 	if !canLogWith(logger) {
 		return
 	}
 
+	orignalPrefix := logger.Prefix()
+	extraPrefix := ""
+	_, file, line, ok := runtime.Caller(3)
+	if ok {
+		//fmt.Println(file + ":" + strconv.Itoa(line))
+		splitPath := strings.Split(file, "/")
+		file = splitPath[len(splitPath)-1] // Get the last part of the path
+		extraPrefix = fmt.Sprintf("%s:%d: ", file, line)
+	} else {
+		extraPrefix = "UnknownFile:0: "
+	}
+
+	trimmedArgs := strings.Trim(fmt.Sprint(v...), "[]")
+
 	if dnxLoggerInstance.LogToConsole {
-		logger.Println(v...)
+		logger.Println(extraPrefix, trimmedArgs)
+
 	}
 
 	if ForceWriteFile || dnxLoggerInstance.LogToFile {
-		writeToFile(logger.Prefix(), v...)
+		writeToFile(extraPrefix, trimmedArgs)
 	}
+
+	logger.SetPrefix(orignalPrefix) // Reset the prefix to the original one
 }
 
 func logDebug(writeFile bool, v ...interface{}) {
