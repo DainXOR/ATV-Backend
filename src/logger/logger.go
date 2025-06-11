@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -20,6 +21,12 @@ const (
 	NONE = 0
 )
 
+const (
+	LOG_PATH      = "../artifacts"
+	LOG_FILE      = "/logs.log"
+	LOG_FULL_PATH = LOG_PATH + LOG_FILE
+)
+
 type dnxLogger struct {
 	DebugLogger   *log.Logger
 	InfoLogger    *log.Logger
@@ -30,6 +37,7 @@ type dnxLogger struct {
 	LogToFile    bool
 	LogToConsole bool
 	LogOptions   int
+	logAttempts  int
 }
 
 var dnxLoggerInstance *dnxLogger
@@ -39,6 +47,7 @@ func Init() {
 		LogToFile:    true,
 		LogToConsole: true,
 		LogOptions:   ALL,
+		logAttempts:  0,
 
 		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags),
 		InfoLogger:    log.New(os.Stdout, "[INFO] ", log.LstdFlags),
@@ -46,6 +55,9 @@ func Init() {
 		ErrorLogger:   log.New(os.Stderr, "[ERROR] ", log.LstdFlags),
 		FatalLogger:   log.New(os.Stderr, "[FATAL] ", log.LstdFlags),
 	}
+
+	// Create the path if it doesn't exist
+	tryCreateLogFile()
 
 	Info("Logger initialized")
 }
@@ -99,12 +111,60 @@ func EnvInit() {
 	Info("Logger environment variables loaded")
 }
 
+func registerLogAttempt() bool {
+	dnxLoggerInstance.logAttempts++
+	if dnxLoggerInstance.logAttempts > 10 && dnxLoggerInstance.logAttempts < 15 {
+		Warning("Too many log attempts, will panic if this continues")
+		return false
+	} else if dnxLoggerInstance.logAttempts >= 15 {
+		Error("Too many log attempts, will panic now")
+		Fatal("Too many log attempts, this is likely a bug in the logger, please report it")
+		return false
+	}
+	return true
+}
+func resetLogAttempts() {
+	if dnxLoggerInstance.logAttempts > 0 {
+		dnxLoggerInstance.logAttempts = 0
+		Info("Log attempts counter reset")
+	}
+}
+
+func tryCreateLogFile() {
+	if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
+		err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
+
+		if err != nil {
+			SetLogToFile(false)
+			Error("Failed to create log directory:", err)
+			Warning("Defaulting to console logging only")
+			return
+
+		} else {
+			Info("Log directory created at", LOG_PATH)
+		}
+	}
+
+	if _, err := os.Stat(LOG_FULL_PATH); os.IsNotExist(err) {
+		file, err := os.Create(LOG_FULL_PATH)
+
+		if err != nil {
+			SetLogToFile(false)
+			logError(false, "Failed to create log file:", err)
+			Warning("Defaulting to console logging only")
+			return
+		}
+		defer file.Close()
+	}
+
+	Info("Log file created at", LOG_FULL_PATH)
+}
 func LogsToFile() bool {
 	return dnxLoggerInstance.LogToFile
 }
 func SetLogToFile(value bool) {
-	Info("File logging set to", value)
 	dnxLoggerInstance.LogToFile = value
+	Info("File logging set to", value)
 }
 
 func LogsToConsole() bool {
@@ -289,10 +349,11 @@ func canLogWith(logger *log.Logger) bool {
 	return false
 }
 
-func writeToFile(prefix string, v ...interface{}) {
-	file, err := os.OpenFile("logs.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+func writeToFile(prefix string, v ...any) {
+	file, err := os.OpenFile(LOG_PATH, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
+		SetLogToFile(false)
 		logError(false, "Failed to open log file")
 		return
 	}
@@ -307,11 +368,12 @@ func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
 		return
 	}
 
+	registerLogAttempt()
+
 	orignalPrefix := logger.Prefix()
 	extraPrefix := ""
 	_, file, line, ok := runtime.Caller(3)
 	if ok {
-		//fmt.Println(file + ":" + strconv.Itoa(line))
 		splitPath := strings.Split(file, "/")
 		file = splitPath[len(splitPath)-1] // Get the last part of the path
 		extraPrefix = fmt.Sprintf("%s:%d: ", file, line)
@@ -323,46 +385,45 @@ func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
 
 	if dnxLoggerInstance.LogToConsole {
 		logger.Println(extraPrefix, trimmedArgs)
-
 	}
-
 	if ForceWriteFile || dnxLoggerInstance.LogToFile {
 		writeToFile(extraPrefix, trimmedArgs)
 	}
 
 	logger.SetPrefix(orignalPrefix) // Reset the prefix to the original one
+	resetLogAttempts()
 }
 
-func logDebug(writeFile bool, v ...interface{}) {
+func logDebug(writeFile bool, v ...any) {
 	logWith(dnxLoggerInstance.DebugLogger, writeFile, v...)
 }
-func logInfo(writeFile bool, v ...interface{}) {
+func logInfo(writeFile bool, v ...any) {
 	logWith(dnxLoggerInstance.InfoLogger, writeFile, v...)
 }
-func logWarning(writeFile bool, v ...interface{}) {
+func logWarning(writeFile bool, v ...any) {
 	logWith(dnxLoggerInstance.WarningLogger, writeFile, v...)
 }
-func logError(writeFile bool, v ...interface{}) {
+func logError(writeFile bool, v ...any) {
 	logWith(dnxLoggerInstance.ErrorLogger, writeFile, v...)
 }
-func logFatal(writeFile bool, v ...interface{}) {
+func logFatal(writeFile bool, v ...any) {
 	logWith(dnxLoggerInstance.FatalLogger, writeFile, v...)
 	os.Exit(1)
 }
 
-func Debug(v ...interface{}) {
+func Debug(v ...any) {
 	logDebug(false, v...)
 }
-func Info(v ...interface{}) {
+func Info(v ...any) {
 	logInfo(false, v...)
 }
-func Warning(v ...interface{}) {
+func Warning(v ...any) {
 	logWarning(false, v...)
 }
-func Error(v ...interface{}) {
+func Error(v ...any) {
 	logError(false, v...)
 }
-func Fatal(v ...interface{}) {
+func Fatal(v ...any) {
 	logFatal(false, v...)
 	os.Exit(1)
 }

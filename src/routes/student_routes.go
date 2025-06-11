@@ -10,14 +10,14 @@ func UserRoutes(router *gin.Engine) {
 	// Grouping the user routes under "api/v0/user"
 	// This allows for better organization and versioning of the API
 	// Grouping can also be done inside other groups
-	userRouter := router.Group("api/v0/user")
+	userRouter := router.Group("api/v0/student")
 	{
 		userRouter.GET("/:id", controller.Student.GetByIDGorm)
 		userRouter.GET("/all", controller.Student.GetAllGorm)
 
 		userRouter.POST("/", controller.Student.CreateGorm)
 	}
-	userRouter = router.Group("api/v1/user")
+	userRouter = router.Group("api/v1/student")
 	{
 		userRouter.GET("/:id", controller.Student.GetByIDMongo)
 		userRouter.GET("/all", controller.Student.GetAllMongo)
