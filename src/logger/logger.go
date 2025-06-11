@@ -44,7 +44,7 @@ var dnxLoggerInstance *dnxLogger
 
 func Init() {
 	dnxLoggerInstance = &dnxLogger{
-		LogToFile:    true,
+		LogToFile:    false,
 		LogToConsole: true,
 		LogOptions:   ALL,
 		logAttempts:  0,
@@ -111,37 +111,20 @@ func EnvInit() {
 	Info("Logger environment variables loaded")
 }
 
-func registerLogAttempt() bool {
-	dnxLoggerInstance.logAttempts++
-	if dnxLoggerInstance.logAttempts > 10 && dnxLoggerInstance.logAttempts < 15 {
-		Warning("Too many log attempts, will panic if this continues")
-		return false
-	} else if dnxLoggerInstance.logAttempts >= 15 {
-		Error("Too many log attempts, will panic now")
-		Fatal("Too many log attempts, this is likely a bug in the logger, please report it")
-		return false
-	}
-	return true
-}
-func resetLogAttempts() {
-	if dnxLoggerInstance.logAttempts > 0 {
-		dnxLoggerInstance.logAttempts = 0
-		Info("Log attempts counter reset")
-	}
-}
-
 func tryCreateLogFile() {
 	if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
+		logWarning(true, "Log directory does not exist")
+		logInfo(true, "Attempting to create log directory at", LOG_PATH)
 		err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
 
 		if err != nil {
+			logError(true, "Failed to create log directory:", err)
+			logWarning(true, "Defaulting to no file logging")
 			SetLogToFile(false)
-			Error("Failed to create log directory:", err)
-			Warning("Defaulting to console logging only")
 			return
 
 		} else {
-			Info("Log directory created at", LOG_PATH)
+			logInfo(true, "Log directory created at", LOG_PATH)
 		}
 	}
 
@@ -149,22 +132,53 @@ func tryCreateLogFile() {
 		file, err := os.Create(LOG_FULL_PATH)
 
 		if err != nil {
+			logError(true, "Failed to create log file:", err)
+			logWarning(true, "Defaulting to no file logging")
 			SetLogToFile(false)
-			logError(false, "Failed to create log file:", err)
-			Warning("Defaulting to console logging only")
+			return
+		} else {
+			file.Close()
+			logInfo(true, "Log file created at", LOG_FULL_PATH)
 			return
 		}
-		defer file.Close()
 	}
 
-	Info("Log file created at", LOG_FULL_PATH)
+	Info("Log file already exists at", LOG_FULL_PATH)
 }
+
+func registerLogAttempt(forceNoFileWrite bool) bool {
+	dnxLoggerInstance.logAttempts++
+
+	if dnxLoggerInstance.logAttempts > 10 && dnxLoggerInstance.logAttempts < 15 {
+		logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
+		return false
+	} else if dnxLoggerInstance.logAttempts >= 15 {
+		logError(forceNoFileWrite, "Too many log attempts, will panic now")
+		logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
+		return false
+	}
+	return true
+}
+func resetLogAttempts(forceNoFileWrite bool) bool {
+	if dnxLoggerInstance.logAttempts == 1 {
+		dnxLoggerInstance.logAttempts = 0
+		return true
+
+	} else if dnxLoggerInstance.logAttempts > 1 {
+		dnxLoggerInstance.logAttempts = 0
+		logInfo(forceNoFileWrite, "Log attempts reset")
+		return true
+	}
+
+	return false
+}
+
 func LogsToFile() bool {
 	return dnxLoggerInstance.LogToFile
 }
 func SetLogToFile(value bool) {
+	logInfo(value, "File logging set to", value)
 	dnxLoggerInstance.LogToFile = value
-	Info("File logging set to", value)
 }
 
 func LogsToConsole() bool {
@@ -363,12 +377,12 @@ func writeToFile(prefix string, v ...any) {
 	logger.Println(v...)
 }
 
-func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
+func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 	if !canLogWith(logger) {
 		return
 	}
 
-	registerLogAttempt()
+	registerLogAttempt(forceNoFileWrite)
 
 	orignalPrefix := logger.Prefix()
 	extraPrefix := ""
@@ -383,31 +397,31 @@ func logWith(logger *log.Logger, ForceWriteFile bool, v ...any) {
 
 	trimmedArgs := strings.Trim(fmt.Sprint(v...), "[]")
 
-	if dnxLoggerInstance.LogToConsole {
+	if LogsToConsole() {
 		logger.Println(extraPrefix, trimmedArgs)
 	}
-	if ForceWriteFile || dnxLoggerInstance.LogToFile {
+	if !forceNoFileWrite && LogsToFile() {
 		writeToFile(extraPrefix, trimmedArgs)
 	}
 
 	logger.SetPrefix(orignalPrefix) // Reset the prefix to the original one
-	resetLogAttempts()
+	resetLogAttempts(forceNoFileWrite)
 }
 
-func logDebug(writeFile bool, v ...any) {
-	logWith(dnxLoggerInstance.DebugLogger, writeFile, v...)
+func logDebug(forceNoFileWrite bool, v ...any) {
+	logWith(dnxLoggerInstance.DebugLogger, forceNoFileWrite, v...)
 }
-func logInfo(writeFile bool, v ...any) {
-	logWith(dnxLoggerInstance.InfoLogger, writeFile, v...)
+func logInfo(forceNoFileWrite bool, v ...any) {
+	logWith(dnxLoggerInstance.InfoLogger, forceNoFileWrite, v...)
 }
-func logWarning(writeFile bool, v ...any) {
-	logWith(dnxLoggerInstance.WarningLogger, writeFile, v...)
+func logWarning(forceNoFileWrite bool, v ...any) {
+	logWith(dnxLoggerInstance.WarningLogger, forceNoFileWrite, v...)
 }
-func logError(writeFile bool, v ...any) {
-	logWith(dnxLoggerInstance.ErrorLogger, writeFile, v...)
+func logError(forceNoFileWrite bool, v ...any) {
+	logWith(dnxLoggerInstance.ErrorLogger, forceNoFileWrite, v...)
 }
-func logFatal(writeFile bool, v ...any) {
-	logWith(dnxLoggerInstance.FatalLogger, writeFile, v...)
+func logFatal(forceNoFileWrite bool, v ...any) {
+	logWith(dnxLoggerInstance.FatalLogger, forceNoFileWrite, v...)
 	os.Exit(1)
 }
 
@@ -425,5 +439,4 @@ func Error(v ...any) {
 }
 func Fatal(v ...any) {
 	logFatal(false, v...)
-	os.Exit(1)
 }
