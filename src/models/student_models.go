@@ -24,7 +24,7 @@ type UserDBGorm struct {
 	InstitutionEmail string `json:"institution_email" gorm:"unique;not null"`
 	ResidenceAddress string `json:"residence_address" gorm:"not null"`
 	Semester         uint   `json:"semester" gorm:"not null"`
-	UniversityID     string `json:"university_id" gorm:"not null"`
+	UniversityID     string `json:"id_university" gorm:"not null"`
 	PhoneNumber      string `json:"phone_number"`
 	// gorm tags are used to specify constraints and properties for the fields
 	// Unique forces the field to be unique in the database for each record
@@ -40,7 +40,7 @@ type StudentDBMongo struct {
 	InstitutionEmail string             `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
 	ResidenceAddress string             `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
 	Semester         uint               `json:"semester,omitempty" bson:"semester,omitempty"`
-	UniversityID     string             `json:"university_id,omitempty" bson:"university_id,omitempty"`
+	UniversityID     string             `json:"id_university,omitempty" bson:"id_university,omitempty"`
 	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
 	CreatedAt        time.Time          `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time          `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
@@ -56,7 +56,7 @@ type StudentDBMongoReceiver struct {
 	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
 	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
 	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
-	UniversityID     string     `json:"university_id,omitempty" bson:"university_id,omitempty"`
+	UniversityID     string     `json:"id_university,omitempty" bson:"id_university,omitempty"`
 	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
 	CreatedAt        time.Time  `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time  `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
@@ -80,7 +80,7 @@ type StudentCreate struct {
 	InstitutionEmail string `json:"institution_email" gorm:"unique;not null"`
 	ResidenceAddress string `json:"residence_address" gorm:"not null"`
 	Semester         uint   `json:"semester" gorm:"not null"`
-	UniversityID     string `json:"university_id" gorm:"not null"`
+	UniversityID     string `json:"id_university" gorm:"not null"`
 	PhoneNumber      string `json:"phone_number"`
 }
 
@@ -96,7 +96,7 @@ type StudentResponse struct {
 	InstitutionEmail string    `json:"institution_email" gorm:"unique;not null"`
 	ResidenceAddress string    `json:"residence_address" gorm:"not null"`
 	Semester         uint      `json:"semester" gorm:"not null"`
-	UniversityID     string    `json:"university_id" gorm:"not null"`
+	UniversityID     string    `json:"id_university" gorm:"not null"`
 	PhoneNumber      string    `json:"phone_number"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
