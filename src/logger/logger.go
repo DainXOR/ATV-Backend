@@ -53,6 +53,7 @@ type dnxLogger struct {
 	LogToConsole bool
 	LogLevels    logLevel
 	logAttempts  int
+	appVersion   uint
 }
 
 var dnxLoggerInstance *dnxLogger
@@ -74,6 +75,7 @@ func Init() {
 		LogToConsole: DEFAULT_LOGS_TO_CONSOLE,
 		LogLevels:    DEFAULT_LOG_LEVEL,
 		logAttempts:  0,
+		appVersion:   0,
 
 		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags),
 		InfoLogger:    log.New(os.Stdout, "[INFO] ", log.LstdFlags),
@@ -220,6 +222,14 @@ func LogsToConsole() bool {
 func SetLogToConsole(value bool) {
 	Info("Console logging set to ", value)
 	get().LogToConsole = value
+}
+
+func SetAppVersion(version uint) {
+	get().appVersion = version
+	Info("App version set to: ", version)
+}
+func AppVersion() uint {
+	return get().appVersion
 }
 
 func LogLevels() logLevel {
@@ -494,4 +504,38 @@ func Error(v ...any) {
 }
 func Fatal(v ...any) {
 	logFatal(false, v...)
+}
+
+func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, error) {
+	if AppVersion() >= removalVersion {
+		Error("DEPRECATED: This feature has been removed in version ", removalVersion, ".\n", v)
+		return false, fmt.Errorf("feature removed in version %d\n %s", removalVersion, v)
+	}
+	if AppVersion() > deprecatedVersion && AppVersion() < removalVersion {
+		Warning("DEPRECATED: This feature will be removed in version ", removalVersion)
+		Warning("REASON: ", v)
+		return false, fmt.Errorf("feature deprecated in version %d, will be removed in version %d\n %s", deprecatedVersion, removalVersion, v)
+	} else if AppVersion() == deprecatedVersion {
+		Warning("DEPRECATED: This feature will be removed in future versions.")
+		Warning("REASON: ", v)
+		return true, fmt.Errorf("feature deprecated in version %d\n %s", deprecatedVersion, v)
+	}
+	return true, nil
+}
+func DeprecateMsg(deprecatedVersion uint, removalVersion uint, v ...any) string {
+	_, err := Deprecate(deprecatedVersion, removalVersion, v...)
+	return err.Error()
+}
+
+func Lava(v ...any) {
+	Warning("LAVA: Running code that should be removed, cleaned up or refactored.\n", v)
+	return
+}
+func LavaStart() {
+	Warning("Start of lava")
+	return
+}
+func LavaEnd() {
+	Warning("End of lava")
+	return
 }

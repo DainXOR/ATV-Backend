@@ -30,7 +30,12 @@ func (studentType) GetByIDGorm(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusOK, user.ToResponse())
+	c.JSON(types.Http.C200().Ok().AsInt(),
+		models.Response(
+			user.ToResponse(),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
 }
 func (studentType) GetByIDMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
@@ -47,7 +52,12 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusOK, user.ToResponse())
+	c.JSON(http.StatusOK,
+		models.Response(
+			user.ToResponse(),
+			"",
+		),
+	)
 }
 
 func (studentType) GetAllGorm(c *gin.Context) {
@@ -72,7 +82,12 @@ func (studentType) GetAllGorm(c *gin.Context) {
 		))
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK,
+		models.Response(
+			users,
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
+		),
+	)
 }
 func (studentType) GetAllMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
@@ -96,7 +111,12 @@ func (studentType) GetAllMongo(c *gin.Context) {
 		))
 		return
 	}
-	c.JSON(http.StatusOK, students)
+	c.JSON(http.StatusOK,
+		models.Response(
+			students,
+			"",
+		),
+	)
 }
 
 func (studentType) CreateGorm(c *gin.Context) {
@@ -132,7 +152,12 @@ func (studentType) CreateGorm(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusCreated, user.ToResponse())
+	c.JSON(http.StatusCreated,
+		models.Response(
+			user.ToResponse(),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
+		),
+	)
 }
 func (studentType) CreateMongo(c *gin.Context) {
 	logger.Debug("Using MongoDB")
@@ -167,7 +192,12 @@ func (studentType) CreateMongo(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusCreated, user.ToResponse())
+	c.JSON(http.StatusCreated,
+		models.Response(
+			user.ToResponse(),
+			"",
+		),
+	)
 }
 
 // Update updates an existing user in the database
@@ -204,7 +234,12 @@ func (studentType) Update(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusOK, user.ToResponse())
+	c.JSON(http.StatusOK,
+		models.Response(
+			user.ToResponse(),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
 }
 
 // Patch updates an existing user in the database
@@ -241,5 +276,10 @@ func (studentType) Patch(c *gin.Context) {
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusOK, user.ToResponse())
+	c.JSON(http.StatusOK,
+		models.Response(
+			user.ToResponse(),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
 }
