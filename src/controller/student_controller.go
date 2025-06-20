@@ -62,7 +62,7 @@ func (studentType) GetAllGorm(c *gin.Context) {
 		return
 	}
 
-	users := types.Map(result.Value(), models.UserDBGorm.ToResponse)
+	users := utils.Map(result.Value(), models.UserDBGorm.ToResponse)
 	if len(users) == 0 {
 		logger.Warning("No users found in GORM database")
 		c.JSON(http.StatusNotFound, types.Error(
@@ -86,7 +86,7 @@ func (studentType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	students := types.Map(result.Value(), models.StudentDBMongo.ToResponse)
+	students := utils.Map(result.Value(), models.StudentDBMongo.ToResponse)
 	if len(students) == 0 {
 		logger.Warning("No students found in MongoDB database")
 		c.JSON(http.StatusNotFound, types.Error(

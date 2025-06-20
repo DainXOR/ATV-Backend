@@ -5,6 +5,7 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -156,7 +157,7 @@ func (studentType) GetAllMongo() types.Result[[]models.StudentDBMongo] {
 		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
 	}
 
-	users := types.Map(usersR, models.StudentDBMongoReceiver.ToDB)
+	users := utils.Map(usersR, models.StudentDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved ", len(users), " users from MongoDB database")
 	return types.ResultOk(users)
 }

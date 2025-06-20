@@ -1,4 +1,6 @@
-package types
+package utils
+
+import "strings"
 
 type Predicate[T any] func(T) bool
 
@@ -30,4 +32,24 @@ func Apply[T, R any](fn func(T) R, value T) func() R {
 	return func() R {
 		return fn(value)
 	}
+}
+
+func Capture(prefix string, text string, suffix string) string {
+	size := len(text)
+
+	if size < len(prefix)+len(suffix) {
+		return ""
+	}
+
+	for i := range size {
+		if strings.HasPrefix(text[i:], prefix) {
+			for j := size; j >= 0; j-- {
+				if strings.HasSuffix(text[i:j], suffix) {
+					return text[i+1 : j-1]
+				}
+			}
+		}
+	}
+
+	return ""
 }

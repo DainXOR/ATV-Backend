@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"dainxor/atv/utils"
+
 	"fmt"
 	"log"
 	"os"
@@ -10,21 +12,34 @@ import (
 	"strings"
 )
 
-const (
-	DEBUG   = 0b00001
-	INFO    = 0b00010
-	WARNING = 0b00100
-	ERROR   = 0b01000
-	FATAL   = 0b10000
+type logLevel int
 
-	ALL  = DEBUG | INFO | WARNING | ERROR | FATAL
-	NONE = 0
+const (
+	LEVEL_DEBUG   logLevel = 1 << iota // 0b00001
+	LEVEL_INFO                         // 0b00010
+	LEVEL_WARNING                      // 0b00100
+	LEVEL_ERROR                        // 0b01000
+	LEVEL_FATAL                        // 0b10000
+
+	LEVEL_ALL           = LEVEL_DEBUG | LEVEL_INFO | LEVEL_WARNING | LEVEL_ERROR | LEVEL_FATAL
+	LEVEL_NONE logLevel = 0 // 0b00000
 )
 
+func hasLogLevel(options logLevel, level logLevel) bool {
+	return options&level == level
+}
+
 const (
-	LOG_PATH      = "../artifacts"
-	LOG_FILE      = "/logs.log"
+	LOG_PATH      = "../artifacts/"
+	LOG_FILE      = "logs.log"
 	LOG_FULL_PATH = LOG_PATH + LOG_FILE
+
+	DEFAULT_LOGS_TO_FILE         = false     // Default to not logging to file
+	DEFAULT_LOGS_TO_CONSOLE      = true      // Default to logging to console
+	DEFAULT_LOG_LEVEL            = LEVEL_ALL // Default logging level
+	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
+	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
+	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
 )
 
 type dnxLogger struct {
@@ -36,17 +51,28 @@ type dnxLogger struct {
 
 	LogToFile    bool
 	LogToConsole bool
-	LogOptions   int
+	LogLevels    logLevel
 	logAttempts  int
 }
 
 var dnxLoggerInstance *dnxLogger
 
+// Returns the singleton instance of dnxLogger, initializing it if necessary.
+// This function should be used to access the logger throughout the internal package.
+// It abstracts the initialization logic and provides a single point of access to the logger instance.
+// It ensures that the logger is initialized only once, and provides a consistent interface for logging.
+func get() *dnxLogger {
+	if dnxLoggerInstance == nil {
+		Init()
+	}
+	return dnxLoggerInstance
+}
+
 func Init() {
 	dnxLoggerInstance = &dnxLogger{
-		LogToFile:    false,
-		LogToConsole: true,
-		LogOptions:   ALL,
+		LogToFile:    DEFAULT_LOGS_TO_FILE,
+		LogToConsole: DEFAULT_LOGS_TO_CONSOLE,
+		LogLevels:    DEFAULT_LOG_LEVEL,
 		logAttempts:  0,
 
 		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags),
@@ -71,12 +97,12 @@ func EnvInit() {
 	logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
 
 	if existMinLevel {
-		Info("Setting minimum log level to", minLogLevel)
+		Info("Setting minimum log level to ", minLogLevel)
 		SetMinLogLevel(LogLevelValue(minLogLevel))
 	}
 	if existDisableLevels {
 		levels := strings.Split(disableLevels, "|")
-		options := 0
+		options := LEVEL_NONE
 		Info("Disabling log levels:")
 
 		for _, level := range levels {
@@ -91,8 +117,8 @@ func EnvInit() {
 		b, err := strconv.ParseBool(logConsole)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_CONSOLE value")
-			SetLogToConsole(true)
-			Warning("Defaulting to console logging enabled")
+			Warning("Defaulting to console logging: ", DEFAULT_LOGS_TO_CONSOLE)
+			SetLogToConsole(DEFAULT_LOGS_TO_CONSOLE)
 		} else {
 			SetLogToConsole(b)
 		}
@@ -101,8 +127,8 @@ func EnvInit() {
 		b, err := strconv.ParseBool(logFile)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_FILE value")
-			SetLogToFile(true)
-			Warning("Defaulting to file logging enabled")
+			Warning("Defaulting to file logging: ", DEFAULT_LOGS_TO_FILE)
+			SetLogToFile(DEFAULT_LOGS_TO_FILE)
 		} else {
 			SetLogToFile(b)
 		}
@@ -111,20 +137,20 @@ func EnvInit() {
 	Info("Logger environment variables loaded")
 }
 
-func tryCreateLogFile() {
+func tryCreateLogFile() bool {
 	if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
 		logWarning(true, "Log directory does not exist")
-		logInfo(true, "Attempting to create log directory at", LOG_PATH)
+		logInfo(true, "Attempting to create log directory at ", LOG_PATH)
 		err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
 
 		if err != nil {
-			logError(true, "Failed to create log directory:", err)
+			logError(true, "Failed to create log directory: ", err)
 			logWarning(true, "Defaulting to no file logging")
 			SetLogToFile(false)
-			return
+			return false
 
 		} else {
-			logInfo(true, "Log directory created at", LOG_PATH)
+			logInfo(true, "Log directory created at ", LOG_PATH)
 		}
 	}
 
@@ -132,40 +158,47 @@ func tryCreateLogFile() {
 		file, err := os.Create(LOG_FULL_PATH)
 
 		if err != nil {
-			logError(true, "Failed to create log file:", err)
+			logError(true, "Failed to create log file: ", err)
 			logWarning(true, "Defaulting to no file logging")
 			SetLogToFile(false)
-			return
+			return false
 		} else {
 			file.Close()
-			logInfo(true, "Log file created at", LOG_FULL_PATH)
-			return
+			logInfo(true, "Log file created at ", LOG_FULL_PATH)
+			return true
 		}
 	}
 
-	Info("Log file already exists at", LOG_FULL_PATH)
+	Info("Log file already exists at ", LOG_FULL_PATH)
+	return true
 }
 
 func registerLogAttempt(forceNoFileWrite bool) bool {
-	dnxLoggerInstance.logAttempts++
+	get().logAttempts++
 
-	if dnxLoggerInstance.logAttempts > 10 && dnxLoggerInstance.logAttempts < 15 {
-		logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
+	if get().logAttempts > DEFAULT_WARNING_LOG_ATTEMPTS && get().logAttempts < DEFAULT_MAX_LOG_ATTEMPTS {
+		if ENABLE_LOG_ATTEMPTS_MESSAGES {
+			logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
+		}
 		return false
-	} else if dnxLoggerInstance.logAttempts >= 15 {
-		logError(forceNoFileWrite, "Too many log attempts, will panic now")
-		logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
+
+	} else if get().logAttempts >= DEFAULT_MAX_LOG_ATTEMPTS {
+		if ENABLE_LOG_ATTEMPTS_MESSAGES {
+			logError(forceNoFileWrite, "Too many log attempts, will panic now")
+			logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
+		}
+
 		return false
 	}
 	return true
 }
 func resetLogAttempts(forceNoFileWrite bool) bool {
-	if dnxLoggerInstance.logAttempts == 1 {
-		dnxLoggerInstance.logAttempts = 0
+	if get().logAttempts == 1 {
+		get().logAttempts = 0
 		return true
 
-	} else if dnxLoggerInstance.logAttempts > 1 {
-		dnxLoggerInstance.logAttempts = 0
+	} else if get().logAttempts > 1 {
+		get().logAttempts = 0
 		logInfo(forceNoFileWrite, "Log attempts reset")
 		return true
 	}
@@ -174,209 +207,220 @@ func resetLogAttempts(forceNoFileWrite bool) bool {
 }
 
 func LogsToFile() bool {
-	return dnxLoggerInstance.LogToFile
+	return get().LogToFile
 }
 func SetLogToFile(value bool) {
-	logInfo(value, "File logging set to", value)
-	dnxLoggerInstance.LogToFile = value
+	logInfo(!value, "File logging set to ", value)
+	get().LogToFile = value
 }
 
 func LogsToConsole() bool {
-	return dnxLoggerInstance.LogToConsole
+	return get().LogToConsole
 }
 func SetLogToConsole(value bool) {
-	Info("Console logging set to", value)
-	dnxLoggerInstance.LogToConsole = value
+	Info("Console logging set to ", value)
+	get().LogToConsole = value
 }
 
-func LogOptions() int {
-	return dnxLoggerInstance.LogOptions
+func LogLevels() logLevel {
+	return get().LogLevels
 }
-func LogOptionsHas(option int) bool {
-	return LogOptions()&option == option
+func LogLevelsHas(option logLevel) bool {
+	return LogLevels()&option == option
 }
-func SetLogOptions(options int) {
-	if options < NONE || options > ALL {
+func SetLogLevels(options logLevel) bool {
+	if options < LEVEL_NONE || options > LEVEL_ALL {
 		Warning("Invalid logging options")
-		return
-	} else if options == ALL {
+		return false
+	} else if options == LEVEL_ALL {
 		Info("Logging options set to ALL")
-		return
-	} else if options == NONE {
+		get().LogLevels = LEVEL_ALL
+		return true
+	} else if options == LEVEL_NONE {
 		Info("Logging options set to NONE")
-		return
-	}
-
-	msg := "Logging options set to: "
-
-	if LogOptionsHas(DEBUG) {
-		msg += "| DEBUG |"
-	}
-	if LogOptionsHas(INFO) {
-		msg += "| INFO |"
-	}
-	if LogOptionsHas(WARNING) {
-		msg += "| WARNING |"
-	}
-	if LogOptionsHas(ERROR) {
-		msg += "| ERROR |"
-	}
-	if LogOptionsHas(FATAL) {
-		msg += "| FATAL |"
-	}
-
-	Info(msg)
-
-	dnxLoggerInstance.LogOptions = options
-}
-func EnableLogOptions(options int) {
-	if options < NONE || options > ALL {
-		Warning("Invalid logging option")
-		return
+		get().LogLevels = LEVEL_NONE
+		return true
 	}
 
 	var msg string
 
-	if options&DEBUG == DEBUG {
+	if LogLevelsHas(LEVEL_DEBUG) {
 		msg += "| DEBUG |"
 	}
-	if options&INFO == INFO {
+	if LogLevelsHas(LEVEL_INFO) {
 		msg += "| INFO |"
 	}
-	if options&WARNING == WARNING {
+	if LogLevelsHas(LEVEL_WARNING) {
 		msg += "| WARNING |"
 	}
-	if options&ERROR == ERROR {
+	if LogLevelsHas(LEVEL_ERROR) {
 		msg += "| ERROR |"
 	}
-	if options&FATAL == FATAL {
+	if LogLevelsHas(LEVEL_FATAL) {
+		msg += "| FATAL |"
+	}
+
+	Info("Logging options set to: ", msg)
+	get().LogLevels = options
+	return true
+}
+func EnableLogOptions(options logLevel) bool {
+	if options < LEVEL_NONE || options > LEVEL_ALL {
+		Warning("Invalid logging option")
+		return false
+	} else if options == LEVEL_ALL {
+		Info("Enabled all logging options")
+		SetLogLevels(LEVEL_ALL)
+		return true
+	} else if options == LEVEL_NONE {
+		Info("Disabled all logging options")
+		SetLogLevels(LEVEL_NONE)
+		return true
+	}
+
+	var msg string
+
+	if hasLogLevel(options, LEVEL_DEBUG) {
+		msg += "| DEBUG |"
+	}
+	if hasLogLevel(options, LEVEL_INFO) {
+		msg += "| INFO |"
+	}
+	if hasLogLevel(options, LEVEL_WARNING) {
+		msg += "| WARNING |"
+	}
+	if hasLogLevel(options, LEVEL_ERROR) {
+		msg += "| ERROR |"
+	}
+	if hasLogLevel(options, LEVEL_FATAL) {
 		msg += "| FATAL |"
 	}
 
 	Info("Enabled logging options: ", msg)
-	dnxLoggerInstance.LogOptions |= options
+	get().LogLevels |= options
+	return true
 }
-func DisableLogOptions(options int) {
-	if options < NONE || options > ALL {
+func DisableLogOptions(options logLevel) bool {
+	if options < LEVEL_NONE || options > LEVEL_ALL {
 		Warning("Invalid logging option")
-		return
+		return false
 	}
 
 	var msg string
 
-	if options&DEBUG == DEBUG {
+	if hasLogLevel(options, LEVEL_DEBUG) {
 		msg += "| DEBUG |"
 	}
-	if options&INFO == INFO {
+	if hasLogLevel(options, LEVEL_INFO) {
 		msg += "| INFO |"
 	}
-	if options&WARNING == WARNING {
+	if hasLogLevel(options, LEVEL_WARNING) {
 		msg += "| WARNING |"
 	}
-	if options&ERROR == ERROR {
+	if hasLogLevel(options, LEVEL_ERROR) {
 		msg += "| ERROR |"
 	}
-	if options&FATAL == FATAL {
+	if hasLogLevel(options, LEVEL_FATAL) {
 		msg += "| FATAL |"
 	}
 
 	Info("Disabled logging options: ", msg)
-	dnxLoggerInstance.LogOptions &= ^options
+	get().LogLevels &= ^options
+	return true
 }
-func SetMinLogLevel(level int) {
-	if level < NONE || level > ALL {
+func SetMinLogLevel(level logLevel) bool {
+	if level < LEVEL_NONE || level > LEVEL_ALL {
 		Warning("Invalid logging level")
-		return
+		return false
 	}
 
 	var msg string
 
 	switch level {
-	case DEBUG:
-		msg += "| DEBUG |"
+	case LEVEL_ALL:
 		fallthrough
-	case INFO:
-		msg += "| INFO |"
-		fallthrough
-	case WARNING:
-		msg += "| WARNING |"
-		fallthrough
-	case ERROR:
-		msg += "| ERROR |"
-		fallthrough
-	case FATAL:
-		msg += "| FATAL |"
-		fallthrough
-	case ALL:
-		msg = "| ALL |"
-	case NONE:
-		msg = "| NONE |"
+	case LEVEL_DEBUG:
+		msg = "DEBUG"
+
+	case LEVEL_INFO:
+		msg = "INFO"
+	case LEVEL_WARNING:
+		msg = "WARNING"
+	case LEVEL_ERROR:
+		msg = "ERROR"
+	case LEVEL_FATAL:
+		msg = "FATAL"
+	case LEVEL_NONE:
+		msg = "NONE"
 	}
 
 	Info("Minimum logging level set to: ", msg)
-	SetLogOptions(level)
+	SetLogLevels(level)
+	return true
 }
-func LogLevelValue(level string) int {
-	value := LogOptions()
+func LogLevelValue(levelName string) logLevel {
+	value := LogLevels()
 
-	switch level {
+	switch levelName {
 	case "DEBUG":
-		value = DEBUG
+		value = LEVEL_DEBUG
 	case "INFO":
-		value = INFO
+		value = LEVEL_INFO
 	case "WARNING":
-		value = WARNING
+		value = LEVEL_WARNING
 	case "ERROR":
-		value = ERROR
+		value = LEVEL_ERROR
 	case "FATAL":
-		value = FATAL
+		value = LEVEL_FATAL
 	case "ALL":
-		value = ALL
+		value = LEVEL_ALL
 	case "NONE":
-		value = NONE
+		value = LEVEL_NONE
 	default:
 		Warning("Invalid logging level")
 	}
 
 	return value
 }
-
 func canLogWith(logger *log.Logger) bool {
-	if LogOptionsHas(ALL) {
+	if LogLevelsHas(LEVEL_ALL) {
 		return true
-	} else if LogOptionsHas(NONE) {
+	} else if LogLevelsHas(LEVEL_NONE) {
 		return false
 	}
 
-	if logger == dnxLoggerInstance.DebugLogger {
-		return LogOptionsHas(DEBUG)
-	} else if logger == dnxLoggerInstance.InfoLogger {
-		return LogOptionsHas(INFO)
-	} else if logger == dnxLoggerInstance.WarningLogger {
-		return LogOptionsHas(WARNING)
-	} else if logger == dnxLoggerInstance.ErrorLogger {
-		return LogOptionsHas(ERROR)
-	} else if logger == dnxLoggerInstance.FatalLogger {
-		return LogOptionsHas(FATAL)
+	if logger == get().DebugLogger {
+		return LogLevelsHas(LEVEL_DEBUG)
+	} else if logger == get().InfoLogger {
+		return LogLevelsHas(LEVEL_INFO)
+	} else if logger == get().WarningLogger {
+		return LogLevelsHas(LEVEL_WARNING)
+	} else if logger == get().ErrorLogger {
+		return LogLevelsHas(LEVEL_ERROR)
+	} else if logger == get().FatalLogger {
+		return LogLevelsHas(LEVEL_FATAL)
 	}
 
 	return false
 }
 
-func writeToFile(prefix string, v ...any) {
-	file, err := os.OpenFile(LOG_PATH, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+func writeToFile(logger *log.Logger, prefix string, v ...any) bool {
+	file, err := os.OpenFile(LOG_FULL_PATH, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
-		SetLogToFile(false)
-		logError(false, "Failed to open log file")
-		return
+		logError(true, "Failed to open log file")
+		return false
 	}
 	defer file.Close()
 
-	logger := log.New(file, prefix, log.LstdFlags|log.Lshortfile)
-	logger.Println(v...)
+	originalOutput := logger.Writer()
+	logger.SetOutput(file)
+	logger.Println(prefix, v)
+	logger.SetOutput(originalOutput)
+	return true
 }
 
+// Private function that handles the actual logging.
 func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 	if !canLogWith(logger) {
 		return
@@ -397,34 +441,45 @@ func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 
 	trimmedArgs := strings.Trim(fmt.Sprint(v...), "[]")
 
+	argsAsStrings := utils.Map(v, func(e any) string { return fmt.Sprint(e) })
+	strings.Join(argsAsStrings, " ") // Join the arguments into a single string
+
 	if LogsToConsole() {
 		logger.Println(extraPrefix, trimmedArgs)
 	}
+
+	// This might be short-circuited, but idk if it is, so I will leave it like this
 	if !forceNoFileWrite && LogsToFile() {
-		writeToFile(extraPrefix, trimmedArgs)
+		if !writeToFile(logger, extraPrefix, trimmedArgs) {
+			SetLogToFile(false)
+		}
 	}
 
 	logger.SetPrefix(orignalPrefix) // Reset the prefix to the original one
 	resetLogAttempts(forceNoFileWrite)
 }
 
+// Private functions for logging at different levels
+// These functions are used internally and should not be called directly by users.
+// Use forceNoFileWrite to prevent writing to the log file, useful for testing or when file logging is disabled or not possible.
 func logDebug(forceNoFileWrite bool, v ...any) {
-	logWith(dnxLoggerInstance.DebugLogger, forceNoFileWrite, v...)
+	logWith(get().DebugLogger, forceNoFileWrite, v...)
 }
 func logInfo(forceNoFileWrite bool, v ...any) {
-	logWith(dnxLoggerInstance.InfoLogger, forceNoFileWrite, v...)
+	logWith(get().InfoLogger, forceNoFileWrite, v...)
 }
 func logWarning(forceNoFileWrite bool, v ...any) {
-	logWith(dnxLoggerInstance.WarningLogger, forceNoFileWrite, v...)
+	logWith(get().WarningLogger, forceNoFileWrite, v...)
 }
 func logError(forceNoFileWrite bool, v ...any) {
-	logWith(dnxLoggerInstance.ErrorLogger, forceNoFileWrite, v...)
+	logWith(get().ErrorLogger, forceNoFileWrite, v...)
 }
 func logFatal(forceNoFileWrite bool, v ...any) {
-	logWith(dnxLoggerInstance.FatalLogger, forceNoFileWrite, v...)
+	logWith(get().FatalLogger, forceNoFileWrite, v...)
 	os.Exit(1)
 }
 
+// Public functions for logging at different levels
 func Debug(v ...any) {
 	logDebug(false, v...)
 }
