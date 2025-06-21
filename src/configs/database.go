@@ -157,7 +157,7 @@ func (mongoType) PatchOne(filter any, update any, result any) error {
 // and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	logger.Lava("Remove individual database environment variables.")
+	logger.Lava(1, "Remove individual database environment variables.")
 	envUser := "DB_USER"
 	envPass := "DB_PASSWORD"
 	envName := "DB_NAME"
@@ -186,8 +186,8 @@ func (db) loadDBConfig() {
 		DB.dbType = DB.Types().Default()
 	}
 
-	logger.Lava("Loading database configuration from individual environment variables")
-	logger.LavaStart()
+	v := logger.Lava(1, "Loading database configuration from individual environment variables")
+	v.LavaStart()
 	host, exist := os.LookupEnv(envHost)
 	if exist {
 		DB.host = host
@@ -227,7 +227,7 @@ func (db) loadDBConfig() {
 		logger.Warning(envPort, "not found, using default")
 		DB.port = "5432"
 	}
-	logger.LavaEnd()
+	v.LavaEnd()
 }
 
 // EnvInit initializes the database connection based on the environment variables
@@ -266,8 +266,8 @@ func (db) EnvInit() error {
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectPostgresEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	logger.Lava("Using individual database environment variables")
-	logger.LavaStart()
+	v := logger.Lava(1, "Using individual database environment variables")
+	v.LavaStart()
 	if exist && useTesting != "TRUE" {
 		DB.ConnectPostgres(
 			os.Getenv("DB_HOST"),
@@ -286,15 +286,15 @@ func (db) ConnectPostgresEnv() {
 			os.Getenv("DB_PORT_TEST"),
 		)
 	}
-	logger.LavaEnd()
+	v.LavaEnd()
 }
 
 // ConnectPostgres connects to the Postgres database using the provided credentials
 // It uses the gorm library to establish the connection
 func (db) ConnectPostgres(host string, user string, password string, dbname string, port string) {
 	var err error
-	logger.Lava("Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
-	logger.LavaStart()
+	v := logger.Lava(1, "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
+	v.LavaStart()
 	dsn := "host=" + host +
 		" user=" + user +
 		" password=" + password +
@@ -302,7 +302,7 @@ func (db) ConnectPostgres(host string, user string, password string, dbname stri
 		" port=" + port +
 		" sslmode=disable"
 
-	logger.LavaEnd()
+	v.LavaEnd()
 	logger.Info("Connecting to database: ", dsn)
 	DB.Gorm().db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -332,7 +332,7 @@ func (db) ConnectSQLite(dbname string) {
 // ConnectMongoDBEnv connects to the MongoDB database using environment variables
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
-	logger.Lava("Refactor getting MongoDB connection string to be here")
+	logger.Lava(1, "Refactor getting MongoDB connection string to be here")
 	DB.ConnectMongoDB(DB.connectionString)
 }
 
@@ -350,7 +350,7 @@ func (db) ConnectMongoDB(conectionString string) {
 		logger.Fatal(err)
 	}
 
-	logger.Lava("Clean up this code")
+	logger.Lava(1, "Clean up this code")
 	// Call Ping to verify that the deployment is up and the Client was
 	// configured successfully. As mentioned in the Ping documentation, this
 	// reduces application resiliency as the server may be temporarily

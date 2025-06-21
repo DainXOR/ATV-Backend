@@ -527,15 +527,38 @@ func DeprecateMsg(deprecatedVersion uint, removalVersion uint, v ...any) string 
 	return err.Error()
 }
 
-func Lava(v ...any) {
-	Warning("LAVA: Running code that should be removed, cleaned up or refactored.\n", v)
-	return
+type volcano struct {
+	version uint
 }
-func LavaStart() {
-	Warning("Start of lava")
-	return
+
+func Lava(version uint, v ...any) volcano {
+	if AppVersion() == version {
+		Warning("LAVA: Running code that should be removed, cleaned up or refactored.\n", v)
+	} else if AppVersion() >= version+2 {
+		Warning("COLD LAVA: This code must be refactored.\n", v)
+	} else if AppVersion() > version+4 {
+		Error("DRIED LAVA: This code should not be running as is, it is likely a bug.\n", v)
+	}
+
+	return volcano{
+		version: version,
+	}
 }
-func LavaEnd() {
-	Warning("End of lava")
-	return
+func (v *volcano) LavaStart() {
+	if AppVersion() == v.version {
+		Warning("LAVA: Start of flow")
+	} else if AppVersion() >= v.version+2 {
+		Warning("COLD LAVA: Start of flow")
+	} else if AppVersion() > v.version+4 {
+		Error("DRIED LAVA: Start of lava cast")
+	}
+}
+func (v *volcano) LavaEnd() {
+	if AppVersion() == v.version {
+		Warning("LAVA: End of flow")
+	} else if AppVersion() >= v.version+2 {
+		Warning("COLD LAVA: End of flow")
+	} else if AppVersion() > v.version+4 {
+		Error("DRIED LAVA: End of lava cast")
+	}
 }
