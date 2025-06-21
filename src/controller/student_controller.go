@@ -25,12 +25,12 @@ func (studentType) GetByIDGorm(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
 	user := result.Value()
-	c.JSON(types.Http.C200().Ok().AsInt(),
+	c.JSON(types.Http.C200().Ok(),
 		models.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
@@ -47,7 +47,7 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (studentType) GetAllGorm(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (studentType) GetAllMongo(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
@@ -147,7 +147,7 @@ func (studentType) CreateGorm(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
@@ -187,7 +187,7 @@ func (studentType) CreateMongo(c *gin.Context) {
 		logger.Error("Failed to create student in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
-		c.JSON(httpErr.Code.AsInt(), err)
+		c.JSON(httpErr.Code, err)
 		return
 	}
 
@@ -229,7 +229,7 @@ func (studentType) Update(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 
@@ -271,7 +271,7 @@ func (studentType) Patch(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code.AsInt(), err)
+		c.JSON(cerror.Code, err)
 		return
 	}
 

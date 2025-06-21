@@ -2,11 +2,10 @@ package types
 
 import (
 	"dainxor/atv/logger"
-	"fmt"
 	"net/http"
 )
 
-type HttpCode int
+type HttpCode = int
 type internalHttpCode struct{}
 
 type _200 struct{}
@@ -16,18 +15,12 @@ type _500 struct{}
 
 var Http internalHttpCode
 
-func (c HttpCode) AsInt() int {
-	return int(c)
-}
-func (c HttpCode) AsString() string {
+func (internalHttpCode) Name(c HttpCode) string {
 	if c == 407 {
 		return "Proxy Authentication Required"
 	}
 
-	return fmt.Sprint(c.AsInt())
-}
-func (c HttpCode) Name() string {
-	return http.StatusText(c.AsInt())
+	return http.StatusText(c)
 }
 
 func (internalHttpCode) C200() _200 {

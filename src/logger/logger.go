@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-type logLevel int
+type logLevel = int
 
 const (
 	LEVEL_DEBUG   logLevel = 1 << iota // 0b00001
