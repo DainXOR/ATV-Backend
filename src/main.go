@@ -1,13 +1,13 @@
 package main
 
 import (
-	"cmp"
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
 	"dainxor/atv/routes"
 	"strconv"
 
+	"cmp"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +55,7 @@ func main() {
 	routes.TestRoutes(router)                      // Routes for testing purposes
 
 	// Versioned API routes
-	routes.UserRoutes(router) // Routes for user management
+	routes.StudentRoutes(router) // Routes for user management
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

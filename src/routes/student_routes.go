@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(router *gin.Engine) {
+func StudentRoutes(router *gin.Engine) {
 	// Grouping the user routes under "api/v0/user"
 	// This allows for better organization and versioning of the API
 	// Grouping can also be done inside other groups
