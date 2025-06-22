@@ -200,9 +200,9 @@ func (studentType) CreateMongo(c *gin.Context) {
 	)
 }
 
-// Update updates an existing user in the database
+// UpdateGorm updates an existing user in the database
 // This will override zeroed fields
-func (studentType) Update(c *gin.Context) {
+func (studentType) UpdateGorm(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -241,10 +241,48 @@ func (studentType) Update(c *gin.Context) {
 		),
 	)
 }
+func (studentType) UpdateMongo(c *gin.Context) {
+	var body models.StudentCreate
 
-// Patch updates an existing user in the database
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to update student: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(http.StatusBadRequest,
+			types.Error(
+				types.Http.BadRequest(),
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	logger.Debug("Updating student by ID: ", id)
+
+	result := db.Student.UpdateMongo(id, body)
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code, err)
+		return
+	}
+
+	user := result.Value()
+	c.JSON(http.StatusOK,
+		types.Response(
+			user.ToResponse(),
+			"",
+		),
+	)
+}
+
+// PatchGorm updates an existing user in the database
 // This will keep previous value in zeroed fields
-func (studentType) Patch(c *gin.Context) {
+func (studentType) PatchGorm(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -280,6 +318,67 @@ func (studentType) Patch(c *gin.Context) {
 		types.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
+}
+func (studentType) PatchMongo(c *gin.Context) {
+	var body models.StudentCreate
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to patch student: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(http.StatusBadRequest,
+			types.Error(
+				types.Http.BadRequest(),
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	logger.Debug("Patching student by ID: ", id)
+
+	result := db.Student.PatchMongo(id, body)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code, err)
+		return
+	}
+
+	user := result.Value()
+	c.JSON(http.StatusOK,
+		types.Response(
+			user.ToResponse(),
+			"",
+		),
+	)
+}
+
+// Delete deletes a student by ID
+func (studentType) Delete(c *gin.Context) {
+	id := c.Param("id")
+	logger.Debug("Deleting student by ID: ", id)
+
+	result := db.Student.DeleteByID(id)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code, err)
+		return
+	}
+
+	c.JSON(http.StatusOK,
+		types.Response(
+			nil,
+			"Student deleted successfully",
 		),
 	)
 }

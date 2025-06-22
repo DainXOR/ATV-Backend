@@ -6,6 +6,7 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -244,6 +245,124 @@ func (studentType) PatchMongo(id string, student models.StudentCreate) types.Res
 	}
 
 	return Student.GetByIDMongo(id)
+}
+
+func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		logger.Error("Failed to convert ID to ObjectID: ", err)
+		httpErr := types.Error(
+			types.Http.UnprocessableEntity(),
+			"Invalid value",
+			"Invalid ID format: "+err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "deleted_at", Value: time.Now()}}}}
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
+	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
+	if err != nil {
+		logger.Error("Failed to delete student in MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to delete student",
+			err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	if result.MatchedCount == 0 {
+		httpErr := types.ErrorNotFound(
+			"Student not found",
+			"Student with ID "+id+" not found",
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	var deletedStudent models.StudentDBMongoReceiver
+	err = configs.DB.Mongo().FindOne(filter, &deletedStudent)
+	if err != nil {
+		logger.Error("Failed to retrieve deleted student: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to retrieve deleted student",
+			err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	logger.Lava(1, "Change dates from time.Time to primitive.DateTime")
+	deletedStudent.DeletedAt = new(time.Time) // primitive.NewDateTimeFromTime(configs.DB.Mongo().Now())
+	*(deletedStudent.DeletedAt) = time.Now()
+	return types.ResultOk(deletedStudent.ToDB())
+}
+func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBMongo] {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		logger.Error("Failed to convert ID to ObjectID: ", err)
+		httpErr := types.Error(
+			types.Http.UnprocessableEntity(),
+			"Invalid value",
+			"Invalid ID format: "+err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	filter := bson.D{{Key: "_id", Value: oid}}
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
+	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).DeleteOne(ctx, filter)
+	if err != nil {
+		logger.Error("Failed to permanently delete student in MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to permanently delete student",
+			err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	if result.DeletedCount == 0 {
+		httpErr := types.ErrorNotFound(
+			"Student not found",
+			"Student with ID "+id+" not found",
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	return types.ResultOk(models.StudentDBMongo{})
+}
+func (studentType) DeletePermanentAll() types.Result[[]models.StudentDBMongo] {
+	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}
+	ctx, cancel := configs.DB.Mongo().Context()
+	defer cancel()
+
+	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).DeleteMany(ctx, filter)
+	if err != nil {
+		logger.Error("Failed to permanently delete all students in MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to permanently delete all students",
+			err.Error(),
+		)
+		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
+	}
+
+	if result.DeletedCount == 0 {
+		httpErr := types.ErrorNotFound(
+			"No deleted students found",
+			"No students marked as deleted found",
+		)
+		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
+	}
+
+	return types.ResultOk([]models.StudentDBMongo{})
 }
 
 // GORM

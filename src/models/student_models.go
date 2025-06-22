@@ -224,3 +224,9 @@ func (StudentDBMongo) TableName() string {
 func (StudentDBMongoReceiver) TableName() string {
 	return StudentDBMongo{}.TableName()
 }
+
+// Explicitly checking if the structs implement the DBModelInterface
+// This will error in compile time if the structs do not implement the interface
+var _ DBModelInterface = (*StudentDBMongo)(nil)
+var _ DBModelInterface = (*UserDBGorm)(nil)
+var _ DBModelInterface = (*StudentDBMongoReceiver)(nil)

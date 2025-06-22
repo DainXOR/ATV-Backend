@@ -23,5 +23,12 @@ func UserRoutes(router *gin.Engine) {
 		userRouter.GET("/all", controller.Student.GetAllMongo)
 
 		userRouter.POST("/", controller.Student.CreateMongo)
+
+		//userRouter.PUT("/:id", controller.Student.UpdateMongo)
+
+		//userRouter.PATCH("/:id", controller.Student.PatchMongo)
+
+		//userRouter.DELETE("/:id", controller.Student.Delete)
+
 	}
 }
