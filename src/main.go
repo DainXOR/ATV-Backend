@@ -5,7 +5,6 @@ import (
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
-	"dainxor/atv/models"
 	"dainxor/atv/routes"
 	"strconv"
 
@@ -31,7 +30,7 @@ func init() {
 	logger.SetAppVersion(programVersion)
 
 	configs.DB.EnvInit()
-	configs.DB.Migrate(&models.UserDBGorm{})
+	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")
 

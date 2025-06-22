@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"dainxor/atv/logger"
+	"dainxor/atv/models"
 	"dainxor/atv/utils"
 	"time"
 
@@ -83,15 +84,10 @@ func (mongoType) DB() *mongo.Database {
 func (mongoType) In(name string) *mongo.Collection {
 	return DB.Mongo().DB().Collection(name)
 }
-func (mongoType) From(v any) *mongo.Collection {
+func (mongoType) From(v models.DBModelInterface) *mongo.Collection {
 	// Use reflection to get the collection name from the struct
-	if v, ok := v.(interface{ TableName() string }); ok {
-		collectionName := v.TableName()
-		return DB.Mongo().In(collectionName)
-	} else {
-		logger.Error("Provided type does not implement TableName() method")
-		return nil
-	}
+	collectionName := v.TableName()
+	return DB.Mongo().In(collectionName)
 }
 func (mongoType) Context() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 2*time.Second)
@@ -104,25 +100,30 @@ func (mongoType) Disconnect() {
 	}
 }
 
-func (mongoType) FindOne(filter any, result any) error {
+func (mongoType) FindOne(filter any, result models.DBModelInterface) error {
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
 	return DB.Mongo().From(result).FindOne(ctx, filter).Decode(result)
 }
 func (mongoType) FindAll(filter any, result any) error {
+	logger.Lava(1, "This mf should be refactored to use models.DBModelInterface instead of any in the result")
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
-	eType, err := utils.SliceElemInstance(result)
+	eType, err := utils.SliceType(result)
 	if err != nil {
-		logger.Error("Failed to get slice element type: ", err)
-		return err
+		logger.Fatal("This function ONLY works with slices or pointers to slices")
 	}
 
-	cursor, err := DB.Mongo().From(eType).Find(ctx, filter)
+	iType, ok := eType.(interface{ TableName() string })
+	if !ok {
+		logger.Fatal("Result type does NOT IMPLEMENT TableName method")
+	}
+
+	cursor, err := DB.Mongo().From(iType).Find(ctx, filter)
 	if err != nil {
-		logger.Error("Failed to find documents: ", err)
+		logger.Error("Failed to find documents:", err)
 		return err
 	}
 	defer cursor.Close(ctx)
@@ -130,20 +131,20 @@ func (mongoType) FindAll(filter any, result any) error {
 	return cursor.All(ctx, result)
 }
 
-func (mongoType) InsertOne(document any) (*mongo.InsertOneResult, error) {
+func (mongoType) InsertOne(document models.DBModelInterface) (*mongo.InsertOneResult, error) {
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
 	return DB.Mongo().From(document).InsertOne(ctx, document)
 }
 
-func (mongoType) PatchOne(filter any, update any, result any) error {
+func (mongoType) PatchOne(filter any, update any, result models.DBModelInterface) error {
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
 	updateResult, err := DB.Mongo().From(result).UpdateOne(ctx, filter, update)
 	if err != nil {
-		logger.Error("Failed to update document: ", err)
+		logger.Error("Failed to update document:", err)
 		return err
 	}
 	if updateResult.MatchedCount == 0 {

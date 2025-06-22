@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -423,9 +422,14 @@ func writeToFile(logger *log.Logger, prefix string, v ...any) bool {
 	}
 	defer file.Close()
 
+	stringValues := utils.AsStrings(v)
+	stringValues = utils.Podate(stringValues, "[ ]")
+	trimmedArgs := strings.Join(stringValues, " ")
+	trimmedArgs = strings.Trim(trimmedArgs, "[]")
+
 	originalOutput := logger.Writer()
 	logger.SetOutput(file)
-	logger.Println(prefix, v)
+	logger.Println(prefix, trimmedArgs)
 	logger.SetOutput(originalOutput)
 	return true
 }
@@ -439,20 +443,13 @@ func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 	registerLogAttempt(forceNoFileWrite)
 
 	orignalPrefix := logger.Prefix()
-	extraPrefix := ""
-	_, file, line, ok := runtime.Caller(3)
-	if ok {
-		splitPath := strings.Split(file, "/")
-		file = splitPath[len(splitPath)-1] // Get the last part of the path
-		extraPrefix = fmt.Sprintf("%s:%d: ", file, line)
-	} else {
-		extraPrefix = "UnknownFile:0: "
-	}
+	extraPrefix := utils.CallOrigin(4)
+	extraPrefix += ":"
 
-	trimmedArgs := strings.Trim(fmt.Sprint(v...), "[]")
-
-	argsAsStrings := utils.Map(v, func(e any) string { return fmt.Sprint(e) })
-	strings.Join(argsAsStrings, " ") // Join the arguments into a single string
+	stringValues := utils.AsStrings(v)
+	stringValues = utils.Podate(stringValues, "[ ]")
+	trimmedArgs := strings.Join(stringValues, " ")
+	trimmedArgs = strings.Trim(trimmedArgs, "[]")
 
 	if LogsToConsole() {
 		logger.Println(extraPrefix, trimmedArgs)
@@ -486,7 +483,7 @@ func logError(forceNoFileWrite bool, v ...any) {
 }
 func logFatal(forceNoFileWrite bool, v ...any) {
 	logWith(get().FatalLogger, forceNoFileWrite, v...)
-	os.Exit(1)
+	panic(fmt.Sprint(v...))
 }
 
 // Public functions for logging at different levels
@@ -507,18 +504,21 @@ func Fatal(v ...any) {
 }
 
 func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, error) {
+	args := utils.Join(v, " ")
+
 	if AppVersion() >= removalVersion {
-		Error("DEPRECATED: This feature has been removed in version ", removalVersion, ".\n", v)
-		return false, fmt.Errorf("feature removed in version %d\n %s", removalVersion, v)
+		Error("DEPRECATED: This feature has been removed in version ", removalVersion)
+		Error("REASON: ", args)
+		return false, fmt.Errorf("feature removed in version %d. %s", removalVersion, args)
 	}
 	if AppVersion() > deprecatedVersion && AppVersion() < removalVersion {
 		Warning("DEPRECATED: This feature will be removed in version ", removalVersion)
-		Warning("REASON: ", v)
-		return false, fmt.Errorf("feature deprecated in version %d, will be removed in version %d\n %s", deprecatedVersion, removalVersion, v)
+		Warning("REASON: ", args)
+		return false, fmt.Errorf("feature deprecated in version %d, will be removed in version %d. %s", deprecatedVersion, removalVersion, args)
 	} else if AppVersion() == deprecatedVersion {
-		Warning("DEPRECATED: This feature will be removed in future versions.")
-		Warning("REASON: ", v)
-		return true, fmt.Errorf("feature deprecated in version %d\n %s", deprecatedVersion, v)
+		Warning("DEPRECATED: This feature will be removed in future versions")
+		Warning("REASON: ", args)
+		return true, fmt.Errorf("feature deprecated in version %d. %s", deprecatedVersion, args)
 	}
 	return true, nil
 }
@@ -532,12 +532,14 @@ type volcano struct {
 }
 
 func Lava(version uint, v ...any) volcano {
+	args := utils.Join(v, " ")
+
 	if AppVersion() == version {
-		Warning("LAVA: Running code that should be removed, cleaned up or refactored.\n", v)
+		Warning("LAVA: Running code that should be removed, cleaned up or refactored. ", args)
 	} else if AppVersion() >= version+2 {
-		Warning("COLD LAVA: This code must be refactored.\n", v)
+		Warning("COLD LAVA: This code must be refactored. ", args)
 	} else if AppVersion() > version+4 {
-		Error("DRIED LAVA: This code should not be running as is, it is likely a bug.\n", v)
+		Error("DRIED LAVA: This code should not be running as is, it is likely a bug. ", args)
 	}
 
 	return volcano{

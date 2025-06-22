@@ -67,7 +67,9 @@ func (StudentDBMongo) Receiver() StudentDBMongoReceiver {
 	return StudentDBMongoReceiver{}
 }
 func (StudentDBMongo) ReceiverList() []StudentDBMongoReceiver {
-	return make([]StudentDBMongoReceiver, 1)
+	s := make([]StudentDBMongoReceiver, 1)
+	s[0] = StudentDBMongo{}.Receiver()
+	return s
 }
 
 // StudentCreate represents the request body for creating a new user or updating an existing user

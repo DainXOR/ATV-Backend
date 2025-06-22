@@ -60,7 +60,7 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 
 // Function to create an instance of the element type of a slice
 // It returns a pointer to the new instance or an error if the input is not a slice or pointer to slice
-func SliceElemInstance(slice any) (any, error) {
+func SliceType(slice any) (any, error) {
 	if slice == nil {
 		return nil, fmt.Errorf("Input is nil, expected a slice or pointer to slice")
 	}
@@ -84,4 +84,6 @@ func SliceElemInstance(slice any) (any, error) {
 	}
 
 	return instance.Interface(), nil
+	//var s S
+	//return s
 }

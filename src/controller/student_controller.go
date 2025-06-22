@@ -31,7 +31,7 @@ func (studentType) GetByIDGorm(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(types.Http.C200().Ok(),
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
@@ -53,7 +53,7 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(http.StatusOK,
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			"",
 		),
@@ -83,7 +83,7 @@ func (studentType) GetAllGorm(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK,
-		models.Response(
+		types.Response(
 			users,
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
 		),
@@ -112,7 +112,7 @@ func (studentType) GetAllMongo(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK,
-		models.Response(
+		types.Response(
 			students,
 			"",
 		),
@@ -153,7 +153,7 @@ func (studentType) CreateGorm(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(http.StatusCreated,
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
 		),
@@ -193,7 +193,7 @@ func (studentType) CreateMongo(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(http.StatusCreated,
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			"",
 		),
@@ -235,7 +235,7 @@ func (studentType) Update(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(http.StatusOK,
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
@@ -277,7 +277,7 @@ func (studentType) Patch(c *gin.Context) {
 
 	user := result.Value()
 	c.JSON(http.StatusOK,
-		models.Response(
+		types.Response(
 			user.ToResponse(),
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),

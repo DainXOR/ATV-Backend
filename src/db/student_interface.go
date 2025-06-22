@@ -148,7 +148,7 @@ func (studentType) GetAllMongo() types.Result[[]models.StudentDBMongo] {
 
 	err := configs.DB.Mongo().FindAll(filter, &usersR)
 	if err != nil {
-		logger.Error("Failed to get all students from MongoDB: ", err)
+		logger.Error("Failed to get all students from MongoDB:", err)
 		httpErr := types.ErrorInternal(
 			"Failed to retrieve students",
 			err.Error(),
@@ -158,7 +158,7 @@ func (studentType) GetAllMongo() types.Result[[]models.StudentDBMongo] {
 	}
 
 	users := utils.Map(usersR, models.StudentDBMongoReceiver.ToDB)
-	logger.Debug("Retrieved ", len(users), " users from MongoDB database")
+	logger.Debug("Retrieved", len(users), "users from MongoDB database")
 	return types.ResultOk(users)
 }
 
@@ -207,7 +207,7 @@ func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Resul
 func (studentType) PatchMongo(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID: ", err)
+		logger.Error("Failed to convert ID to ObjectID:", err)
 		httpErr := types.Error(
 			types.Http.UnprocessableEntity(),
 			"Invalid value",
@@ -226,7 +226,7 @@ func (studentType) PatchMongo(id string, student models.StudentCreate) types.Res
 	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
 
 	if err != nil {
-		logger.Error("Failed to update student in MongoDB: ", err)
+		logger.Error("Failed to update student in MongoDB:", err)
 		httpErr := types.ErrorInternal(
 			"Failed to update student",
 			err.Error(),
