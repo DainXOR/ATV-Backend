@@ -31,7 +31,7 @@ func Error(code HttpCode, information ...string) HttpError {
 }
 
 func (m *HttpError) Error() string {
-	return fmt.Sprintf("%s (%s): %s - %s", m.Code.Name(), m.Code.AsString(), m.Err, m.Detail)
+	return fmt.Sprintf("%s (%d): %s - %s", Http.Name(m.Code), m.Code, m.Err, m.Detail)
 }
 
 func ErrorNotFound(information ...string) HttpError {
