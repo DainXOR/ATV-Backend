@@ -1,12 +1,20 @@
 package types
 
-type Response[M, E any] struct {
-	Code  int  `json:"code"`
-	Extra bool `json:"extra"`
-	Data  M    `json:"data"`
-	Other E    `json:"other"`
+type JSONResponse struct {
+	Data    any    `json:"data"`
+	Message string `json:"message"`
+	Extra   any    `json:"extra,omitempty"`
 }
 
-type SimpleResponse[Model any] struct {
-	Response[Model, any]
+func Response(data any, message string, extra ...any) JSONResponse {
+	response := JSONResponse{
+		Data:    data,
+		Message: message,
+	}
+
+	if len(extra) > 0 {
+		response.Extra = extra
+	}
+
+	return response
 }

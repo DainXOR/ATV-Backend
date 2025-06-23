@@ -2,78 +2,75 @@ package types
 
 import (
 	"dainxor/atv/logger"
-	"fmt"
 	"net/http"
 )
 
-type HttpCode int
-type httpCode struct{}
+type HttpCode = int
+type internalHttpCode struct{}
 
 type _200 struct{}
 type _300 struct{}
 type _400 struct{}
 type _500 struct{}
 
-var Http httpCode
+var Http internalHttpCode
 
-func (c HttpCode) AsInt() int {
-	return int(c)
-}
-func (c HttpCode) AsString() string {
-	return fmt.Sprint(c.AsInt())
-}
-func (c HttpCode) Name() string {
-	return http.StatusText(c.AsInt())
+func (internalHttpCode) Name(c HttpCode) string {
+	if c == 407 {
+		return "Proxy Authentication Required"
+	}
+
+	return http.StatusText(c)
 }
 
-func (HttpCode) C200() _200 {
+func (internalHttpCode) C200() _200 {
 	return _200{}
 }
-func (HttpCode) C300() _300 {
+func (internalHttpCode) C300() _300 {
 	return _300{}
 }
-func (HttpCode) C400() _400 {
+func (internalHttpCode) C400() _400 {
 	return _400{}
 }
-func (HttpCode) C500() _500 {
+func (internalHttpCode) C500() _500 {
 	return _500{}
 }
 
 // 2xx Success
-func (httpCode) Ok() HttpCode {
-	logger.Warning("Using deprecated Ok() method, use C200().Ok() instead")
+func (internalHttpCode) Ok() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Ok() method, use C200().Ok() instead")
 	return http.StatusOK
 }
-func (httpCode) Created() HttpCode {
-	logger.Warning("Using deprecated Created() method, use C200().Created() instead")
+func (internalHttpCode) Created() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Created() method, use C200().Created() instead")
 	return http.StatusCreated
 }
-func (httpCode) Accepted() HttpCode {
-	logger.Warning("Using deprecated Accepted() method, use C200().Accepted() instead")
+func (internalHttpCode) Accepted() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Accepted() method, use C200().Accepted() instead")
 	return http.StatusAccepted
 }
-func (httpCode) NoContent() HttpCode {
-	logger.Warning("Using deprecated NoContent() method, use C200().NoContent() instead")
+func (internalHttpCode) NoContent() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NoContent() method, use C200().NoContent() instead")
 	return http.StatusNoContent
 }
-func (httpCode) ResetContent() HttpCode {
-	logger.Warning("Using deprecated ResetContent() method, use C200().ResetContent() instead")
+func (internalHttpCode) ResetContent() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated ResetContent() method, use C200().ResetContent() instead")
 	return http.StatusResetContent
 }
-func (httpCode) PartialContent() HttpCode {
-	logger.Warning("Using deprecated PartialContent() method, use C200().PartialContent() instead")
+func (internalHttpCode) PartialContent() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated PartialContent() method, use C200().PartialContent() instead")
 	return http.StatusPartialContent
 }
-func (httpCode) MultiStatus() HttpCode {
-	logger.Warning("Using deprecated MultiStatus() method, use C200().MultiStatus() instead")
+func (internalHttpCode) MultiStatus() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated MultiStatus() method, use C200().MultiStatus() instead")
 	return http.StatusMultiStatus
 }
-func (httpCode) AlreadyReported() HttpCode {
-	logger.Warning("Using deprecated AlreadyReported() method, use C200().AlreadyReported() instead")
+func (internalHttpCode) AlreadyReported() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated AlreadyReported() method, use C200().AlreadyReported() instead")
 	return http.StatusAlreadyReported
 }
-func (httpCode) IMUsed() HttpCode {
-	logger.Warning("Using deprecated IMUsed() method, use C200().IMUsed() instead")
+func (internalHttpCode) IMUsed() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated IMUsed() method, use C200().IMUsed() instead")
 	return http.StatusIMUsed
 }
 
@@ -107,36 +104,36 @@ func (_200) IMUsed() HttpCode {
 }
 
 // 3xx Redirection
-func (httpCode) MultipleChoices() HttpCode {
-	logger.Warning("Using deprecated MultipleChoices() method, use C300().MultipleChoices() instead")
+func (internalHttpCode) MultipleChoices() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated MultipleChoices() method, use C300().MultipleChoices() instead")
 	return http.StatusMultipleChoices
 }
-func (httpCode) MovedPermanently() HttpCode {
-	logger.Warning("Using deprecated MovedPermanently() method, use C300().MovedPermanently() instead")
+func (internalHttpCode) MovedPermanently() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated MovedPermanently() method, use C300().MovedPermanently() instead")
 	return http.StatusMovedPermanently
 }
-func (httpCode) Found() HttpCode {
-	logger.Warning("Using deprecated Found() method, use C300().Found() instead")
+func (internalHttpCode) Found() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Found() method, use C300().Found() instead")
 	return http.StatusFound
 }
-func (httpCode) SeeOther() HttpCode {
-	logger.Warning("Using deprecated SeeOther() method, use C300().SeeOther() instead")
+func (internalHttpCode) SeeOther() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated SeeOther() method, use C300().SeeOther() instead")
 	return http.StatusSeeOther
 }
-func (httpCode) NotModified() HttpCode {
-	logger.Warning("Using deprecated NotModified() method, use C300().NotModified() instead")
+func (internalHttpCode) NotModified() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NotModified() method, use C300().NotModified() instead")
 	return http.StatusNotModified
 }
-func (httpCode) UseProxy() HttpCode {
-	logger.Warning("Using deprecated UseProxy() method, use C300().UseProxy() instead")
+func (internalHttpCode) UseProxy() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated UseProxy() method, use C300().UseProxy() instead")
 	return http.StatusUseProxy
 }
-func (httpCode) TemporaryRedirect() HttpCode {
-	logger.Warning("Using deprecated TemporaryRedirect() method, use C300().TemporaryRedirect() instead")
+func (internalHttpCode) TemporaryRedirect() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated TemporaryRedirect() method, use C300().TemporaryRedirect() instead")
 	return http.StatusTemporaryRedirect
 }
-func (httpCode) PermanentRedirect() HttpCode {
-	logger.Warning("Using deprecated PermanentRedirect() method, use C300().PermanentRedirect() instead")
+func (internalHttpCode) PermanentRedirect() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated PermanentRedirect() method, use C300().PermanentRedirect() instead")
 	return http.StatusPermanentRedirect
 }
 
@@ -167,112 +164,112 @@ func (_300) PermanentRedirect() HttpCode {
 }
 
 // 4xx Client Error
-func (httpCode) BadRequest() HttpCode {
-	logger.Warning("Using deprecated BadRequest() method, use C400().BadRequest() instead")
+func (internalHttpCode) BadRequest() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated BadRequest() method, use C400().BadRequest() instead")
 	return http.StatusBadRequest
 }
-func (httpCode) Unauthorized() HttpCode {
-	logger.Warning("Using deprecated Unauthorized() method, use C400().Unauthorized() instead")
+func (internalHttpCode) Unauthorized() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Unauthorized() method, use C400().Unauthorized() instead")
 	return http.StatusUnauthorized
 }
-func (httpCode) Forbidden() HttpCode {
-	logger.Warning("Using deprecated Forbidden() method, use C400().Forbidden() instead")
+func (internalHttpCode) Forbidden() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Forbidden() method, use C400().Forbidden() instead")
 	return http.StatusForbidden
 }
-func (httpCode) NotFound() HttpCode {
-	logger.Warning("Using deprecated NotFound() method, use C400().NotFound() instead")
+func (internalHttpCode) NotFound() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NotFound() method, use C400().NotFound() instead")
 	return http.StatusNotFound
 }
-func (httpCode) MethodNotAllowed() HttpCode {
-	logger.Warning("Using deprecated MethodNotAllowed() method, use C400().MethodNotAllowed() instead")
+func (internalHttpCode) MethodNotAllowed() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated MethodNotAllowed() method, use C400().MethodNotAllowed() instead")
 	return http.StatusMethodNotAllowed
 }
-func (httpCode) NotAcceptable() HttpCode {
-	logger.Warning("Using deprecated NotAcceptable() method, use C400().NotAcceptable() instead")
+func (internalHttpCode) NotAcceptable() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NotAcceptable() method, use C400().NotAcceptable() instead")
 	return http.StatusNotAcceptable
 }
-func (httpCode) ProxyAuthenticationRequired() HttpCode {
-	logger.Warning("Using deprecated ProxyAuthenticationRequired() method, use C400().ProxyAuthenticationRequired() instead")
+func (internalHttpCode) ProxyAuthenticationRequired() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated ProxyAuthenticationRequired() method, use C400().ProxyAuthenticationRequired() instead")
 	return 407
 }
-func (httpCode) RequestTimeout() HttpCode {
-	logger.Warning("Using deprecated RequestTimeout() method, use C400().RequestTimeout() instead")
+func (internalHttpCode) RequestTimeout() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated RequestTimeout() method, use C400().RequestTimeout() instead")
 	return http.StatusRequestTimeout
 }
-func (httpCode) Conflict() HttpCode {
-	logger.Warning("Using deprecated Conflict() method, use C400().Conflict() instead")
+func (internalHttpCode) Conflict() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Conflict() method, use C400().Conflict() instead")
 	return http.StatusConflict
 }
-func (httpCode) Gone() HttpCode {
-	logger.Warning("Using deprecated Gone() method, use C400().Gone() instead")
+func (internalHttpCode) Gone() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Gone() method, use C400().Gone() instead")
 	return http.StatusGone
 }
-func (httpCode) LengthRequired() HttpCode {
-	logger.Warning("Using deprecated LengthRequired() method, use C400().LengthRequired() instead")
+func (internalHttpCode) LengthRequired() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated LengthRequired() method, use C400().LengthRequired() instead")
 	return http.StatusLengthRequired
 }
-func (httpCode) PreconditionFailed() HttpCode {
-	logger.Warning("Using deprecated PreconditionFailed() method, use C400().PreconditionFailed() instead")
+func (internalHttpCode) PreconditionFailed() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated PreconditionFailed() method, use C400().PreconditionFailed() instead")
 	return http.StatusPreconditionFailed
 }
-func (httpCode) ContentTooLarge() HttpCode {
-	logger.Warning("Using deprecated ContentTooLarge() method, use C400().ContentTooLarge() instead")
+func (internalHttpCode) ContentTooLarge() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated ContentTooLarge() method, use C400().ContentTooLarge() instead")
 	return http.StatusRequestEntityTooLarge
 }
-func (httpCode) RequestURITooLong() HttpCode {
-	logger.Warning("Using deprecated RequestURITooLong() method, use C400().RequestURITooLong() instead")
+func (internalHttpCode) RequestURITooLong() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated RequestURITooLong() method, use C400().RequestURITooLong() instead")
 	return http.StatusRequestURITooLong
 }
-func (httpCode) UnsupportedMediaType() HttpCode {
-	logger.Warning("Using deprecated UnsupportedMediaType() method, use C400().UnsupportedMediaType() instead")
+func (internalHttpCode) UnsupportedMediaType() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated UnsupportedMediaType() method, use C400().UnsupportedMediaType() instead")
 	return http.StatusUnsupportedMediaType
 }
-func (httpCode) RequestedRangeNotSatisfiable() HttpCode {
-	logger.Warning("Using deprecated RequestedRangeNotSatisfiable() method, use C400().RequestedRangeNotSatisfiable() instead")
+func (internalHttpCode) RequestedRangeNotSatisfiable() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated RequestedRangeNotSatisfiable() method, use C400().RequestedRangeNotSatisfiable() instead")
 	return http.StatusRequestedRangeNotSatisfiable
 }
-func (httpCode) ExpectationFailed() HttpCode {
-	logger.Warning("Using deprecated ExpectationFailed() method, use C400().ExpectationFailed() instead")
+func (internalHttpCode) ExpectationFailed() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated ExpectationFailed() method, use C400().ExpectationFailed() instead")
 	return http.StatusExpectationFailed
 }
-func (httpCode) Teapot() HttpCode {
-	logger.Warning("Using deprecated Teapot() method, use C400().Teapot() instead")
+func (internalHttpCode) Teapot() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Teapot() method, use C400().Teapot() instead")
 	return http.StatusTeapot
 }
-func (httpCode) MisdirectedRequest() HttpCode {
-	logger.Warning("Using deprecated MisdirectedRequest() method, use C400().MisdirectedRequest() instead")
+func (internalHttpCode) MisdirectedRequest() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated MisdirectedRequest() method, use C400().MisdirectedRequest() instead")
 	return http.StatusMisdirectedRequest
 }
-func (httpCode) UnprocessableEntity() HttpCode {
-	logger.Warning("Using deprecated UnprocessableEntity() method, use C400().UnprocessableEntity() instead")
+func (internalHttpCode) UnprocessableEntity() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated UnprocessableEntity() method, use C400().UnprocessableEntity() instead")
 	return http.StatusUnprocessableEntity
 }
-func (httpCode) Locked() HttpCode {
-	logger.Warning("Using deprecated Locked() method, use C400().Locked() instead")
+func (internalHttpCode) Locked() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated Locked() method, use C400().Locked() instead")
 	return http.StatusLocked
 }
-func (httpCode) FailedDependency() HttpCode {
-	logger.Warning("Using deprecated FailedDependency() method, use C400().FailedDependency() instead")
+func (internalHttpCode) FailedDependency() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated FailedDependency() method, use C400().FailedDependency() instead")
 	return http.StatusFailedDependency
 }
-func (httpCode) UpgradeRequired() HttpCode {
-	logger.Warning("Using deprecated UpgradeRequired() method, use C400().UpgradeRequired() instead")
+func (internalHttpCode) UpgradeRequired() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated UpgradeRequired() method, use C400().UpgradeRequired() instead")
 	return http.StatusUpgradeRequired
 }
-func (httpCode) PreconditionRequired() HttpCode {
-	logger.Warning("Using deprecated PreconditionRequired() method, use C400().PreconditionRequired() instead")
+func (internalHttpCode) PreconditionRequired() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated PreconditionRequired() method, use C400().PreconditionRequired() instead")
 	return http.StatusPreconditionRequired
 }
-func (httpCode) TooManyRequests() HttpCode {
-	logger.Warning("Using deprecated TooManyRequests() method, use C400().TooManyRequests() instead")
+func (internalHttpCode) TooManyRequests() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated TooManyRequests() method, use C400().TooManyRequests() instead")
 	return http.StatusTooManyRequests
 }
-func (httpCode) RequestHeaderFieldsTooLarge() HttpCode {
-	logger.Warning("Using deprecated RequestHeaderFieldsTooLarge() method, use C400().RequestHeaderFieldsTooLarge() instead")
+func (internalHttpCode) RequestHeaderFieldsTooLarge() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated RequestHeaderFieldsTooLarge() method, use C400().RequestHeaderFieldsTooLarge() instead")
 	return http.StatusRequestHeaderFieldsTooLarge
 }
-func (httpCode) UnavailableForLegalReasons() HttpCode {
-	logger.Warning("Using deprecated UnavailableForLegalReasons() method, use C400().UnavailableForLegalReasons() instead")
+func (internalHttpCode) UnavailableForLegalReasons() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated UnavailableForLegalReasons() method, use C400().UnavailableForLegalReasons() instead")
 	return http.StatusUnavailableForLegalReasons
 }
 
@@ -360,48 +357,48 @@ func (_400) UnavailableForLegalReasons() HttpCode {
 }
 
 // 5xx Server Error
-func (httpCode) InternalServerError() HttpCode {
-	logger.Warning("Using deprecated InternalServerError() method, use C500().InternalServerError() instead")
+func (internalHttpCode) InternalServerError() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated InternalServerError() method, use C500().InternalServerError() instead")
 	return http.StatusInternalServerError
 }
-func (httpCode) NotImplemented() HttpCode {
-	logger.Warning("Using deprecated NotImplemented() method, use C500().NotImplemented() instead")
+func (internalHttpCode) NotImplemented() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NotImplemented() method, use C500().NotImplemented() instead")
 	return http.StatusNotImplemented
 }
-func (httpCode) BadGateway() HttpCode {
-	logger.Warning("Using deprecated BadGateway() method, use C500().BadGateway() instead")
+func (internalHttpCode) BadGateway() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated BadGateway() method, use C500().BadGateway() instead")
 	return http.StatusBadGateway
 }
-func (httpCode) ServiceUnavailable() HttpCode {
-	logger.Warning("Using deprecated ServiceUnavailable() method, use C500().ServiceUnavailable() instead")
+func (internalHttpCode) ServiceUnavailable() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated ServiceUnavailable() method, use C500().ServiceUnavailable() instead")
 	return http.StatusServiceUnavailable
 }
-func (httpCode) GatewayTimeout() HttpCode {
-	logger.Warning("Using deprecated GatewayTimeout() method, use C500().GatewayTimeout() instead")
+func (internalHttpCode) GatewayTimeout() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated GatewayTimeout() method, use C500().GatewayTimeout() instead")
 	return http.StatusGatewayTimeout
 }
-func (httpCode) HTTPVersionNotSupported() HttpCode {
-	logger.Warning("Using deprecated HTTPVersionNotSupported() method, use C500().HTTPVersionNotSupported() instead")
+func (internalHttpCode) HTTPVersionNotSupported() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated HTTPVersionNotSupported() method, use C500().HTTPVersionNotSupported() instead")
 	return http.StatusHTTPVersionNotSupported
 }
-func (httpCode) VariantAlsoNegotiates() HttpCode {
-	logger.Warning("Using deprecated VariantAlsoNegotiates() method, use C500().VariantAlsoNegotiates() instead")
+func (internalHttpCode) VariantAlsoNegotiates() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated VariantAlsoNegotiates() method, use C500().VariantAlsoNegotiates() instead")
 	return http.StatusVariantAlsoNegotiates
 }
-func (httpCode) InsufficientStorage() HttpCode {
-	logger.Warning("Using deprecated InsufficientStorage() method, use C500().InsufficientStorage() instead")
+func (internalHttpCode) InsufficientStorage() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated InsufficientStorage() method, use C500().InsufficientStorage() instead")
 	return http.StatusInsufficientStorage
 }
-func (httpCode) LoopDetected() HttpCode {
-	logger.Warning("Using deprecated LoopDetected() method, use C500().LoopDetected() instead")
+func (internalHttpCode) LoopDetected() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated LoopDetected() method, use C500().LoopDetected() instead")
 	return http.StatusLoopDetected
 }
-func (httpCode) NotExtended() HttpCode {
-	logger.Warning("Using deprecated NotExtended() method, use C500().NotExtended() instead")
+func (internalHttpCode) NotExtended() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NotExtended() method, use C500().NotExtended() instead")
 	return http.StatusNotExtended
 }
-func (httpCode) NetworkAuthenticationRequired() HttpCode {
-	logger.Warning("Using deprecated NetworkAuthenticationRequired() method, use C500().NetworkAuthenticationRequired() instead")
+func (internalHttpCode) NetworkAuthenticationRequired() HttpCode {
+	logger.Deprecate(1, 2, "Using deprecated NetworkAuthenticationRequired() method, use C500().NetworkAuthenticationRequired() instead")
 	return http.StatusNetworkAuthenticationRequired
 }
 
