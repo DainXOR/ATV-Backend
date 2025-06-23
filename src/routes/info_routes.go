@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,7 @@ func InfoRoutes(router *gin.Engine, routesVersion uint) {
 		})
 		infoRouter.GET("/api-version", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"version": "0.1.0",
+				"version": "0." + fmt.Sprint(routesVersion) + ".0",
 			})
 		})
 		infoRouter.GET("/route-version", func(c *gin.Context) {

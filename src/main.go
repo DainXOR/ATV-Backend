@@ -14,7 +14,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const DEFAULT_ROUTE_VERSION = 1 // Default version for the API routes
+const DEFAULT_ROUTE_VERSION = 2 // Default version for the API routes
 // Move this number so the deprecations are in sync with the API version
 
 func init() {

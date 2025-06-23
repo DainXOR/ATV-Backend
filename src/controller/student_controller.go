@@ -16,29 +16,14 @@ type studentType struct{}
 var Student studentType
 
 func (studentType) GetByIDGorm(c *gin.Context) {
-	logger.Debug("Using GORM")
-	id := c.Param("id")
-	logger.Debug("Getting user by ID: ", id)
-
-	result := db.Student.GetByIDGorm(id)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
-		return
-	}
-
-	user := result.Value()
-	c.JSON(types.Http.C200().Ok(),
-		types.Response(
-			user.ToResponse(),
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
 	)
 }
 func (studentType) GetByIDMongo(c *gin.Context) {
-	logger.Debug("Using MongoDB")
 	id := c.Param("id")
 	logger.Debug("Getting student by ID: ", id)
 
@@ -47,7 +32,12 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
 		return
 	}
 
@@ -61,57 +51,37 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 }
 
 func (studentType) GetAllGorm(c *gin.Context) {
-	logger.Debug("Using GORM")
-
-	result := db.Student.GetAllGorm()
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
-		return
-	}
-
-	users := utils.Map(result.Value(), models.UserDBGorm.ToResponse)
-	if len(users) == 0 {
-		logger.Warning("No users found in GORM database")
-		c.JSON(http.StatusNotFound, types.Error(
-			types.Http.NotFound(),
-			"No users found",
-			"No users found in the GORM database",
-		))
-		return
-	}
+	c.Header("Location", "/api/v1/student/all")
 	c.JSON(http.StatusOK,
-		types.Response(
-			users,
+		types.EmptyResponse(
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
 		),
 	)
 }
 func (studentType) GetAllMongo(c *gin.Context) {
-	logger.Debug("Using MongoDB")
-
 	result := db.Student.GetAllMongo()
 
 	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
+		err := result.Error().(*types.HttpError)
+		c.JSON(err.Code,
+			types.EmptyResponse(
+				err.Msg(),
+				err.Details(),
+			),
+		)
 		return
 	}
 
 	students := utils.Map(result.Value(), models.StudentDBMongo.ToResponse)
 	if len(students) == 0 {
 		logger.Warning("No students found in MongoDB database")
-		c.JSON(http.StatusNotFound, types.Error(
-			types.Http.NotFound(),
-			"No students found",
-			"No students found in the MongoDB database",
-		))
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No students found",
+			))
 		return
 	}
-	c.JSON(http.StatusOK,
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
 			students,
 			"",
@@ -120,47 +90,15 @@ func (studentType) GetAllMongo(c *gin.Context) {
 }
 
 func (studentType) CreateGorm(c *gin.Context) {
-	logger.Debug("Using GORM")
-	var body models.StudentCreate
+	c.Header("Location", "/api/v1/student")
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		expected := utils.StructToString(body)
-		logger.Error(err.Error())
-		logger.Error("Failed to create user: JSON request body is invalid")
-		logger.Error("Expected body: ", expected)
-
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
-				"Invalid request body",
-				"Expected body: "+expected,
-			),
-		)
-		return
-	}
-
-	logger.Debug("Creating user: ", body)
-	logger.Debug("Username: ", body.FirstName, body.LastName)
-
-	result := db.Student.CreateGorm(body)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
-		return
-	}
-
-	user := result.Value()
-	c.JSON(http.StatusCreated,
-		types.Response(
-			user.ToResponse(),
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
 		),
 	)
 }
 func (studentType) CreateMongo(c *gin.Context) {
-	logger.Debug("Using MongoDB")
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -169,9 +107,8 @@ func (studentType) CreateMongo(c *gin.Context) {
 		logger.Error("Failed to create student: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
 				"Invalid request body",
 				"Expected body: "+expected,
 			),
@@ -187,12 +124,17 @@ func (studentType) CreateMongo(c *gin.Context) {
 		logger.Error("Failed to create student in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
-		c.JSON(httpErr.Code, err)
+		c.JSON(httpErr.Code,
+			types.EmptyResponse(
+				httpErr.Msg(),
+				httpErr.Details(),
+			),
+		)
 		return
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusCreated,
+	c.JSON(types.Http.C200().Created(),
 		types.Response(
 			user.ToResponse(),
 			"",
@@ -203,40 +145,10 @@ func (studentType) CreateMongo(c *gin.Context) {
 // UpdateGorm updates an existing user in the database
 // This will override zeroed fields
 func (studentType) UpdateGorm(c *gin.Context) {
-	var body models.StudentCreate
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		expected := utils.StructToString(body)
-		logger.Error(err.Error())
-		logger.Error("Failed to update user: JSON request body is invalid")
-		logger.Error("Expected body: ", expected)
-
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
-				"Invalid request body",
-				"Expected body: "+expected,
-			),
-		)
-		return
-	}
-
-	id := c.Param("id")
-	logger.Debug("Updating user by ID: ", id)
-
-	result := db.Student.UpdateGorm(id, body)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
-		return
-	}
-
-	user := result.Value()
-	c.JSON(http.StatusOK,
-		types.Response(
-			user.ToResponse(),
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
 	)
@@ -250,9 +162,8 @@ func (studentType) UpdateMongo(c *gin.Context) {
 		logger.Error("Failed to update student: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
 				"Invalid request body",
 				"Expected body: "+expected,
 			),
@@ -283,40 +194,10 @@ func (studentType) UpdateMongo(c *gin.Context) {
 // PatchGorm updates an existing user in the database
 // This will keep previous value in zeroed fields
 func (studentType) PatchGorm(c *gin.Context) {
-	var body models.StudentCreate
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		expected := utils.StructToString(body)
-		logger.Error(err.Error())
-		logger.Error("Failed to update user: JSON request body is invalid")
-		logger.Error("Expected body: ", expected)
-
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
-				"Invalid request body",
-				"Expected body: "+expected,
-			),
-		)
-		return
-	}
-
-	id := c.Param("id")
-	logger.Debug("Patching user by ID: ", id)
-
-	result := db.Student.PatchGorm(id, body)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
-		return
-	}
-
-	user := result.Value()
-	c.JSON(http.StatusOK,
-		types.Response(
-			user.ToResponse(),
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
 			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
 	)
@@ -330,9 +211,8 @@ func (studentType) PatchMongo(c *gin.Context) {
 		logger.Error("Failed to patch student: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
-		c.JSON(http.StatusBadRequest,
-			types.Error(
-				types.Http.BadRequest(),
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
 				"Invalid request body",
 				"Expected body: "+expected,
 			),
@@ -348,12 +228,17 @@ func (studentType) PatchMongo(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
 		return
 	}
 
 	user := result.Value()
-	c.JSON(http.StatusOK,
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
 			user.ToResponse(),
 			"",
@@ -361,8 +246,8 @@ func (studentType) PatchMongo(c *gin.Context) {
 	)
 }
 
-// Delete deletes a student by ID
-func (studentType) Delete(c *gin.Context) {
+// DeleteByID deletes a student by ID
+func (studentType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Deleting student by ID: ", id)
 
@@ -371,14 +256,48 @@ func (studentType) Delete(c *gin.Context) {
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code, err)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
 		return
 	}
 
-	c.JSON(http.StatusOK,
+	data := result.Value().ToResponse()
+
+	c.JSON(types.Http.C200().Accepted(),
 		types.Response(
-			nil,
-			"Student deleted successfully",
+			data,
+			"Student marked for deletion",
+		),
+	)
+}
+func (studentType) ForceDeleteByID(c *gin.Context) {
+	id := c.Param("id")
+	logger.Debug("Force deleting student by ID: ", id)
+
+	result := db.Student.DeletePermanentByID(id)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
+		return
+	}
+
+	data := result.Value().ToResponse()
+
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			data,
+			"Student deleted permanently",
 		),
 	)
 }

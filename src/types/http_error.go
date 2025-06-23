@@ -34,6 +34,14 @@ func (m *HttpError) Error() string {
 	return fmt.Sprintf("%s (%d): %s - %s", Http.Name(m.Code), m.Code, m.Err, m.Detail)
 }
 
+func (m *HttpError) Msg() string {
+	return m.Err.Error()
+}
+
+func (m *HttpError) Details() string {
+	return m.Detail
+}
+
 func ErrorNotFound(information ...string) HttpError {
 	return Error(Http.NotFound(), information...)
 }

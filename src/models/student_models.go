@@ -9,8 +9,6 @@ import (
 
 	"slices"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"gorm.io/gorm"
 )
 
@@ -32,19 +30,19 @@ type UserDBGorm struct {
 	// JSON tags are used to specify the JSON key names for the fields inside de db and in JSON schema
 }
 type StudentDBMongo struct {
-	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	IDNumber         string             `json:"id_number,omitempty" bson:"id_number,omitempty"`
-	FirstName        string             `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string             `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	PersonalEmail    string             `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string             `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	ResidenceAddress string             `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
-	Semester         uint               `json:"semester,omitempty" bson:"semester,omitempty"`
-	UniversityID     string             `json:"id_university,omitempty" bson:"id_university,omitempty"`
-	PhoneNumber      string             `json:"phone_number" bson:"phone_number"`
-	CreatedAt        time.Time          `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt        time.Time          `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
-	DeletedAt        *time.Time         `json:"deleted_at" bson:"deleted_at"`
+	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+	IDNumber         string     `json:"id_number,omitempty" bson:"id_number,omitempty"`
+	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
+	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
+	PersonalEmail    string     `json:"email,omitempty" bson:"email,omitempty"`
+	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
+	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
+	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
+	IDUniversity     DBID       `json:"id_university,omitempty" bson:"id_university,omitempty"`
+	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
+	CreatedAt        time.Time  `json:"created_at,omitzero" bson:"created_at,omitzero"`
+	UpdatedAt        time.Time  `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	DeletedAt        *time.Time `json:"deleted_at" bson:"deleted_at"`
 }
 
 type StudentDBMongoReceiver struct {
@@ -56,7 +54,7 @@ type StudentDBMongoReceiver struct {
 	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
 	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
 	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
-	UniversityID     string     `json:"id_university,omitempty" bson:"id_university,omitempty"`
+	IDUniversity     any        `json:"id_university,omitempty" bson:"id_university,omitempty"`
 	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
 	CreatedAt        time.Time  `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt        time.Time  `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
@@ -82,7 +80,7 @@ type StudentCreate struct {
 	InstitutionEmail string `json:"institution_email" gorm:"unique;not null"`
 	ResidenceAddress string `json:"residence_address" gorm:"not null"`
 	Semester         uint   `json:"semester" gorm:"not null"`
-	UniversityID     string `json:"id_university" gorm:"not null"`
+	IDUniversity     string `json:"id_university" gorm:"not null"`
 	PhoneNumber      string `json:"phone_number"`
 }
 
@@ -98,7 +96,7 @@ type StudentResponse struct {
 	InstitutionEmail string    `json:"institution_email" gorm:"unique;not null"`
 	ResidenceAddress string    `json:"residence_address" gorm:"not null"`
 	Semester         uint      `json:"semester" gorm:"not null"`
-	UniversityID     string    `json:"id_university" gorm:"not null"`
+	IDUniversity     string    `json:"id_university" gorm:"not null"`
 	PhoneNumber      string    `json:"phone_number"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
@@ -115,7 +113,7 @@ func (user StudentCreate) ToDBGorm() UserDBGorm {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		UniversityID:     user.UniversityID,
+		UniversityID:     user.IDUniversity,
 		PhoneNumber:      user.PhoneNumber,
 	}
 }
@@ -123,6 +121,11 @@ func (user StudentCreate) ToDBGorm() UserDBGorm {
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
 func (user StudentCreate) ToDBMongo() StudentDBMongo {
+	IDU, err := IDFrom(user.IDUniversity)
+	if err != nil {
+		return StudentDBMongo{} // Return an empty struct if conversion fails
+	}
+
 	return StudentDBMongo{
 		IDNumber:         user.IDNumber,
 		FirstName:        user.FirstName,
@@ -131,7 +134,7 @@ func (user StudentCreate) ToDBMongo() StudentDBMongo {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		UniversityID:     user.UniversityID,
+		IDUniversity:     IDU,
 		PhoneNumber:      user.PhoneNumber,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
@@ -139,7 +142,8 @@ func (user StudentCreate) ToDBMongo() StudentDBMongo {
 	}
 }
 func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
-	id, _ := primitive.ObjectIDFromHex(user.ID.(bson.ObjectID).Hex())
+	id, _ := IDFrom(user.ID)
+	idu, _ := IDFrom(user.IDUniversity)
 
 	return StudentDBMongo{
 		ID:               id,
@@ -150,7 +154,7 @@ func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		UniversityID:     user.UniversityID,
+		IDUniversity:     idu,
 		PhoneNumber:      user.PhoneNumber,
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
@@ -190,7 +194,7 @@ func (user UserDBGorm) ToResponse() StudentResponse {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		UniversityID:     user.UniversityID,
+		IDUniversity:     user.UniversityID,
 		PhoneNumber:      user.PhoneNumber,
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
@@ -206,7 +210,7 @@ func (user StudentDBMongo) ToResponse() StudentResponse {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		UniversityID:     user.UniversityID,
+		IDUniversity:     user.IDUniversity.Hex(),
 		PhoneNumber:      user.PhoneNumber,
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
