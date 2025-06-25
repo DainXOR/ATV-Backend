@@ -19,7 +19,7 @@ var Student studentType
 
 // Mongo
 func (studentType) CreateMongo(user models.StudentCreate) types.Result[models.StudentDBMongo] {
-	userDB := user.ToDBMongo()
+	userDB := user.ToInsert()
 	result, err := configs.DB.Mongo().InsertOne(userDB)
 
 	if err != nil {
@@ -164,7 +164,7 @@ func (studentType) GetAllMongo() types.Result[[]models.StudentDBMongo] {
 }
 
 func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Result[models.StudentDBMongo] {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := models.BsonIDFrom(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
@@ -177,14 +177,14 @@ func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Resul
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: user.ToDBMongo()}}
+	update := bson.D{{Key: "$set", Value: user.ToUpdate()}}
+	studentDB := user.ToUpdate().Receiver()
 
-	ctx, cancel := configs.DB.Mongo().Context()
-	defer cancel()
+	result := configs.DB.Mongo().PatchOne(filter, update, studentDB)
+	// .From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
 
-	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
-
-	if err != nil {
+	if result.IsErr() {
+		err := result.Error()
 		logger.Error("Failed to update student in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
 			"Failed to update student",
@@ -194,10 +194,21 @@ func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Resul
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	if result.MatchedCount == 0 {
+	if result.Value().MatchedCount == 0 {
 		httpErr := types.ErrorNotFound(
 			"Student not found",
 			"Student with ID "+id+" not found",
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	if result.Value().ModifiedCount == 0 {
+		logger.Info("No changes made to student with ID: ", id)
+		logger.Lava(2, "Send a more proper code for no changes made")
+		httpErr := types.Error(
+			types.Http.C200().Accepted(),
+			"No changes made",
+			"Student with ID "+id+" was not modified",
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
@@ -206,9 +217,9 @@ func (studentType) UpdateMongo(id string, user models.StudentCreate) types.Resul
 }
 
 func (studentType) PatchMongo(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := models.BsonIDFrom(id)
 	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID:", err)
+		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
 			types.Http.UnprocessableEntity(),
 			"Invalid value",
@@ -217,17 +228,28 @@ func (studentType) PatchMongo(id string, student models.StudentCreate) types.Res
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
-	studentDB := student.ToDBMongo()
+
+	studentDB := student.ToUpdate()
+	if studentDB == (models.StudentDBMongo{}) {
+		logger.Error("Error converting student to DB model")
+		httpErr := types.Error(
+			types.Http.C400().UnprocessableEntity(),
+			"Invalid value",
+			"Invalid student data",
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
 	filter := bson.D{{Key: "_id", Value: oid}}
 	update := bson.D{{Key: "$set", Value: studentDB}}
+	receiver := studentDB.Receiver()
 
-	ctx, cancel := configs.DB.Mongo().Context()
-	defer cancel()
+	result := configs.DB.Mongo().PatchOne(filter, update, &receiver)
 
-	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
-
-	if err != nil {
-		logger.Error("Failed to update student in MongoDB:", err)
+	if result.IsErr() {
+		err := result.Error()
+		logger.Error("Failed to update student in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
 			"Failed to update student",
 			err.Error(),
@@ -236,7 +258,7 @@ func (studentType) PatchMongo(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	if result.MatchedCount == 0 {
+	if result.Value().MatchedCount == 0 {
 		httpErr := types.ErrorNotFound(
 			"Student not found",
 			"Student with ID "+id+" not found",
@@ -244,11 +266,22 @@ func (studentType) PatchMongo(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return Student.GetByIDMongo(id)
+	if result.Value().ModifiedCount == 0 {
+		logger.Info("No changes made to student with ID: ", id)
+		logger.Lava(2, "Send a more proper code for no changes made")
+		httpErr := types.Error(
+			types.Http.C200().Accepted(),
+			"No changes made",
+			"Student with ID "+id+" was not modified",
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
+	return types.ResultOk(receiver.ToDB())
 }
 
 func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
@@ -296,13 +329,11 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	logger.Lava(1, "Change dates from time.Time to primitive.DateTime")
-	deletedStudent.DeletedAt = new(time.Time) // primitive.NewDateTimeFromTime(configs.DB.Mongo().Now())
-	*(deletedStudent.DeletedAt) = time.Now()
+	deletedStudent.DeletedAt = models.TimeNow() // primitive.NewDateTimeFromTime(configs.DB.Mongo().Now())
 	return types.ResultOk(deletedStudent.ToDB())
 }
 func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBMongo] {
-	oid, err := primitive.ObjectIDFromHex(id)
+	oid, err := models.BsonIDFrom(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
@@ -314,13 +345,34 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBM
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter := bson.D{{Key: "_id", Value: oid}, {Key: "deleted_at", Value: bson.M{"$ne": time.Time{}}}} // Ensure the student is marked as deleted
 	ctx, cancel := configs.DB.Mongo().Context()
 	defer cancel()
 
+	var student models.StudentDBMongoReceiver
+	err = configs.DB.Mongo().FindOne(filter, &student)
+	if err != nil {
+		logger.Debug("Failed to find student for permanent deletion: ", err)
+
+		if err == mongo.ErrNoDocuments {
+			httpErr := types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+id+" not found or not marked as deleted",
+			)
+			return types.ResultErr[models.StudentDBMongo](&httpErr)
+		}
+
+		httpErr := types.ErrorInternal(
+			"Failed to find student for permanent deletion",
+			err.Error(),
+			"Student ID: "+id,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
 	result, err := configs.DB.Mongo().From(models.StudentDBMongo{}).DeleteOne(ctx, filter)
 	if err != nil {
-		logger.Error("Failed to permanently delete student in MongoDB: ", err)
+		logger.Debug("Failed to permanently delete student in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
 			"Failed to permanently delete student",
 			err.Error(),
@@ -331,13 +383,14 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBM
 
 	if result.DeletedCount == 0 {
 		httpErr := types.ErrorNotFound(
-			"Student not found",
-			"Student with ID "+id+" not found",
+			"Student not found.",
+			"Student with ID "+id+" not found.",
+			"Ensure the student is marked as deleted before permanent deletion.",
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(models.StudentDBMongo{})
+	return types.ResultOk(student.ToDB())
 }
 func (studentType) DeletePermanentAll() types.Result[[]models.StudentDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}
@@ -363,124 +416,4 @@ func (studentType) DeletePermanentAll() types.Result[[]models.StudentDBMongo] {
 	}
 
 	return types.ResultOk([]models.StudentDBMongo{})
-}
-
-// GORM
-func (studentType) CreateGorm(user models.StudentCreate) types.Result[models.UserDBGorm] {
-	//if User.GetUserByEmail(user.Email).IsOk() {
-	//	return types.ResultErr[models.UserDB](models.Error(
-	//		types.Http.Conflict(),
-	//		"conflict",
-	//		"Email is already in use",
-	//	))
-	//}
-
-	newUser := user.ToDBGorm()
-
-	if res := Student.GetByIDNumberGorm(newUser.IDNumber); res.IsOk() {
-		logger.Error("User with ID number already exists: ", newUser.IDNumber)
-		err := types.Error(
-			types.Http.Conflict(),
-			"User already exists",
-			"User with ID number "+newUser.IDNumber+" already exists",
-		)
-
-		return types.ResultErr[models.UserDBGorm](&err)
-	} else {
-		if res.Error().(*types.HttpError).Code == types.Http.NotFound() {
-			logger.Debug("Creating user")
-
-			configs.DB.Gorm().DB().Create(&newUser)
-
-			logger.Debug("User id: ", newUser.ID)
-
-			if newUser.ID == 0 {
-				err := types.ErrorInternal(
-					"Failed to create user",
-				)
-
-				return types.ResultErr[models.UserDBGorm](&err)
-			}
-
-			return types.ResultOk(newUser)
-		} else {
-			logger.Error("Failed to create user: ", res.Error())
-			return types.ResultErr[models.UserDBGorm](res.Error())
-		}
-	}
-}
-
-func (studentType) GetByIDGorm(id string) types.Result[models.UserDBGorm] {
-	var user models.UserDBGorm
-	configs.DB.Gorm().DB().First(&user, id)
-	if user.ID == 0 {
-		err := types.ErrorNotFound(
-			"User not found",
-			"User with ID "+id+" not found",
-		)
-		return types.ResultErr[models.UserDBGorm](&err)
-	}
-	return types.ResultOk(user)
-}
-func (studentType) GetByIDNumberGorm(idNumber string) types.Result[models.UserDBGorm] {
-	var user models.UserDBGorm
-	configs.DB.Gorm().DB().Where("id_number = ?", idNumber).First(&user)
-	if user.ID == 0 {
-		err := types.ErrorNotFound(
-			"User not found",
-			"User with ID number "+idNumber+" not found",
-		)
-		return types.ResultErr[models.UserDBGorm](&err)
-	}
-	return types.ResultOk(user)
-}
-func (studentType) GetAllGorm() types.Result[[]models.UserDBGorm] {
-	var users []models.UserDBGorm
-
-	configs.DB.Gorm().DB().Find(&users)
-
-	if len(users) == 0 {
-		err := types.ErrorNotFound(
-			"No users found",
-			"No users found in the database",
-		)
-		return types.ResultErr[[]models.UserDBGorm](&err)
-	}
-
-	logger.Debug("Retrieved ", len(users), " users from GORM database")
-	return types.ResultOk(users)
-}
-
-func (studentType) UpdateGorm(id string, user models.StudentCreate) types.Result[models.UserDBGorm] {
-	var userDB models.UserDBGorm
-	configs.DB.Gorm().DB().First(&userDB, id)
-
-	if userDB.ID == 0 {
-		err := types.ErrorNotFound(
-			"User not found",
-			"User with ID "+id+" not found",
-		)
-		return types.ResultErr[models.UserDBGorm](&err)
-	}
-
-	configs.DB.Gorm().DB().Model(&userDB).Updates(user.ToPutDBGorm())
-
-	return types.ResultOk(userDB)
-}
-
-func (studentType) PatchGorm(id string, user models.StudentCreate) types.Result[models.UserDBGorm] {
-	var userDB models.UserDBGorm
-	configs.DB.Gorm().DB().First(&userDB, id)
-
-	if userDB.ID == 0 {
-		err := types.ErrorNotFound(
-			"User not found",
-			"User with ID "+id+" not found",
-		)
-		return types.ResultErr[models.UserDBGorm](&err)
-	}
-
-	configs.DB.Gorm().DB().Model(&userDB).Updates(user.ToDBGorm())
-
-	return types.ResultOk(userDB)
 }

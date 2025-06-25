@@ -3,7 +3,6 @@ package main
 import (
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
-	"dainxor/atv/models"
 )
 
 func init() {
@@ -13,5 +12,5 @@ func init() {
 
 func main() {
 	//configs.DataBase.AutoMigrate(&models.UserDB{})
-	configs.DB.Migrate(&models.UserDBGorm{})
+	//configs.DB.Migrate(&models.UserDBGorm{})
 }
