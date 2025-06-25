@@ -6,11 +6,11 @@ type Optional[T any] struct {
 }
 
 func OptionalOf[T any](value T, condition ...bool) Optional[T] {
-
 	if len(condition) > 0 {
 		if condition[0] {
 			return Optional[T]{value: value, present: true}
 		}
+
 		return OptionalEmpty[T]()
 
 	} else {

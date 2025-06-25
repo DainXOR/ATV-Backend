@@ -5,6 +5,7 @@ import (
 	"context"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
+	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"time"
 
@@ -138,20 +139,19 @@ func (mongoType) InsertOne(document models.DBModelInterface) (*mongo.InsertOneRe
 	return DB.Mongo().From(document).InsertOne(ctx, document)
 }
 
-func (mongoType) PatchOne(filter any, update any, result models.DBModelInterface) error {
+func (mongoType) PatchOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
 	ctx, cancel := DB.Mongo().Context()
 	defer cancel()
 
 	updateResult, err := DB.Mongo().From(result).UpdateOne(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to update document:", err)
-		return err
+		return types.ResultErr[mongo.UpdateResult](err)
 	}
-	if updateResult.MatchedCount == 0 {
-		logger.Warning("No documents matched the filter for update")
-		return nil
-	}
-	return DB.Mongo().FindOne(filter, result)
+
+	err = DB.Mongo().FindOne(filter, result)
+
+	return types.ResultOf(*updateResult, err, err != nil)
 }
 
 // LoadDBConfig loads the database configuration from environment variables

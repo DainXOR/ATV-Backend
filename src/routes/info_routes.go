@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InfoRoutes(router *gin.Engine, routesVersion uint) {
+func InfoRoutes(router *gin.Engine, apiVersion string, routesVersion uint) {
 	routes := gin.H{
 		"info":               "/api/info/",
 		"info ping":          "/api/info/ping",
@@ -43,7 +43,7 @@ func InfoRoutes(router *gin.Engine, routesVersion uint) {
 		})
 		infoRouter.GET("/api-version", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"version": "0.1.0",
+				"version": apiVersion,
 			})
 		})
 		infoRouter.GET("/route-version", func(c *gin.Context) {
