@@ -45,9 +45,13 @@ func BsonIDFrom(id any) (bson.ObjectID, error) {
 		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
 	}
 }
+
+// If decide to change the time type, you can only change it here
 func TimeNow() DBDateTime {
 	return time.Now()
 }
+
+// If decide to change the time type, you can only change it here
 func TimeZero() DBDateTime {
 	return time.Time{}
 }

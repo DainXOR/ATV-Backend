@@ -19,7 +19,7 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting student by ID: ", id)
 
-	result := db.Student.GetByIDMongo(id)
+	result := db.Student.GetByID(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -42,7 +42,7 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 	)
 }
 func (studentType) GetAllMongo(c *gin.Context) {
-	result := db.Student.GetAllMongo()
+	result := db.Student.GetAll()
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -92,7 +92,7 @@ func (studentType) CreateMongo(c *gin.Context) {
 
 	logger.Debug("Creating student in MongoDB: ", body)
 
-	result := db.Student.CreateMongo(body)
+	result := db.Student.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create student in MongoDB: ", result.Error())
@@ -137,7 +137,7 @@ func (studentType) UpdateMongo(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Updating student by ID: ", id)
 
-	result := db.Student.UpdateMongo(id, body)
+	result := db.Student.UpdateByID(id, body)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -174,7 +174,7 @@ func (studentType) PatchMongo(c *gin.Context) {
 
 	id := c.Param("id")
 
-	result := db.Student.PatchMongo(id, body)
+	result := db.Student.PatchByID(id, body)
 
 	if result.IsErr() {
 		err := result.Error()

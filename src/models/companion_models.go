@@ -1,5 +1,7 @@
 package models
 
+import "dainxor/atv/logger"
+
 type CompanionDB struct {
 	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
@@ -61,6 +63,7 @@ type CompanionResponse struct {
 func (c CompanionCreate) ToDB() (CompanionDB, error) {
 	idSpeciality, err := PrimitiveIDFrom(c.IDSpeciality)
 	if err != nil {
+		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err)
 		return CompanionDB{}, err
 	}
 
@@ -76,8 +79,17 @@ func (c CompanionCreate) ToDB() (CompanionDB, error) {
 	}, nil
 }
 func (c CompanionDBReceiver) ToDB() (CompanionDB, error) {
-	idSpeciality, _ := PrimitiveIDFrom(c.IDSpeciality)
-	id, _ := PrimitiveIDFrom(c.ID)
+	idSpeciality, err1 := PrimitiveIDFrom(c.IDSpeciality)
+	id, err2 := PrimitiveIDFrom(c.ID)
+
+	if err1 != nil {
+		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err1)
+		return CompanionDB{}, err1
+
+	} else if err2 != nil {
+		logger.Warning("Failed to convert ID to PrimitiveID: ", err2)
+		return CompanionDB{}, err2
+	}
 
 	return CompanionDB{
 		ID:               id,
