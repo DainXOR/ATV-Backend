@@ -18,14 +18,14 @@ type DBModelInterface interface {
 	TableName() string
 }
 
-type DBID = primitive.ObjectID
+type DBID = bson.ObjectID
 type DBDateTime = time.Time
 
-func PrimitiveIDFrom(id any) (DBID, error) {
+func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
 	switch v := id.(type) {
 	case string:
 		return primitive.ObjectIDFromHex(v)
-	case DBID:
+	case primitive.ObjectID:
 		return v, nil
 	case bson.ObjectID:
 		return primitive.ObjectIDFromHex(v.Hex())
@@ -37,13 +37,18 @@ func BsonIDFrom(id any) (bson.ObjectID, error) {
 	switch v := id.(type) {
 	case string:
 		return bson.ObjectIDFromHex(v)
-	case DBID:
+	case primitive.ObjectID:
 		return bson.ObjectIDFromHex(v.Hex())
 	case bson.ObjectID:
 		return v, nil
 	default:
 		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
 	}
+}
+
+// Change this if you decide to change the ID type in the database
+func DBIDFrom(id any) (DBID, error) {
+	return BsonIDFrom(id)
 }
 
 // If decide to change the time type, you can only change it here

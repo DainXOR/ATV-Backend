@@ -24,7 +24,7 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 		return types.ResultErr[models.UniversityDBMongo](err)
 	}
 
-	universityDB.ID, err = models.PrimitiveIDFrom(result.InsertedID)
+	universityDB.ID, err = models.DBIDFrom(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Error converting inserted ID to PrimitiveID: ", err)

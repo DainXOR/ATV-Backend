@@ -59,7 +59,7 @@ func (u UniversityCreate) ToUpdate() UniversityDBMongo {
 }
 
 func (u UniversityDBMongoReceiver) ToDB() UniversityDBMongo {
-	id, _ := PrimitiveIDFrom(u.ID)
+	id, _ := DBIDFrom(u.ID)
 	return UniversityDBMongo{
 		ID:        id,
 		Name:      u.Name,

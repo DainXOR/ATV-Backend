@@ -16,16 +16,16 @@ type studentType struct{}
 
 var Student studentType
 
-func (studentType) Create(user models.StudentCreate) types.Result[models.StudentDBMongo] {
-	userDB := user.ToInsert()
-	result, err := configs.DB.InsertOne(userDB)
+func (studentType) Create(student models.StudentCreate) types.Result[models.StudentDBMongo] {
+	studentDB := student.ToInsert()
+	result, err := configs.DB.InsertOne(studentDB)
 
 	if err != nil {
 		logger.Error("Failed to create student in MongoDB: ", err)
 		return types.ResultErr[models.StudentDBMongo](err)
 	}
 
-	userDB.ID, err = models.PrimitiveIDFrom(result.InsertedID)
+	studentDB.ID, err = models.DBIDFrom(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
@@ -38,7 +38,7 @@ func (studentType) Create(user models.StudentCreate) types.Result[models.Student
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(userDB)
+	return types.ResultOk(studentDB)
 }
 
 func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
@@ -50,15 +50,15 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 			types.Http.UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
-			"User ID: "+id,
+			"Student ID: "+id,
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var userF models.StudentDBMongoReceiver
+	var studentF models.StudentDBMongoReceiver
 
-	err = configs.DB.FindOne(filter, &userF)
+	err = configs.DB.FindOne(filter, &studentF)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -81,13 +81,13 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(userF.ToDB())
+	return types.ResultOk(studentF.ToDB())
 }
 func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "id_number", Value: idNumber}}
-	var user models.StudentDBMongoReceiver
+	var student models.StudentDBMongoReceiver
 
-	err := configs.DB.FindOne(filter, &user)
+	err := configs.DB.FindOne(filter, &student)
 	if err != nil {
 		var httpErr types.HttpError
 		if err == mongo.ErrNoDocuments {
@@ -109,13 +109,13 @@ func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDBM
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(user.ToDB())
+	return types.ResultOk(student.ToDB())
 }
 func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "email", Value: email}}
-	var userF models.StudentDBMongoReceiver
+	var studentF models.StudentDBMongoReceiver
 
-	err := configs.DB.FindOne(filter, &userF)
+	err := configs.DB.FindOne(filter, &studentF)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -138,13 +138,13 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] 
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(userF.ToDB())
+	return types.ResultOk(studentF.ToDB())
 }
 func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
-	usersR := models.StudentDBMongo{}.ReceiverList()
+	studentsR := models.StudentDBMongo{}.ReceiverList()
 
-	err := configs.DB.FindAll(filter, &usersR)
+	err := configs.DB.FindAll(filter, &studentsR)
 	if err != nil {
 		logger.Error("Failed to get all students from MongoDB:", err)
 		httpErr := types.ErrorInternal(
@@ -155,12 +155,12 @@ func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
 		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
 	}
 
-	users := utils.Map(usersR, models.StudentDBMongoReceiver.ToDB)
-	logger.Debug("Retrieved", len(users), "users from MongoDB database")
-	return types.ResultOk(users)
+	students := utils.Map(studentsR, models.StudentDBMongoReceiver.ToDB)
+	logger.Debug("Retrieved", len(students), "students from MongoDB database")
+	return types.ResultOk(students)
 }
 
-func (studentType) UpdateByID(id string, user models.StudentCreate) types.Result[models.StudentDBMongo] {
+func (studentType) UpdateByID(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
 	oid, err := models.BsonIDFrom(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -174,8 +174,8 @@ func (studentType) UpdateByID(id string, user models.StudentCreate) types.Result
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: user.ToUpdate()}}
-	studentDB := user.ToUpdate().Receiver()
+	update := bson.D{{Key: "$set", Value: student.ToUpdate()}}
+	studentDB := student.ToUpdate().Receiver()
 
 	result := configs.DB.PatchOne(filter, update, studentDB)
 	// .From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)

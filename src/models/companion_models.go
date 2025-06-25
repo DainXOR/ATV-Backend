@@ -1,8 +1,12 @@
 package models
 
-import "dainxor/atv/logger"
+import (
+	"dainxor/atv/logger"
 
-type CompanionDB struct {
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
+
+type CompanionDBMongo struct {
 	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -15,7 +19,7 @@ type CompanionDB struct {
 	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
-type CompanionDBReceiver struct {
+type CompanionDBMongoReceiver struct {
 	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
@@ -29,12 +33,12 @@ type CompanionDBReceiver struct {
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
-func (CompanionDB) Receiver() CompanionDBReceiver {
-	return CompanionDBReceiver{}
+func (CompanionDBMongo) Receiver() CompanionDBMongoReceiver {
+	return CompanionDBMongoReceiver{}
 }
-func (CompanionDB) ReceiverList() []CompanionDBReceiver {
-	s := make([]CompanionDBReceiver, 1)
-	s[0] = CompanionDB{}.Receiver()
+func (CompanionDBMongo) ReceiverList() []CompanionDBMongoReceiver {
+	s := make([]CompanionDBMongoReceiver, 1)
+	s[0] = CompanionDBMongo{}.Receiver()
 	return s
 }
 
@@ -60,14 +64,14 @@ type CompanionResponse struct {
 	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (c CompanionCreate) ToDB() (CompanionDB, error) {
-	idSpeciality, err := PrimitiveIDFrom(c.IDSpeciality)
+func (c CompanionCreate) ToInsert() CompanionDBMongo {
+	idSpeciality, err := bson.ObjectIDFromHex(c.IDSpeciality)
 	if err != nil {
 		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err)
-		return CompanionDB{}, err
+		return CompanionDBMongo{}
 	}
 
-	return CompanionDB{
+	return CompanionDBMongo{
 		NumberID:         c.NumberID,
 		FirstName:        c.FirstName,
 		LastName:         c.LastName,
@@ -76,22 +80,42 @@ func (c CompanionCreate) ToDB() (CompanionDB, error) {
 		PhoneNumber:      c.PhoneNumber,
 		IDSpeciality:     idSpeciality,
 		CreatedAt:        TimeNow(),
-	}, nil
+		UpdatedAt:        TimeNow(),
+		DeletedAt:        TimeZero(),
+	}
 }
-func (c CompanionDBReceiver) ToDB() (CompanionDB, error) {
-	idSpeciality, err1 := PrimitiveIDFrom(c.IDSpeciality)
-	id, err2 := PrimitiveIDFrom(c.ID)
-
-	if err1 != nil {
-		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err1)
-		return CompanionDB{}, err1
-
-	} else if err2 != nil {
-		logger.Warning("Failed to convert ID to PrimitiveID: ", err2)
-		return CompanionDB{}, err2
+func (c CompanionCreate) ToUpdate() CompanionDBMongo {
+	idSpeciality, err := DBIDFrom(c.IDSpeciality)
+	if err != nil {
+		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err)
+		return CompanionDBMongo{}
 	}
 
-	return CompanionDB{
+	return CompanionDBMongo{
+		NumberID:         c.NumberID,
+		FirstName:        c.FirstName,
+		LastName:         c.LastName,
+		Email:            c.Email,
+		InstitutionEmail: c.InstitutionEmail,
+		PhoneNumber:      c.PhoneNumber,
+		IDSpeciality:     idSpeciality,
+		CreatedAt:        TimeNow(),
+	}
+}
+func (c CompanionDBMongoReceiver) ToDB() CompanionDBMongo {
+	id, err2 := DBIDFrom(c.ID)
+	idSpeciality, err1 := DBIDFrom(c.IDSpeciality)
+
+	if err2 != nil {
+		logger.Warning("Failed to convert ID to PrimitiveID: ", err2)
+		return CompanionDBMongo{}
+
+	} else if err1 != nil {
+		logger.Warning("Failed to convert IDSpeciality to PrimitiveID: ", err1)
+		return CompanionDBMongo{}
+	}
+
+	return CompanionDBMongo{
 		ID:               id,
 		NumberID:         c.NumberID,
 		FirstName:        c.FirstName,
@@ -102,10 +126,10 @@ func (c CompanionDBReceiver) ToDB() (CompanionDB, error) {
 		IDSpeciality:     idSpeciality,
 		CreatedAt:        c.CreatedAt,
 		UpdatedAt:        c.UpdatedAt,
-	}, nil
+	}
 }
 
-func (c CompanionDB) ToResponse() CompanionResponse {
+func (c CompanionDBMongo) ToResponse() CompanionResponse {
 	return CompanionResponse{
 		ID:               c.ID.Hex(),
 		NumberID:         c.NumberID,
@@ -119,3 +143,13 @@ func (c CompanionDB) ToResponse() CompanionResponse {
 		UpdatedAt:        c.UpdatedAt,
 	}
 }
+
+func (CompanionDBMongo) TableName() string {
+	return "companions"
+}
+func (CompanionDBMongoReceiver) TableName() string {
+	return CompanionDBMongo{}.TableName()
+}
+
+var _ DBModelInterface = (*CompanionDBMongo)(nil)
+var _ DBModelInterface = (*CompanionDBMongoReceiver)(nil)

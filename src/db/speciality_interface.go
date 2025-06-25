@@ -24,7 +24,7 @@ func (specialityType) Create(u models.SpecialityCreate) types.Result[models.Spec
 		return types.ResultErr[models.SpecialityDBMongo](err)
 	}
 
-	specialityDB.ID, err = models.PrimitiveIDFrom(result.InsertedID)
+	specialityDB.ID, err = models.DBIDFrom(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Error converting inserted ID to PrimitiveID: ", err)

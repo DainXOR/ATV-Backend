@@ -53,7 +53,7 @@ func (u SpecialityCreate) ToUpdate() SpecialityDBMongo {
 }
 
 func (u SpecialityDBMongoReceiver) ToDB() SpecialityDBMongo {
-	id, _ := PrimitiveIDFrom(u.ID)
+	id, _ := DBIDFrom(u.ID)
 	return SpecialityDBMongo{
 		ID:        id,
 		Name:      u.Name,

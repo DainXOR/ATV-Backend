@@ -83,7 +83,7 @@ type StudentResponse struct {
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
 func (user StudentCreate) ToInsert() StudentDBMongo {
-	idu, err := PrimitiveIDFrom(user.IDUniversity)
+	idu, err := DBIDFrom(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
@@ -106,7 +106,7 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 	}
 }
 func (user StudentCreate) ToUpdate() StudentDBMongo {
-	idu, err := PrimitiveIDFrom(user.IDUniversity)
+	idu, err := DBIDFrom(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
@@ -127,8 +127,8 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 	}
 }
 func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
-	id, err1 := PrimitiveIDFrom(user.ID)
-	idu, err2 := PrimitiveIDFrom(user.IDUniversity)
+	id, err1 := DBIDFrom(user.ID)
+	idu, err2 := DBIDFrom(user.IDUniversity)
 
 	if err1 != nil {
 		logger.Warning("Failed to convert ID to primitive.ObjectID:", err1)
