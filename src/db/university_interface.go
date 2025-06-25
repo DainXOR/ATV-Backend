@@ -61,18 +61,18 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 		var httpErr types.HttpError
 
 		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get student by ID: ", err)
+			logger.Error("Failed to get university by ID: ", err)
 			httpErr = types.ErrorNotFound(
-				"Student not found",
-				"Student with ID "+id+" not found",
+				"University not found",
+				"University with ID "+id+" not found",
 			)
 		} else {
-			logger.Error("Failed to get student by ID: ", err)
+			logger.Error("Failed to get university by ID: ", err)
 			httpErr = types.ErrorInternal(
-				"Failed to retrieve student",
+				"Failed to retrieve university",
 				"Decoding error",
 				err.Error(),
-				"Student ID: "+id,
+				"University ID: "+id,
 			)
 		}
 
@@ -82,14 +82,14 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 	return types.ResultOk(university.ToDB())
 }
 func (universityType) GetAll() types.Result[[]models.UniversityDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
+	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted universities
 	usersR := models.UniversityDBMongo{}.ReceiverList()
 
 	err := configs.DB.FindAll(filter, &usersR)
 	if err != nil {
 		logger.Error("Failed to get all universities from MongoDB:", err)
 		httpErr := types.ErrorInternal(
-			"Failed to retrieve students",
+			"Failed to retrieve universities",
 			err.Error(),
 		)
 

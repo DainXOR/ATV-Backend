@@ -108,7 +108,7 @@ func (db) FindOne(filter any, result models.DBModelInterface) error {
 	return DB.From(result).FindOne(ctx, filter).Decode(result)
 }
 func (db) FindAll(filter any, result any) error {
-	logger.Lava(1, "This mf should be refactored to use models.DBModelInterface instead of any in the result")
+	logger.Lava(1, "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
 	ctx, cancel := DB.Context()
 	defer cancel()
 

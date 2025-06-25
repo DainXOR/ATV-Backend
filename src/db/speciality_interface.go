@@ -61,18 +61,18 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 		var httpErr types.HttpError
 
 		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get student by ID: ", err)
+			logger.Error("Failed to get speciality by ID: ", err)
 			httpErr = types.ErrorNotFound(
-				"Student not found",
-				"Student with ID "+id+" not found",
+				"Speciality not found",
+				"Speciality with ID "+id+" not found",
 			)
 		} else {
-			logger.Error("Failed to get student by ID: ", err)
+			logger.Error("Failed to get speciality by ID: ", err)
 			httpErr = types.ErrorInternal(
-				"Failed to retrieve student",
+				"Failed to retrieve speciality",
 				"Decoding error",
 				err.Error(),
-				"Student ID: "+id,
+				"Speciality ID: "+id,
 			)
 		}
 
@@ -82,14 +82,14 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 	return types.ResultOk(speciality.ToDB())
 }
 func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
+	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted specialities
 	usersR := models.SpecialityDBMongo{}.ReceiverList()
 
 	err := configs.DB.FindAll(filter, &usersR)
 	if err != nil {
 		logger.Error("Failed to get all specialities from MongoDB:", err)
 		httpErr := types.ErrorInternal(
-			"Failed to retrieve students",
+			"Failed to retrieve specialities",
 			err.Error(),
 		)
 
