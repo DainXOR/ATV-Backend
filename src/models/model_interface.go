@@ -1,5 +1,13 @@
 package models
 
+import (
+	"fmt"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
+
 // Later will see how to use this interface to
 // simplify the code on the db interface layer.
 //
@@ -8,4 +16,38 @@ package models
 // Yes, that's it, nothing else is required.
 type DBModelInterface interface {
 	TableName() string
+}
+
+type DBID = primitive.ObjectID
+type DBDateTime = time.Time
+
+func PrimitiveIDFrom(id any) (DBID, error) {
+	switch v := id.(type) {
+	case string:
+		return primitive.ObjectIDFromHex(v)
+	case DBID:
+		return v, nil
+	case bson.ObjectID:
+		return primitive.ObjectIDFromHex(v.Hex())
+	default:
+		return primitive.NilObjectID, fmt.Errorf("unsupported type for PrimitiveIDFrom: %T", id)
+	}
+}
+func BsonIDFrom(id any) (bson.ObjectID, error) {
+	switch v := id.(type) {
+	case string:
+		return bson.ObjectIDFromHex(v)
+	case DBID:
+		return bson.ObjectIDFromHex(v.Hex())
+	case bson.ObjectID:
+		return v, nil
+	default:
+		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
+	}
+}
+func TimeNow() DBDateTime {
+	return time.Now()
+}
+func TimeZero() DBDateTime {
+	return time.Time{}
 }
