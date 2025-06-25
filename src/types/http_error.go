@@ -18,8 +18,8 @@ func Error(code HttpCode, information ...string) HttpError {
 	if len(information) > 0 {
 		message = information[0]
 
-		if len(information) > 1 {
-			detail = information[1]
+		for _, info := range information[1:] {
+			detail += info + " "
 		}
 	}
 
@@ -43,9 +43,9 @@ func (m *HttpError) Details() string {
 }
 
 func ErrorNotFound(information ...string) HttpError {
-	return Error(Http.NotFound(), information...)
+	return Error(Http.C400().NotFound(), information...)
 }
 
 func ErrorInternal(information ...string) HttpError {
-	return Error(Http.InternalServerError(), information...)
+	return Error(Http.C500().InternalServerError(), information...)
 }

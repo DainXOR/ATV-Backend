@@ -33,10 +33,3 @@ func EmptyResponse(message string, extra ...any) JSONResponse {
 
 	return response
 }
-
-func ErrorResponse(err error) JSONResponse {
-	return Response(
-		body{},
-		err.Error(),
-	)
-}

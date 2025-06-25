@@ -9,10 +9,11 @@ func ResultErr[T any](err error) Result[T] {
 	return Result[T]{value: OptionalEmpty[T](), err: err}
 }
 func ResultOk[T any](value T) Result[T] {
-	return Result[T]{value: OptionalOf(value), err: nil}
+	res := Result[T]{value: OptionalOf(value), err: nil}
+	return res
 }
-func ResultOf[T any](value T, err error, condition bool) Result[T] {
-	if condition {
+func ResultOf[T any](value T, err error, isError bool) Result[T] {
+	if !isError {
 		return ResultOk(value)
 	}
 	return ResultErr[T](err)

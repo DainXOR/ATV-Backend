@@ -14,7 +14,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const DEFAULT_ROUTE_VERSION = 2 // Default version for the API routes
+const (
+	DEFAULT_ROUTE_VERSION = 1       // Default version for the API routes
+	DEFAULT_API_VERSION   = "0.1.1" // Default version for the API
+)
+
 // Move this number so the deprecations are in sync with the API version
 
 func init() {
@@ -51,8 +55,8 @@ func main() {
 	routes.MainRoutes(router)
 
 	// Api routes
-	routes.InfoRoutes(router, logger.AppVersion()) // Routes for information about the API
-	routes.TestRoutes(router)                      // Routes for testing purposes
+	routes.InfoRoutes(router, DEFAULT_API_VERSION, logger.AppVersion()) // Routes for information about the API
+	routes.TestRoutes(router)                                           // Routes for testing purposes
 
 	// Versioned API routes
 	routes.StudentRoutes(router) // Routes for user management

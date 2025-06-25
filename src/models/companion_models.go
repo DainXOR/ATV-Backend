@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type CompanionDB struct {
 	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
@@ -48,20 +46,20 @@ type CompanionCreate struct {
 	IDSpeciality     string `json:"id_speciality" bson:"id_speciality"`
 }
 type CompanionResponse struct {
-	ID               string `json:"_id,omitempty" bson:"_id,omitempty"`
-	NumberID         string `json:"number_id,omitempty" bson:"number_id,omitempty"`
-	FirstName        string `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	Email            string `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	PhoneNumber      string `json:"phone_number" bson:"phone_number"`
-	IDSpeciality     string `json:"id_speciality" bson:"id_speciality"`
-	CreatedAt        string `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt        string `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID               string     `json:"_id,omitempty" bson:"_id,omitempty"`
+	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
+	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
+	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
+	Email            string     `json:"email,omitempty" bson:"email,omitempty"`
+	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
+	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
+	IDSpeciality     string     `json:"id_speciality" bson:"id_speciality"`
+	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
+	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
 func (c CompanionCreate) ToDB() (CompanionDB, error) {
-	idSpeciality, err := IDFrom(c.IDSpeciality)
+	idSpeciality, err := PrimitiveIDFrom(c.IDSpeciality)
 	if err != nil {
 		return CompanionDB{}, err
 	}
@@ -78,8 +76,8 @@ func (c CompanionCreate) ToDB() (CompanionDB, error) {
 	}, nil
 }
 func (c CompanionDBReceiver) ToDB() (CompanionDB, error) {
-	idSpeciality, _ := IDFrom(c.IDSpeciality)
-	id, _ := IDFrom(c.ID)
+	idSpeciality, _ := PrimitiveIDFrom(c.IDSpeciality)
+	id, _ := PrimitiveIDFrom(c.ID)
 
 	return CompanionDB{
 		ID:               id,
@@ -105,7 +103,7 @@ func (c CompanionDB) ToResponse() CompanionResponse {
 		InstitutionEmail: c.InstitutionEmail,
 		PhoneNumber:      c.PhoneNumber,
 		IDSpeciality:     c.IDSpeciality.Hex(),
-		CreatedAt:        c.CreatedAt.Time().Format("yyyy-MM-dd HH:mm:ss"),
-		UpdatedAt:        c.UpdatedAt.Time().Format(time.RFC3339),
+		CreatedAt:        c.CreatedAt,
+		UpdatedAt:        c.UpdatedAt,
 	}
 }

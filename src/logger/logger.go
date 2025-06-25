@@ -39,6 +39,42 @@ const (
 	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
 	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
 	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
+
+	TXT_BLACK   = "30m"
+	TXT_RED     = "31m"
+	TXT_GREEN   = "32m"
+	TXT_YELLOW  = "33m"
+	TXT_BLUE    = "34m"
+	TXT_MAGENTA = "35m"
+	TXT_CYAN    = "36m"
+	TXT_WHITE   = "37m"
+
+	BG_BLACK   = "40"
+	BG_RED     = "41"
+	BG_GREEN   = "42"
+	BG_YELLOW  = "43"
+	BG_BLUE    = "44"
+	BG_MAGENTA = "45"
+	BG_CYAN    = "46"
+	BG_WHITE   = "47"
+
+	CLR_START = "\033["
+	CLR_RESET = "\033[0m"
+
+	CLR_DEBUG = CLR_START + BG_GREEN + ";" + TXT_BLACK  // Green background with black text for debug messages
+	CLR_INFO  = CLR_START + BG_CYAN + ";" + TXT_BLACK   // Cyan background with black text for info messages
+	CLR_WARN  = CLR_START + BG_YELLOW + ";" + TXT_BLACK // Yellow background with black text for warning messages
+	CLR_ERROR = CLR_START + BG_RED + ";" + TXT_BLACK    // Red background with black text for error messages
+	CLR_FATAL = CLR_START + BG_RED + ";" + TXT_WHITE    // Red background with white text for fatal messages
+
+	CLR_DEPRECATE   = CLR_START + BG_MAGENTA + ";" + TXT_WHITE // Magenta background with white text for deprecation messages
+	CLR_DEPR_REASON = CLR_START + BG_YELLOW + ";" + TXT_WHITE  // Yellow background with white text for deprecation reason messages
+
+	CLR_LAVA       = CLR_START + BG_WHITE + ";" + TXT_BLACK  // White background with black text for lava messages
+	CLR_COLD_LAVA  = CLR_START + BG_YELLOW + ";" + TXT_BLACK // Yellow background with black text for cold lava messages
+	CLR_DRIED_LAVA = CLR_START + BG_RED + ";" + TXT_BLACK    // Red background with black text for dried lava messages
+
+	CLR_FILE = CLR_START + BG_BLUE + ";" + TXT_WHITE // Blue background with white text for file paths
 )
 
 type dnxLogger struct {
@@ -67,6 +103,12 @@ func get() *dnxLogger {
 	}
 	return dnxLoggerInstance
 }
+func colorTxt(txt string, textColor string, bgColor string) string {
+	return CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
+}
+func colorWith(txt string, colorString string) string {
+	return colorString + txt + CLR_RESET
+}
 
 func Init() {
 	dnxLoggerInstance = &dnxLogger{
@@ -76,11 +118,11 @@ func Init() {
 		logAttempts:  0,
 		appVersion:   0,
 
-		DebugLogger:   log.New(os.Stdout, "[DEBUG] ", log.LstdFlags),
-		InfoLogger:    log.New(os.Stdout, "[INFO] ", log.LstdFlags),
-		WarningLogger: log.New(os.Stdout, "[WARNING] ", log.LstdFlags),
-		ErrorLogger:   log.New(os.Stderr, "[ERROR] ", log.LstdFlags),
-		FatalLogger:   log.New(os.Stderr, "[FATAL] ", log.LstdFlags),
+		DebugLogger:   log.New(os.Stdout, "|"+colorWith(" DEBUG ", CLR_DEBUG)+"| ", log.LstdFlags),
+		InfoLogger:    log.New(os.Stdout, "|"+colorWith(" INFO ", CLR_INFO)+"| ", log.LstdFlags),
+		WarningLogger: log.New(os.Stdout, "|"+colorWith(" WARNING ", CLR_WARN)+"| ", log.LstdFlags),
+		ErrorLogger:   log.New(os.Stderr, "|"+colorWith(" ERROR ", CLR_ERROR)+"| ", log.LstdFlags),
+		FatalLogger:   log.New(os.Stderr, "|"+colorWith(" FATAL ", CLR_FATAL)+"| ", log.LstdFlags),
 	}
 
 	// Create the path if it doesn't exist
@@ -435,6 +477,7 @@ func writeToFile(logger *log.Logger, prefix string, v ...any) bool {
 }
 
 // Private function that handles the actual logging.
+// TO DO: Add option to modify depth of the call stack to log origin
 func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 	if !canLogWith(logger) {
 		return
@@ -444,6 +487,7 @@ func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
 
 	orignalPrefix := logger.Prefix()
 	extraPrefix := utils.CallOrigin(4)
+	extraPrefix = colorWith(extraPrefix, CLR_FILE)
 	extraPrefix += ":"
 
 	stringValues := utils.AsStrings(v)
@@ -505,19 +549,22 @@ func Fatal(v ...any) {
 
 func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
+	deprecateTxt := colorWith(" DEPRECATED ", CLR_DEPRECATE)
+	reasonTxt := colorWith(" REASON : ", CLR_DEPR_REASON)
 
 	if AppVersion() >= removalVersion {
-		Error("DEPRECATED: This feature has been removed in version ", removalVersion)
-		Error("REASON: ", args)
+		Fatal(deprecateTxt+": This feature has been removed in version ", removalVersion)
+		Fatal(reasonTxt+":", args)
 		return false, fmt.Errorf("feature removed in version %d. %s", removalVersion, args)
-	}
-	if AppVersion() > deprecatedVersion && AppVersion() < removalVersion {
-		Warning("DEPRECATED: This feature will be removed in version ", removalVersion)
-		Warning("REASON: ", args)
+
+	} else if AppVersion() >= deprecatedVersion && AppVersion() < removalVersion {
+		Warning(deprecateTxt+": This feature is marked for removal in version ", removalVersion)
+		Warning(reasonTxt+":", args)
 		return false, fmt.Errorf("feature deprecated in version %d, will be removed in version %d. %s", deprecatedVersion, removalVersion, args)
+
 	} else if AppVersion() == deprecatedVersion {
-		Warning("DEPRECATED: This feature will be removed in future versions")
-		Warning("REASON: ", args)
+		Warning(deprecateTxt + ": This feature will be removed in future versions")
+		Warning(reasonTxt+":", args)
 		return true, fmt.Errorf("feature deprecated in version %d. %s", deprecatedVersion, args)
 	}
 	return true, nil
@@ -533,13 +580,16 @@ type volcano struct {
 
 func Lava(version uint, v ...any) volcano {
 	args := utils.Join(v, " ")
+	lavaTxt := colorWith(" LAVA ", CLR_LAVA)
+	coldLavaTxt := colorWith(" COLD LAVA ", CLR_COLD_LAVA)
+	driedLavaTxt := colorWith(" DRIED LAVA ", CLR_DRIED_LAVA)
 
 	if AppVersion() == version {
-		Warning("LAVA: Running code that should be removed, cleaned up or refactored. ", args)
+		Warning(lavaTxt+": Running code that should be removed, cleaned up or refactored. ", args)
 	} else if AppVersion() >= version+2 {
-		Warning("COLD LAVA: This code must be refactored. ", args)
+		Warning(coldLavaTxt+": This code must be refactored. ", args)
 	} else if AppVersion() > version+4 {
-		Error("DRIED LAVA: This code should not be running as is, it is likely a bug. ", args)
+		Error(driedLavaTxt+": This code should not be running as is, it is likely a bug. ", args)
 	}
 
 	return volcano{
@@ -547,20 +597,28 @@ func Lava(version uint, v ...any) volcano {
 	}
 }
 func (v *volcano) LavaStart() {
+	lavaTxt := colorWith(" LAVA ", CLR_LAVA)
+	coldLavaTxt := colorWith(" COLD LAVA ", CLR_COLD_LAVA)
+	driedLavaTxt := colorWith(" DRIED LAVA ", CLR_DRIED_LAVA)
+
 	if AppVersion() == v.version {
-		Warning("LAVA: Start of flow")
+		Warning(lavaTxt + ": Start of flow")
 	} else if AppVersion() >= v.version+2 {
-		Warning("COLD LAVA: Start of flow")
+		Warning(coldLavaTxt + ": Start of flow")
 	} else if AppVersion() > v.version+4 {
-		Error("DRIED LAVA: Start of lava cast")
+		Error(driedLavaTxt + ": Start of lava cast")
 	}
 }
 func (v *volcano) LavaEnd() {
+	lavaTxt := colorWith(" LAVA ", CLR_LAVA)
+	coldLavaTxt := colorWith(" COLD LAVA ", CLR_COLD_LAVA)
+	driedLavaTxt := colorWith(" DRIED LAVA ", CLR_DRIED_LAVA)
+
 	if AppVersion() == v.version {
-		Warning("LAVA: End of flow")
+		Warning(lavaTxt + ": End of flow")
 	} else if AppVersion() >= v.version+2 {
-		Warning("COLD LAVA: End of flow")
+		Warning(coldLavaTxt + ": End of flow")
 	} else if AppVersion() > v.version+4 {
-		Error("DRIED LAVA: End of lava cast")
+		Error(driedLavaTxt + ": End of lava cast")
 	}
 }

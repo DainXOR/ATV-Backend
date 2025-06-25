@@ -15,14 +15,6 @@ type studentType struct{}
 
 var Student studentType
 
-func (studentType) GetByIDGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
-		),
-	)
-}
 func (studentType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting student by ID: ", id)
@@ -46,15 +38,6 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 		types.Response(
 			user.ToResponse(),
 			"",
-		),
-	)
-}
-
-func (studentType) GetAllGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/all")
-	c.JSON(http.StatusOK,
-		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
 		),
 	)
 }
@@ -89,15 +72,6 @@ func (studentType) GetAllMongo(c *gin.Context) {
 	)
 }
 
-func (studentType) CreateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student")
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
-		),
-	)
-}
 func (studentType) CreateMongo(c *gin.Context) {
 	var body models.StudentCreate
 
@@ -142,17 +116,6 @@ func (studentType) CreateMongo(c *gin.Context) {
 	)
 }
 
-// UpdateGorm updates an existing user in the database
-// This will override zeroed fields
-func (studentType) UpdateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
-		),
-	)
-}
 func (studentType) UpdateMongo(c *gin.Context) {
 	var body models.StudentCreate
 
@@ -191,17 +154,6 @@ func (studentType) UpdateMongo(c *gin.Context) {
 	)
 }
 
-// PatchGorm updates an existing user in the database
-// This will keep previous value in zeroed fields
-func (studentType) PatchGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
-		),
-	)
-}
 func (studentType) PatchMongo(c *gin.Context) {
 	var body models.StudentCreate
 
@@ -221,7 +173,6 @@ func (studentType) PatchMongo(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	logger.Debug("Patching student by ID: ", id)
 
 	result := db.Student.PatchMongo(id, body)
 
@@ -275,8 +226,19 @@ func (studentType) DeleteByID(c *gin.Context) {
 	)
 }
 func (studentType) ForceDeleteByID(c *gin.Context) {
+	confirm := c.Param("confirm")
+	if confirm != "delete-permanently" {
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
+				"Invalid confirmation parameter",
+				"Use 'delete-permanently' to confirm deletion",
+			),
+		)
+		return
+	}
+
 	id := c.Param("id")
-	logger.Debug("Force deleting student by ID: ", id)
+	logger.Info("Force deleting student by ID: ", id)
 
 	result := db.Student.DeletePermanentByID(id)
 
@@ -298,6 +260,57 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 		types.Response(
 			data,
 			"Student deleted permanently",
+		),
+	)
+}
+
+func (studentType) GetByIDGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
+}
+func (studentType) GetAllGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/student/all")
+	c.JSON(http.StatusOK,
+		types.EmptyResponse(
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
+		),
+	)
+}
+
+func (studentType) CreateGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/student")
+
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
+		),
+	)
+}
+
+// UpdateGorm updates an existing user in the database
+// This will override zeroed fields
+func (studentType) UpdateGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+		),
+	)
+}
+
+// PatchGorm updates an existing user in the database
+// This will keep previous value in zeroed fields
+func (studentType) PatchGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+
+	c.JSON(types.Http.C300().MovedPermanently(),
+		types.EmptyResponse(
+			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
 		),
 	)
 }
