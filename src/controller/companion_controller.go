@@ -11,15 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type studentType struct{}
+type companionType struct{}
 
-var Student studentType
+var Companion companionType
 
-func (studentType) GetByIDMongo(c *gin.Context) {
+func (companionType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Getting student by ID: ", id)
+	logger.Debug("Getting companion by ID: ", id)
 
-	result := db.Student.GetByID(id)
+	result := db.Companion.GetByID(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -33,16 +33,16 @@ func (studentType) GetByIDMongo(c *gin.Context) {
 		return
 	}
 
-	student := result.Value()
+	companion := result.Value()
 	c.JSON(http.StatusOK,
 		types.Response(
-			student.ToResponse(),
+			companion.ToResponse(),
 			"",
 		),
 	)
 }
-func (studentType) GetAllMongo(c *gin.Context) {
-	result := db.Student.GetAll()
+func (companionType) GetAllMongo(c *gin.Context) {
+	result := db.Companion.GetAll()
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -55,30 +55,30 @@ func (studentType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	students := utils.Map(result.Value(), models.StudentDBMongo.ToResponse)
-	if len(students) == 0 {
-		logger.Warning("No students found in MongoDB database")
+	companions := utils.Map(result.Value(), models.CompanionDBMongo.ToResponse)
+	if len(companions) == 0 {
+		logger.Warning("No companions found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
-				"No students found",
+				"No companions found",
 			))
 		return
 	}
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			students,
+			companions,
 			"",
 		),
 	)
 }
 
-func (studentType) CreateMongo(c *gin.Context) {
-	var body models.StudentCreate
+func (companionType) CreateMongo(c *gin.Context) {
+	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to create student: JSON request body is invalid")
+		logger.Error("Failed to create companion: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -90,12 +90,12 @@ func (studentType) CreateMongo(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating student in MongoDB: ", body)
+	logger.Debug("Creating companion in MongoDB: ", body)
 
-	result := db.Student.Create(body)
+	result := db.Companion.Create(body)
 
 	if result.IsErr() {
-		logger.Error("Failed to create student in MongoDB: ", result.Error())
+		logger.Error("Failed to create companion in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,
@@ -107,22 +107,22 @@ func (studentType) CreateMongo(c *gin.Context) {
 		return
 	}
 
-	student := result.Value()
+	companion := result.Value()
 	c.JSON(types.Http.C200().Created(),
 		types.Response(
-			student.ToResponse(),
+			companion.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (studentType) UpdateMongo(c *gin.Context) {
-	var body models.StudentCreate
+func (companionType) UpdateMongo(c *gin.Context) {
+	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to update student: JSON request body is invalid")
+		logger.Error("Failed to update companion: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -135,9 +135,9 @@ func (studentType) UpdateMongo(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	logger.Debug("Updating student by ID: ", id)
+	logger.Debug("Updating companion by ID: ", id)
 
-	result := db.Student.UpdateByID(id, body)
+	result := db.Companion.UpdateByID(id, body)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -145,22 +145,22 @@ func (studentType) UpdateMongo(c *gin.Context) {
 		return
 	}
 
-	student := result.Value()
+	companion := result.Value()
 	c.JSON(http.StatusOK,
 		types.Response(
-			student.ToResponse(),
+			companion.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (studentType) PatchMongo(c *gin.Context) {
-	var body models.StudentCreate
+func (companionType) PatchMongo(c *gin.Context) {
+	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to patch student: JSON request body is invalid")
+		logger.Error("Failed to patch companion: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -174,7 +174,7 @@ func (studentType) PatchMongo(c *gin.Context) {
 
 	id := c.Param("id")
 
-	result := db.Student.PatchByID(id, body)
+	result := db.Companion.PatchByID(id, body)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -188,21 +188,21 @@ func (studentType) PatchMongo(c *gin.Context) {
 		return
 	}
 
-	student := result.Value()
+	companion := result.Value()
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			student.ToResponse(),
+			companion.ToResponse(),
 			"",
 		),
 	)
 }
 
-// DeleteByID deletes a student by ID
-func (studentType) DeleteByID(c *gin.Context) {
+// DeleteByID deletes a companion by ID
+func (companionType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Deleting student by ID: ", id)
+	logger.Debug("Deleting companion by ID: ", id)
 
-	result := db.Student.DeleteByID(id)
+	result := db.Companion.DeleteByID(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -221,11 +221,11 @@ func (studentType) DeleteByID(c *gin.Context) {
 	c.JSON(types.Http.C200().Accepted(),
 		types.Response(
 			data,
-			"Student marked for deletion",
+			"Companion marked for deletion",
 		),
 	)
 }
-func (studentType) ForceDeleteByID(c *gin.Context) {
+func (companionType) ForceDeleteByID(c *gin.Context) {
 	confirm := c.Param("confirm")
 	if confirm != "delete-permanently" {
 		c.JSON(types.Http.C400().BadRequest(),
@@ -238,9 +238,9 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	logger.Info("Force deleting student by ID: ", id)
+	logger.Info("Force deleting companion by ID: ", id)
 
-	result := db.Student.DeletePermanentByID(id)
+	result := db.Companion.DeletePermanentByID(id)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -259,58 +259,58 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
 			data,
-			"Student deleted permanently",
+			"Companion deleted permanently",
 		),
 	)
 }
 
-func (studentType) GetByIDGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+func (companionType) GetByIDGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
 		),
 	)
 }
-func (studentType) GetAllGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/all")
+func (companionType) GetAllGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/companion/all")
 	c.JSON(http.StatusOK,
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/all instead"),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/all instead"),
 		),
 	)
 }
 
-func (studentType) CreateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student")
+func (companionType) CreateGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/companion")
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student instead"),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/companion instead"),
 		),
 	)
 }
 
-// UpdateGorm updates an existing student in the database
+// UpdateGorm updates an existing companion in the database
 // This will override zeroed fields
-func (studentType) UpdateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+func (companionType) UpdateGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
 		),
 	)
 }
 
-// PatchGorm updates an existing student in the database
+// PatchGorm updates an existing companion in the database
 // This will keep previous value in zeroed fields
-func (studentType) PatchGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
+func (companionType) PatchGorm(c *gin.Context) {
+	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
 		),
 	)
 }

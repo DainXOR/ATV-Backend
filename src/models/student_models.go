@@ -2,14 +2,7 @@ package models
 
 import (
 	"dainxor/atv/logger"
-	"dainxor/atv/utils"
-	"reflect"
-	"strings"
 	"time"
-
-	"slices"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // UserDBGorm represents the database model for a user
@@ -25,8 +18,8 @@ type StudentDBMongo struct {
 	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
 	IDUniversity     DBID       `json:"id_university,omitempty" bson:"id_university,omitempty"`
 	PhoneNumber      string     `json:"phone_number,omitempty" bson:"phone_number,omitempty"`
-	CreatedAt        DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
@@ -90,15 +83,11 @@ type StudentResponse struct {
 // ToDB converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion or patch into the MongoDB database
 func (user StudentCreate) ToInsert() StudentDBMongo {
-	idu, err := PrimitiveIDFrom(user.IDUniversity)
+	idu, err := DBIDFrom(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
-		logger.Lava(1, "Bypassing IDUniversity conversion to primitive.ObjectID")
-		err = nil
-		idu = primitive.NewObjectID()
-
-		//return StudentDBMongo{} // Return an empty struct if conversion fails
+		return StudentDBMongo{} // Return an empty struct if conversion fails
 	}
 
 	return StudentDBMongo{
@@ -117,15 +106,11 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 	}
 }
 func (user StudentCreate) ToUpdate() StudentDBMongo {
-	idu, err := PrimitiveIDFrom(user.IDUniversity)
+	idu, err := DBIDFrom(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
-		logger.Lava(1, "Bypassing IDUniversity conversion to primitive.ObjectID")
-		err = nil
-		idu = primitive.NewObjectID()
-
-		//return StudentDBMongo{} // Return an empty struct if conversion fails
+		return StudentDBMongo{} // Return an empty struct if conversion fails
 	}
 
 	return StudentDBMongo{
@@ -142,8 +127,8 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 	}
 }
 func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
-	id, err1 := PrimitiveIDFrom(user.ID)
-	idu, err2 := PrimitiveIDFrom(user.IDUniversity)
+	id, err1 := DBIDFrom(user.ID)
+	idu, err2 := DBIDFrom(user.IDUniversity)
 
 	if err1 != nil {
 		logger.Warning("Failed to convert ID to primitive.ObjectID:", err1)
@@ -152,11 +137,7 @@ func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
 
 	if err2 != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err2)
-		logger.Lava(1, "Bypassing IDUniversity conversion to primitive.ObjectID")
-		err2 = nil
-		idu = primitive.NewObjectID()
-
-		//return StudentDBMongo{} // Return an empty struct if conversion fails
+		return StudentDBMongo{} // Return an empty struct if conversion fails
 	}
 
 	return StudentDBMongo{
@@ -174,27 +155,6 @@ func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
 		UpdatedAt:        user.UpdatedAt,
 	}
 
-}
-
-// ToPutDBGorm converts a UserCreate struct to a map[string]any
-// This is used to prepare the data for updating a user in the database
-// It filters out fields that are not needed for the update or should not be zeroed
-func (user StudentCreate) ToPutDBGorm() map[string]any {
-	filter := func(key reflect.StructField, value reflect.Value) bool {
-		excludeFields := []string{"id", "created_at", "updated_at", "deleted_at"}
-		if slices.Contains(excludeFields, key.Tag.Get("json")) {
-			return false
-		}
-
-		tags := strings.Split(key.Tag.Get("gorm"), ";")
-		if slices.Contains(tags, "not null") && value.IsZero() {
-			return false
-		}
-
-		return true
-	}
-
-	return utils.StructToMap(user, filter)
 }
 
 // ToDB converts a UserDB struct to a UserResponse struct
