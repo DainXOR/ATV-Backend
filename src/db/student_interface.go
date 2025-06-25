@@ -333,6 +333,7 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 	return types.ResultOk(deletedStudent.ToDB())
 }
 func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBMongo] {
+	logger.Warning("Permanently deleting student by ID: ", id)
 	oid, err := models.BsonIDFrom(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
