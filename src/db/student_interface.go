@@ -141,7 +141,7 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] 
 	return types.ResultOk(studentF.ToDB())
 }
 func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
+	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted students
 	studentsR := models.StudentDBMongo{}.ReceiverList()
 
 	err := configs.DB.FindAll(filter, &studentsR)

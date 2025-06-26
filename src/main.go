@@ -48,8 +48,9 @@ func address() string {
 
 func main() {
 	router := gin.Default()
-	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and log errors
+	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and logs a small trace
 	router.Use(middleware.CORSMiddleware())
+	router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
 	routes.MainRoutes(router)

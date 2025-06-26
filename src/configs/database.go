@@ -98,7 +98,7 @@ func (db) From(v models.DBModelInterface) *mongo.Collection {
 	return DB.In(collectionName)
 }
 func (db) Context() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), 2*time.Second)
+	return context.WithTimeout(context.Background(), 10*time.Second)
 }
 
 func (db) FindOne(filter any, result models.DBModelInterface) error {
