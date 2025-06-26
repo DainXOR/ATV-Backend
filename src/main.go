@@ -63,6 +63,7 @@ func main() {
 	routes.UniversityRoutes(router) // Routes for university management
 	routes.SpecialityRoutes(router) // Routes for speciality management
 	routes.CompanionRoutes(router)  // Routes for companion management
+	routes.SessionRoutes(router)    // Routes for session management
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }
