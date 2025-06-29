@@ -13,7 +13,7 @@ func SessionRoutes(router *gin.Engine) {
 		sessionRouter.POST("/", controller.Session.Create)
 
 		sessionRouter.GET("/:id", controller.Session.GetByID)
-		sessionRouter.GET("/student/:student_id", controller.Session.GetAllByStudentID)
 		sessionRouter.GET("/all", controller.Session.GetAll)
+		sessionRouter.GET("/student/:student_id", controller.Session.GetAllByStudentID)
 	}
 }

@@ -23,31 +23,6 @@ type StudentDBMongo struct {
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
-type StudentDBMongoReceiver struct {
-	ID               any        `json:"_id,omitempty" bson:"_id,omitempty"`
-	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
-	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	PersonalEmail    string     `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
-	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
-	IDUniversity     any        `json:"id_university,omitempty" bson:"id_university,omitempty"`
-	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
-	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
-	DeletedAt        DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
-}
-
-func (StudentDBMongo) Receiver() StudentDBMongoReceiver {
-	return StudentDBMongoReceiver{}
-}
-func (StudentDBMongo) ReceiverList() []StudentDBMongoReceiver {
-	s := make([]StudentDBMongoReceiver, 1)
-	s[0] = StudentDBMongo{}.Receiver()
-	return s
-}
-
 // StudentCreate represents the request body for creating a new user or updating an existing user
 // It is used to validate the input data before creating or updating a user in the database
 type StudentCreate struct {
@@ -80,8 +55,8 @@ type StudentResponse struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
-// ToDB converts a UserCreate struct to a UserDBMongo struct
-// This is used to prepare the data for insertion or patch into the MongoDB database
+// ToInsert and ToUpdate converts a UserCreate struct to a UserDBMongo struct
+// This is used to prepare the data for insertion into the MongoDB database
 func (user StudentCreate) ToInsert() StudentDBMongo {
 	idu, err := DBIDFrom(user.IDUniversity)
 
@@ -105,15 +80,10 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 		DeletedAt:        TimeZero(), // DeletedAt is nil by default, indicating the user is not deleted
 	}
 }
+
+// This is used to prepare the data for patch into the MongoDB database
 func (user StudentCreate) ToUpdate() StudentDBMongo {
-	idu, err := DBIDFrom(user.IDUniversity)
-
-	if err != nil {
-		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
-		return StudentDBMongo{} // Return an empty struct if conversion fails
-	}
-
-	return StudentDBMongo{
+	obj := StudentDBMongo{
 		NumberID:         user.NumberID,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -121,45 +91,19 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 		InstitutionEmail: user.InstitutionEmail,
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
-		IDUniversity:     idu,
 		PhoneNumber:      user.PhoneNumber,
 		UpdatedAt:        TimeNow(),
 	}
-}
-func (user StudentDBMongoReceiver) ToDB() StudentDBMongo {
-	id, err1 := DBIDFrom(user.ID)
-	idu, err2 := DBIDFrom(user.IDUniversity)
 
-	if err1 != nil {
-		logger.Warning("Failed to convert ID to primitive.ObjectID:", err1)
-		return StudentDBMongo{} // Return an empty struct if conversion fails
+	if !OmitEmptyID(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
+		return StudentDBMongo{}
 	}
 
-	if err2 != nil {
-		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err2)
-		return StudentDBMongo{} // Return an empty struct if conversion fails
-	}
-
-	return StudentDBMongo{
-		ID:               id,
-		NumberID:         user.NumberID,
-		FirstName:        user.FirstName,
-		LastName:         user.LastName,
-		PersonalEmail:    user.PersonalEmail,
-		InstitutionEmail: user.InstitutionEmail,
-		ResidenceAddress: user.ResidenceAddress,
-		Semester:         user.Semester,
-		IDUniversity:     idu,
-		PhoneNumber:      user.PhoneNumber,
-		CreatedAt:        user.CreatedAt,
-		UpdatedAt:        user.UpdatedAt,
-	}
-
+	return obj
 }
 
 // ToDB converts a UserDB struct to a UserResponse struct
 // This is used to prepare the data for returning to the client
-
 func (user StudentDBMongo) ToResponse() StudentResponse {
 	return StudentResponse{
 		ID:               user.ID.Hex(),
@@ -182,11 +126,7 @@ func (user StudentDBMongo) ToResponse() StudentResponse {
 func (StudentDBMongo) TableName() string {
 	return "students"
 }
-func (StudentDBMongoReceiver) TableName() string {
-	return StudentDBMongo{}.TableName()
-}
 
 // Explicitly checking if the structs implement the DBModelInterface
 // This will error in compile time if the structs do not implement the interface
 var _ DBModelInterface = (*StudentDBMongo)(nil)
-var _ DBModelInterface = (*StudentDBMongoReceiver)(nil)

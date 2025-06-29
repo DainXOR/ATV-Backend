@@ -1,6 +1,8 @@
 package models
 
 import (
+	"dainxor/atv/logger"
+
 	"fmt"
 	"time"
 
@@ -59,4 +61,26 @@ func TimeNow() DBDateTime {
 // If decide to change the time type, you can only change it here
 func TimeZero() DBDateTime {
 	return time.Time{}
+}
+
+func OmitEmptyID(id string, result *DBID, idName string) bool {
+	if id != "" {
+		return EnsureID(id, result, idName)
+	}
+	return true
+}
+func EnsureID(id string, result *DBID, idName string) bool {
+	if id == "" {
+		logger.Warning("Missing required field:", idName)
+		return false
+	}
+
+	idObj, err := DBIDFrom(id)
+	if err != nil {
+		logger.Warning("Failed to convert", idName, "to ObjectID:", err)
+		return false
+	}
+
+	*result = idObj
+	return true
 }

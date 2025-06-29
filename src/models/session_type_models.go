@@ -1,6 +1,6 @@
 package models
 
-type SpecialityDBMongo struct {
+type SessionTypeDBMongo struct {
 	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
@@ -8,34 +8,34 @@ type SpecialityDBMongo struct {
 	DeletedAt DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
 }
 
-// SpecialityCreate represents the request body for creating a new Speciality
-type SpecialityCreate struct {
+// SessionTypeCreate represents the request body for creating a new SessionType
+type SessionTypeCreate struct {
 	Name string `json:"name" gorm:"not null"`
 }
 
-// SpecialityResponse represents the response body for a Speciality
-type SpecialityResponse struct {
+// SessionTypeResponse represents the response body for a SessionType
+type SessionTypeResponse struct {
 	ID        string     `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (u SpecialityCreate) ToInsert() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SessionTypeCreate) ToInsert() SessionTypeDBMongo {
+	return SessionTypeDBMongo{
 		Name:      u.Name,
 		CreatedAt: TimeNow(),
 		UpdatedAt: TimeNow(),
 	}
 }
-func (u SpecialityCreate) ToUpdate() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SessionTypeCreate) ToUpdate() SessionTypeDBMongo {
+	return SessionTypeDBMongo{
 		Name:      u.Name,
 		UpdatedAt: TimeNow(),
 	}
 }
-func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
-	return SpecialityResponse{
+func (u SessionTypeDBMongo) ToResponse() SessionTypeResponse {
+	return SessionTypeResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
 		CreatedAt: u.CreatedAt,
@@ -43,8 +43,8 @@ func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
 	}
 }
 
-func (SpecialityDBMongo) TableName() string {
-	return "specialities"
+func (SessionTypeDBMongo) TableName() string {
+	return "session_types"
 }
 
-var _ DBModelInterface = (*SpecialityDBMongo)(nil)
+var _ DBModelInterface = (*SessionTypeDBMongo)(nil)

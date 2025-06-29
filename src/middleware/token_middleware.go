@@ -9,7 +9,7 @@ import (
 func TokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logger.Debug("Header:", c.Request.Header)
-		//c.
+
 		c.Next()
 	}
 }

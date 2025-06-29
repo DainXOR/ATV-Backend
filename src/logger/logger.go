@@ -88,7 +88,7 @@ type dnxLogger struct {
 	LogToConsole bool
 	LogLevels    logLevel
 	logAttempts  int
-	appVersion   uint
+	appVersion   uint64
 }
 
 var dnxLoggerInstance *dnxLogger
@@ -265,11 +265,11 @@ func SetLogToConsole(value bool) {
 	get().LogToConsole = value
 }
 
-func SetAppVersion(version uint) {
+func SetAppVersion(version uint64) {
 	get().appVersion = version
 	Info("App version set to: ", version)
 }
-func AppVersion() uint {
+func AppVersion() uint64 {
 	return get().appVersion
 }
 
@@ -547,7 +547,7 @@ func Fatal(v ...any) {
 	logFatal(false, v...)
 }
 
-func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, error) {
+func Deprecate(deprecatedVersion uint64, removalVersion uint64, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
 	deprecateTxt := colorWith(" DEPRECATED ", CLR_DEPRECATE)
 	reasonTxt := colorWith(" REASON : ", CLR_DEPR_REASON)
@@ -569,16 +569,16 @@ func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, err
 	}
 	return true, nil
 }
-func DeprecateMsg(deprecatedVersion uint, removalVersion uint, v ...any) string {
+func DeprecateMsg(deprecatedVersion uint64, removalVersion uint64, v ...any) string {
 	_, err := Deprecate(deprecatedVersion, removalVersion, v...)
 	return err.Error()
 }
 
 type volcano struct {
-	version uint
+	version uint64
 }
 
-func Lava(version uint, v ...any) volcano {
+func Lava(version uint64, v ...any) volcano {
 	args := utils.Join(v, " ")
 	lavaTxt := colorWith(" LAVA ", CLR_LAVA)
 	coldLavaTxt := colorWith(" COLD LAVA ", CLR_COLD_LAVA)
