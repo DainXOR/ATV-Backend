@@ -15,7 +15,7 @@ type SessionTypeCreate struct {
 
 // SessionTypeResponse represents the response body for a SessionType
 type SessionTypeResponse struct {
-	ID        string     `json:"_id,omitempty" bson:"_id,omitempty"`
+	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
@@ -26,6 +26,7 @@ func (u SessionTypeCreate) ToInsert() SessionTypeDBMongo {
 		Name:      u.Name,
 		CreatedAt: TimeNow(),
 		UpdatedAt: TimeNow(),
+		DeletedAt: TimeZero(),
 	}
 }
 func (u SessionTypeCreate) ToUpdate() SessionTypeDBMongo {

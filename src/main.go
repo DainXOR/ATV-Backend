@@ -53,12 +53,12 @@ func main() {
 	routes.TestRoutes(router)                                                        // Routes for testing purposes
 
 	// Versioned API routes
-	routes.StudentRoutes(router)     // Routes for user management
-	routes.UniversityRoutes(router)  // Routes for university management
-	routes.SpecialityRoutes(router)  // Routes for speciality management
-	routes.CompanionRoutes(router)   // Routes for companion management
-	routes.SessionTypeRoutes(router) // Routes for session type management
-	routes.SessionRoutes(router)     // Routes for session management
+	routes.StudentRoutes(router)
+	routes.UniversityRoutes(router)
+	routes.SpecialityRoutes(router)
+	routes.CompanionRoutes(router)
+	routes.SessionTypeRoutes(router)
+	routes.SessionRoutes(router)
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

@@ -23,7 +23,7 @@ type CompanionCreate struct {
 	IDSpeciality     string `json:"id_speciality" bson:"id_speciality"`
 }
 type CompanionResponse struct {
-	ID               string     `json:"_id,omitempty" bson:"_id,omitempty"`
+	ID               string     `json:"id,omitempty" bson:"id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`

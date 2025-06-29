@@ -123,7 +123,7 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDBMongo] {
 	return types.ResultOk(session)
 }
 func (sessionType) GetAll() types.Result[[]models.SessionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted sessions
+	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted sessions
 	sessions := []models.SessionDBMongo{}
 
 	err := configs.DB.FindAll(filter, &sessions)
@@ -141,7 +141,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDBMongo] {
 	return types.ResultOk(sessions)
 }
 func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.DBIDFrom(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)

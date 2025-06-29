@@ -17,7 +17,7 @@ type UniversityCreate struct {
 
 // UniversityResponse represents the response body for a university
 type UniversityResponse struct {
-	ID        string     `json:"_id,omitempty" bson:"_id,omitempty"`
+	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`

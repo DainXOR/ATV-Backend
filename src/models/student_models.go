@@ -77,7 +77,7 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 		PhoneNumber:      user.PhoneNumber,
 		CreatedAt:        TimeNow(),
 		UpdatedAt:        TimeNow(),
-		DeletedAt:        TimeZero(), // DeletedAt is nil by default, indicating the user is not deleted
+		DeletedAt:        TimeZero(),
 	}
 }
 

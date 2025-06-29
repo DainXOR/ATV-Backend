@@ -32,7 +32,7 @@ type SessionCreate struct {
 
 // SessionResponse represents the response body for a session
 type SessionResponse struct {
-	ID                  string     `json:"_id,omitempty" bson:"_id,omitempty"`
+	ID                  string     `json:"id,omitempty" bson:"id,omitempty"`
 	IDStudent           string     `json:"id_student,omitempty" bson:"id_student,omitempty"`
 	StudentName         string     `json:"name,omitempty" bson:"name,omitempty"`
 	StudentSurname      string     `json:"surname,omitempty" bson:"surname,omitempty"`
@@ -58,6 +58,7 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		Date:                u.Date,
 		CreatedAt:           TimeNow(),
 		UpdatedAt:           TimeNow(),
+		DeletedAt:           TimeZero(),
 	}
 
 	if !EnsureID(u.IDStudent, &obj.IDStudent, "IDStudent") ||
