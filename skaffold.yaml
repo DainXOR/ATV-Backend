@@ -11,8 +11,10 @@ profiles:
       platforms: ["linux/amd64"]
       artifacts:
         - image: gcr.io/services-experiments/atv-back
+          context: src/
           docker:
-            dockerfile: docker/Dockerfile
+            dockerfile: Dockerfile
+          sync: {} 
     deploy:
       cloudrun:
         projectid: services-experiments
