@@ -94,7 +94,7 @@ func (u SessionDBMongo) ToResponse() SessionResponse {
 		ID:                  u.ID.Hex(),
 		IDStudent:           u.IDStudent.Hex(),
 		StudentName:         u.StudentName,
-		StudentSurname:      u.CompanionName,
+		StudentSurname:      u.StudentSurname,
 		IDCompanion:         u.IDCompanion.Hex(),
 		CompanionName:       u.CompanionName,
 		CompanionSurname:    u.CompanionSurname,
