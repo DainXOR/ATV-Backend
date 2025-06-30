@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"dainxor/atv/test"
+	"dainxor/atv/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,10 +9,10 @@ import (
 func TestRoutes(router *gin.Engine) {
 	testRouter := router.Group("api/test")
 	{
-		testRouter.GET("/get", test.Get)
-		testRouter.POST("/post", test.Post)
-		testRouter.PUT("/put", test.Put)
-		testRouter.PATCH("/patch", test.Patch)
-		testRouter.DELETE("/del", test.Delete)
+		testRouter.GET("/get", controller.Test.Get)
+		testRouter.POST("/post", controller.Test.Post)
+		testRouter.PUT("/put", controller.Test.Put)
+		testRouter.PATCH("/patch", controller.Test.Patch)
+		testRouter.DELETE("/del", controller.Test.Delete)
 	}
 }

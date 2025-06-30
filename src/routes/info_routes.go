@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InfoRoutes(router *gin.Engine, apiVersion string, routesVersion uint) {
+func InfoRoutes(router *gin.Engine, apiVersion string, routesVersion uint64) {
 	routes := gin.H{
 		"info":               "/api/info/",
 		"info ping":          "/api/info/ping",

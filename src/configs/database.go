@@ -74,25 +74,6 @@ func (db) Gorm() *gormType {
 func (db) Mongo() *mongoType {
 	return &mongoT
 }
-
-func (gormType) DB() *gorm.DB {
-	return DB.Gorm().db
-}
-
-func (mongoType) DB() *mongo.Database {
-	return DB.Mongo().db
-}
-func (mongoType) In(name string) *mongo.Collection {
-	return DB.Mongo().DB().Collection(name)
-}
-func (mongoType) From(v models.DBModelInterface) *mongo.Collection {
-	// Use reflection to get the collection name from the struct
-	collectionName := v.TableName()
-	return DB.Mongo().In(collectionName)
-}
-func (mongoType) Context() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), 2*time.Second)
-}
 func (mongoType) Disconnect() {
 	if DB.Mongo().disconectFunc != nil {
 		DB.Mongo().disconectFunc()
@@ -101,15 +82,34 @@ func (mongoType) Disconnect() {
 	}
 }
 
-func (mongoType) FindOne(filter any, result models.DBModelInterface) error {
-	ctx, cancel := DB.Mongo().Context()
+func (db) GormDB() *gorm.DB {
+	return DB.Gorm().db
+}
+
+func (db) MongoDB() *mongo.Database {
+	return DB.Mongo().db
+}
+func (db) In(name string) *mongo.Collection {
+	return DB.MongoDB().Collection(name)
+}
+func (db) From(v models.DBModelInterface) *mongo.Collection {
+	// Use reflection to get the collection name from the struct
+	collectionName := v.TableName()
+	return DB.In(collectionName)
+}
+func (db) Context() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 10*time.Second)
+}
+
+func (db) FindOne(filter any, result models.DBModelInterface) error {
+	ctx, cancel := DB.Context()
 	defer cancel()
 
-	return DB.Mongo().From(result).FindOne(ctx, filter).Decode(result)
+	return DB.From(result).FindOne(ctx, filter).Decode(result)
 }
-func (mongoType) FindAll(filter any, result any) error {
-	logger.Lava(1, "This mf should be refactored to use models.DBModelInterface instead of any in the result")
-	ctx, cancel := DB.Mongo().Context()
+func (db) FindAll(filter any, result any) error {
+	logger.Lava("0.1.1", "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
+	ctx, cancel := DB.Context()
 	defer cancel()
 
 	eType, err := utils.SliceType(result)
@@ -122,7 +122,7 @@ func (mongoType) FindAll(filter any, result any) error {
 		logger.Fatal("Result type does NOT IMPLEMENT TableName method")
 	}
 
-	cursor, err := DB.Mongo().From(iType).Find(ctx, filter)
+	cursor, err := DB.From(iType).Find(ctx, filter)
 	if err != nil {
 		logger.Error("Failed to find documents:", err)
 		return err
@@ -132,24 +132,40 @@ func (mongoType) FindAll(filter any, result any) error {
 	return cursor.All(ctx, result)
 }
 
-func (mongoType) InsertOne(document models.DBModelInterface) (*mongo.InsertOneResult, error) {
-	ctx, cancel := DB.Mongo().Context()
+func (db) InsertOne(document models.DBModelInterface) (*mongo.InsertOneResult, error) {
+	ctx, cancel := DB.Context()
 	defer cancel()
 
-	return DB.Mongo().From(document).InsertOne(ctx, document)
+	return DB.From(document).InsertOne(ctx, document)
 }
-
-func (mongoType) PatchOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
-	ctx, cancel := DB.Mongo().Context()
+func (db) UpdateOne(filter any, update any, result models.DBModelInterface) (*mongo.UpdateResult, error) {
+	ctx, cancel := DB.Context()
 	defer cancel()
 
-	updateResult, err := DB.Mongo().From(result).UpdateOne(ctx, filter, update)
+	updateResult, err := DB.From(result).UpdateOne(ctx, filter, update)
+	if err != nil {
+		logger.Error("Failed to update document:", err)
+		return nil, err
+	}
+
+	err = DB.FindOne(filter, result)
+	if err != nil {
+		logger.Error("Failed to find updated document:", err)
+		return nil, err
+	}
+	return updateResult, nil
+}
+func (db) PatchOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
+	ctx, cancel := DB.Context()
+	defer cancel()
+
+	updateResult, err := DB.From(result).UpdateOne(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to update document:", err)
 		return types.ResultErr[mongo.UpdateResult](err)
 	}
 
-	err = DB.Mongo().FindOne(filter, result)
+	err = DB.FindOne(filter, result)
 
 	return types.ResultOf(*updateResult, err, err != nil)
 }
@@ -158,7 +174,7 @@ func (mongoType) PatchOne(filter any, update any, result models.DBModelInterface
 // and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	logger.Lava(1, "Remove individual database environment variables.")
+	logger.Lava("0.1.1", "Remove individual database environment variables.")
 	envUser := "DB_USER"
 	envPass := "DB_PASSWORD"
 	envName := "DB_NAME"
@@ -187,7 +203,7 @@ func (db) loadDBConfig() {
 		DB.dbType = DB.Types().Default()
 	}
 
-	v := logger.Lava(1, "Loading database configuration from individual environment variables")
+	v := logger.Lava("0.1.1", "Loading database configuration from individual environment variables")
 	v.LavaStart()
 	host, exist := os.LookupEnv(envHost)
 	if exist {
@@ -267,7 +283,7 @@ func (db) EnvInit() error {
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectPostgresEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	v := logger.Lava(1, "Using individual database environment variables")
+	v := logger.Lava("0.1.1", "Using individual database environment variables")
 	v.LavaStart()
 	if exist && useTesting != "TRUE" {
 		DB.ConnectPostgres(
@@ -294,7 +310,7 @@ func (db) ConnectPostgresEnv() {
 // It uses the gorm library to establish the connection
 func (db) ConnectPostgres(host string, user string, password string, dbname string, port string) {
 	var err error
-	v := logger.Lava(1, "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
+	v := logger.Lava("0.1.1", "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
 	v.LavaStart()
 	dsn := "host=" + host +
 		" user=" + user +
@@ -333,7 +349,7 @@ func (db) ConnectSQLite(dbname string) {
 // ConnectMongoDBEnv connects to the MongoDB database using environment variables
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
-	logger.Lava(1, "Refactor getting MongoDB connection string to be here")
+	logger.Lava("0.1.1", "Refactor getting MongoDB connection string to be here")
 	DB.ConnectMongoDB(DB.connectionString)
 }
 
@@ -351,7 +367,7 @@ func (db) ConnectMongoDB(conectionString string) {
 		logger.Fatal(err)
 	}
 
-	logger.Lava(1, "Clean up this code")
+	logger.Lava("0.1.1", "Clean up this code")
 	// Call Ping to verify that the deployment is up and the Client was
 	// configured successfully. As mentioned in the Ping documentation, this
 	// reduces application resiliency as the server may be temporarily
@@ -402,7 +418,7 @@ func (db) CreateDatabase() error {
 func (db) CreatePostgresDatabase() error {
 	var exists bool
 	checkQuery := "SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = ?)"
-	if err := DB.Gorm().DB().Raw(checkQuery, DB.name).Scan(&exists).Error; err != nil {
+	if err := DB.GormDB().Raw(checkQuery, DB.name).Scan(&exists).Error; err != nil {
 		logger.Error("Error checking database existence: ", err)
 		return err
 	}
@@ -414,7 +430,7 @@ func (db) CreatePostgresDatabase() error {
 
 	// Create the new database
 	createQuery := fmt.Sprintf("CREATE DATABASE \"%s\"", DB.name)
-	if err := DB.Gorm().DB().Exec(createQuery).Error; err != nil {
+	if err := DB.GormDB().Exec(createQuery).Error; err != nil {
 		logger.Error("failed to create database", DB.name, ": ", err)
 		return fmt.Errorf("failed to create database '%s': %w", DB.name, err)
 	}
@@ -444,7 +460,7 @@ func (db) Migrate(models ...any) {
 
 	if DB.dbType == DB.Types().Postgres() {
 		for _, model := range models {
-			err := DB.Gorm().DB().AutoMigrate(model)
+			err := DB.GormDB().AutoMigrate(model)
 
 			if err != nil {
 				logger.Error("Error migrating model: ", err)
@@ -462,7 +478,7 @@ func (db) Migrate(models ...any) {
 
 // Close closes the database connection
 func (db) ClosePostgres() {
-	sqlDB, err := DB.Gorm().DB().DB()
+	sqlDB, err := DB.GormDB().DB()
 	if err != nil {
 		logger.Error("Error getting SQL DB: ", err)
 		return

@@ -9,37 +9,37 @@ import (
 )
 
 func StudentRoutes(router *gin.Engine) {
-	// Grouping the user routes under "api/v0/user"
+	// Grouping the student routes under "api/v#/student"
 	// This allows for better organization and versioning of the API
 	// Grouping can also be done inside other groups
 	router.Group("api/v0/user").Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().MovedPermanently(),
 			types.EmptyResponse(
-				logger.DeprecateMsg(0, 1, "Use /api/v1/student/ instead"),
+				logger.DeprecateMsg("0.0.3", "0.1.0", "Use /api/v1/student/ instead"),
 			),
 		)
 	})
 
-	userRouter := router.Group("api/v0/student")
+	studentRouter := router.Group("api/v0/student")
 	{
-		userRouter.GET("/:id", controller.Student.GetByIDGorm)
-		userRouter.GET("/all", controller.Student.GetAllGorm)
+		studentRouter.GET("/:id", controller.Student.GetByIDGorm)
+		studentRouter.GET("/all", controller.Student.GetAllGorm)
 
-		userRouter.POST("/", controller.Student.CreateGorm)
+		studentRouter.POST("/", controller.Student.CreateGorm)
 	}
-	userRouter = router.Group("api/v1/student")
+	studentRouter = router.Group("api/v1/student")
 	{
-		userRouter.GET("/:id", controller.Student.GetByIDMongo)
-		userRouter.GET("/all", controller.Student.GetAllMongo)
+		studentRouter.GET("/:id", controller.Student.GetByIDMongo)
+		studentRouter.GET("/all", controller.Student.GetAllMongo)
 
-		userRouter.POST("/", controller.Student.CreateMongo)
+		studentRouter.POST("/", controller.Student.CreateMongo)
 
-		userRouter.PUT("/:id", controller.Student.UpdateMongo)
+		studentRouter.PUT("/:id", controller.Student.UpdateMongo)
 
-		userRouter.PATCH("/:id", controller.Student.PatchMongo)
+		studentRouter.PATCH("/:id", controller.Student.PatchMongo)
 
-		userRouter.DELETE("/:id", controller.Student.DeleteByID)
-		//userRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
+		studentRouter.DELETE("/:id", controller.Student.DeleteByID)
+		//studentRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
 
 	}
 }

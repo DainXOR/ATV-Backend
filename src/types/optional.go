@@ -31,7 +31,7 @@ func (o Optional[T]) Get() T {
 	return o.value
 }
 
-func (o Optional[T]) GetOrElse(defaultValue T) T {
+func (o Optional[T]) GetOr(defaultValue T) T {
 	if o.present {
 		return o.value
 	}
