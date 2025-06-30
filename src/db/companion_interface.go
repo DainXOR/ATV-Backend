@@ -5,7 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"dainxor/atv/utils"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -56,9 +55,9 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDBMongo] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var companionF models.CompanionDBMongoReceiver
+	var companion models.CompanionDBMongo
 
-	err = configs.DB.FindOne(filter, &companionF)
+	err = configs.DB.FindOne(filter, &companion)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -81,11 +80,11 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDBMongo] {
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(companionF.ToDB())
+	return types.ResultOk(companion)
 }
 func (companionType) GetByNumberID(idNumber string) types.Result[models.CompanionDBMongo] {
 	filter := bson.D{{Key: "id_number", Value: idNumber}}
-	var companion models.CompanionDBMongoReceiver
+	var companion models.CompanionDBMongo
 
 	err := configs.DB.FindOne(filter, &companion)
 	if err != nil {
@@ -109,13 +108,13 @@ func (companionType) GetByNumberID(idNumber string) types.Result[models.Companio
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(companion.ToDB())
+	return types.ResultOk(companion)
 }
 func (companionType) GetByEmail(email string) types.Result[models.CompanionDBMongo] {
 	filter := bson.D{{Key: "email", Value: email}}
-	var companionF models.CompanionDBMongoReceiver
+	var companion models.CompanionDBMongo
 
-	err := configs.DB.FindOne(filter, &companionF)
+	err := configs.DB.FindOne(filter, &companion)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -138,13 +137,13 @@ func (companionType) GetByEmail(email string) types.Result[models.CompanionDBMon
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(companionF.ToDB())
+	return types.ResultOk(companion)
 }
 func (companionType) GetAll() types.Result[[]models.CompanionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted companions
-	companionsR := models.CompanionDBMongo{}.ReceiverList()
+	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted companions
+	companions := []models.CompanionDBMongo{}
 
-	err := configs.DB.FindAll(filter, &companionsR)
+	err := configs.DB.FindAll(filter, &companions)
 	if err != nil {
 		logger.Error("Failed to get all companions from MongoDB:", err)
 		httpErr := types.ErrorInternal(
@@ -155,7 +154,6 @@ func (companionType) GetAll() types.Result[[]models.CompanionDBMongo] {
 		return types.ResultErr[[]models.CompanionDBMongo](&httpErr)
 	}
 
-	companions := utils.Map(companionsR, models.CompanionDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved", len(companions), "companions from MongoDB database")
 	return types.ResultOk(companions)
 }
@@ -175,9 +173,9 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 
 	filter := bson.D{{Key: "_id", Value: oid}}
 	update := bson.D{{Key: "$set", Value: companion.ToUpdate()}}
-	companionDB := companion.ToUpdate().Receiver()
+	companionDB := companion.ToUpdate()
 
-	result := configs.DB.PatchOne(filter, update, companionDB)
+	result := configs.DB.PatchOne(filter, update, &companionDB)
 	// .From(models.CompanionDBMongo{}).UpdateOne(ctx, filter, update)
 
 	if result.IsErr() {
@@ -201,7 +199,7 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -240,9 +238,8 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 
 	filter := bson.D{{Key: "_id", Value: oid}}
 	update := bson.D{{Key: "$set", Value: companionDB}}
-	receiver := companionDB.Receiver()
 
-	result := configs.DB.PatchOne(filter, update, &receiver)
+	result := configs.DB.PatchOne(filter, update, &companionDB)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -265,7 +262,7 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -274,7 +271,7 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(receiver.ToDB())
+	return types.ResultOk(companionDB)
 }
 
 func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo] {
@@ -295,9 +292,9 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 	ctx, cancel := configs.DB.Context()
 	defer cancel()
 
-	var deletedCompanion models.CompanionDBMongoReceiver
+	var companion models.CompanionDBMongo
 	//result, err := configs.DB.UpdateOne(filter, update, deletedCompanion)
-	v := logger.Lava(1, "Use the code above to update the companion with deleted_at field")
+	v := logger.Lava("0.1.1", "Use the code above to update the companion with deleted_at field")
 	v.LavaStart()
 	result, err := configs.DB.From(models.CompanionDBMongo{}).UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -318,7 +315,7 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	err = configs.DB.FindOne(filter, &deletedCompanion)
+	err = configs.DB.FindOne(filter, &companion)
 	if err != nil {
 		logger.Error("Failed to retrieve deleted companion: ", err)
 		httpErr := types.ErrorInternal(
@@ -331,7 +328,7 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 
 	v.LavaEnd()
 
-	return types.ResultOk(deletedCompanion.ToDB())
+	return types.ResultOk(companion)
 }
 func (companionType) DeletePermanentByID(id string) types.Result[models.CompanionDBMongo] {
 	logger.Warning("Permanently deleting companion by ID: ", id)
@@ -351,7 +348,7 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 	ctx, cancel := configs.DB.Context()
 	defer cancel()
 
-	var companion models.CompanionDBMongoReceiver
+	var companion models.CompanionDBMongo
 	err = configs.DB.FindOne(filter, &companion)
 	if err != nil {
 		logger.Debug("Failed to find companion for permanent deletion: ", err)
@@ -392,7 +389,7 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 		return types.ResultErr[models.CompanionDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(companion.ToDB())
+	return types.ResultOk(companion)
 }
 func (companionType) DeletePermanentAll() types.Result[[]models.CompanionDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}

@@ -98,7 +98,7 @@ func (db) From(v models.DBModelInterface) *mongo.Collection {
 	return DB.In(collectionName)
 }
 func (db) Context() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), 2*time.Second)
+	return context.WithTimeout(context.Background(), 10*time.Second)
 }
 
 func (db) FindOne(filter any, result models.DBModelInterface) error {
@@ -108,7 +108,7 @@ func (db) FindOne(filter any, result models.DBModelInterface) error {
 	return DB.From(result).FindOne(ctx, filter).Decode(result)
 }
 func (db) FindAll(filter any, result any) error {
-	logger.Lava(1, "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
+	logger.Lava("0.1.1", "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
 	ctx, cancel := DB.Context()
 	defer cancel()
 
@@ -174,7 +174,7 @@ func (db) PatchOne(filter any, update any, result models.DBModelInterface) types
 // and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	logger.Lava(1, "Remove individual database environment variables.")
+	logger.Lava("0.1.1", "Remove individual database environment variables.")
 	envUser := "DB_USER"
 	envPass := "DB_PASSWORD"
 	envName := "DB_NAME"
@@ -203,7 +203,7 @@ func (db) loadDBConfig() {
 		DB.dbType = DB.Types().Default()
 	}
 
-	v := logger.Lava(1, "Loading database configuration from individual environment variables")
+	v := logger.Lava("0.1.1", "Loading database configuration from individual environment variables")
 	v.LavaStart()
 	host, exist := os.LookupEnv(envHost)
 	if exist {
@@ -283,7 +283,7 @@ func (db) EnvInit() error {
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectPostgresEnv() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	v := logger.Lava(1, "Using individual database environment variables")
+	v := logger.Lava("0.1.1", "Using individual database environment variables")
 	v.LavaStart()
 	if exist && useTesting != "TRUE" {
 		DB.ConnectPostgres(
@@ -310,7 +310,7 @@ func (db) ConnectPostgresEnv() {
 // It uses the gorm library to establish the connection
 func (db) ConnectPostgres(host string, user string, password string, dbname string, port string) {
 	var err error
-	v := logger.Lava(1, "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
+	v := logger.Lava("0.1.1", "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
 	v.LavaStart()
 	dsn := "host=" + host +
 		" user=" + user +
@@ -349,7 +349,7 @@ func (db) ConnectSQLite(dbname string) {
 // ConnectMongoDBEnv connects to the MongoDB database using environment variables
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
-	logger.Lava(1, "Refactor getting MongoDB connection string to be here")
+	logger.Lava("0.1.1", "Refactor getting MongoDB connection string to be here")
 	DB.ConnectMongoDB(DB.connectionString)
 }
 
@@ -367,7 +367,7 @@ func (db) ConnectMongoDB(conectionString string) {
 		logger.Fatal(err)
 	}
 
-	logger.Lava(1, "Clean up this code")
+	logger.Lava("0.1.1", "Clean up this code")
 	// Call Ping to verify that the deployment is up and the Client was
 	// configured successfully. As mentioned in the Ping documentation, this
 	// reduces application resiliency as the server may be temporarily

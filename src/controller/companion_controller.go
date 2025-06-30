@@ -268,7 +268,7 @@ func (companionType) GetByIDGorm(c *gin.Context) {
 	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
+			logger.DeprecateMsg("0.1.1", "0.1.2", "Use /api/v1/companion/:id instead"),
 		),
 	)
 }
@@ -276,7 +276,7 @@ func (companionType) GetAllGorm(c *gin.Context) {
 	c.Header("Location", "/api/v1/companion/all")
 	c.JSON(http.StatusOK,
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/all instead"),
+			logger.DeprecateMsg("0.1.1", "0.1.2", "Use /api/v1/companion/all instead"),
 		),
 	)
 }
@@ -286,7 +286,7 @@ func (companionType) CreateGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/companion instead"),
+			logger.DeprecateMsg("0.1.1", "0.1.2", "Use /api/v1/companion instead"),
 		),
 	)
 }
@@ -298,7 +298,7 @@ func (companionType) UpdateGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
+			logger.DeprecateMsg("0.1.1", "0.1.2", "Use /api/v1/companion/:id instead"),
 		),
 	)
 }
@@ -310,7 +310,7 @@ func (companionType) PatchGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg(1, 2, "Use /api/v1/companion/:id instead"),
+			logger.DeprecateMsg("0.1.1", "0.1.2", "Use /api/v1/companion/:id instead"),
 		),
 	)
 }

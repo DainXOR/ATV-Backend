@@ -1,4 +1,4 @@
-package test
+package controller
 
 import (
 	"net/http"
@@ -6,31 +6,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Get(c *gin.Context) {
+type testType struct{}
+
+var Test testType
+
+func (testType) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "get test",
 	})
 }
 
-func Post(c *gin.Context) {
+func (testType) Post(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "post test",
 	})
 }
 
-func Put(c *gin.Context) {
+func (testType) Put(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "put test",
 	})
 }
 
-func Delete(c *gin.Context) {
+func (testType) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "delete test",
 	})
 }
 
-func Patch(c *gin.Context) {
+func (testType) Patch(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "patch test",
 	})

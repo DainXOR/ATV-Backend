@@ -5,7 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"dainxor/atv/utils"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -42,7 +41,7 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 }
 
 func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
-	oid, err := bson.ObjectIDFromHex(id)
+	oid, err := models.DBIDFrom(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -56,9 +55,9 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var studentF models.StudentDBMongoReceiver
+	var student models.StudentDBMongo
 
-	err = configs.DB.FindOne(filter, &studentF)
+	err = configs.DB.FindOne(filter, &student)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -81,11 +80,11 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(studentF.ToDB())
+	return types.ResultOk(student)
 }
 func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "id_number", Value: idNumber}}
-	var student models.StudentDBMongoReceiver
+	var student models.StudentDBMongo
 
 	err := configs.DB.FindOne(filter, &student)
 	if err != nil {
@@ -109,13 +108,13 @@ func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDBM
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(student.ToDB())
+	return types.ResultOk(student)
 }
 func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] {
 	filter := bson.D{{Key: "email", Value: email}}
-	var studentF models.StudentDBMongoReceiver
+	var student models.StudentDBMongo
 
-	err := configs.DB.FindOne(filter, &studentF)
+	err := configs.DB.FindOne(filter, &student)
 	if err != nil {
 		var httpErr types.HttpError
 
@@ -138,13 +137,13 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] 
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(studentF.ToDB())
+	return types.ResultOk(student)
 }
 func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted students
-	studentsR := models.StudentDBMongo{}.ReceiverList()
+	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted students
+	students := []models.StudentDBMongo{}
 
-	err := configs.DB.FindAll(filter, &studentsR)
+	err := configs.DB.FindAll(filter, &students)
 	if err != nil {
 		logger.Error("Failed to get all students from MongoDB:", err)
 		httpErr := types.ErrorInternal(
@@ -155,7 +154,6 @@ func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
 		return types.ResultErr[[]models.StudentDBMongo](&httpErr)
 	}
 
-	students := utils.Map(studentsR, models.StudentDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved", len(students), "students from MongoDB database")
 	return types.ResultOk(students)
 }
@@ -173,12 +171,11 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
+	studentDB := student.ToUpdate()
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: student.ToUpdate()}}
-	studentDB := student.ToUpdate().Receiver()
+	update := bson.D{{Key: "$set", Value: studentDB}}
 
-	result := configs.DB.PatchOne(filter, update, studentDB)
-	// .From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
+	result := configs.DB.PatchOne(filter, update, &studentDB)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -201,7 +198,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -210,7 +207,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return Student.GetByID(id)
+	return types.ResultOk(studentDB)
 }
 
 func (studentType) PatchByID(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
@@ -240,9 +237,8 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 
 	filter := bson.D{{Key: "_id", Value: oid}}
 	update := bson.D{{Key: "$set", Value: studentDB}}
-	receiver := studentDB.Receiver()
 
-	result := configs.DB.PatchOne(filter, update, &receiver)
+	result := configs.DB.PatchOne(filter, update, &studentDB)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -265,7 +261,7 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -274,7 +270,7 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(receiver.ToDB())
+	return types.ResultOk(studentDB)
 }
 
 func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
@@ -295,9 +291,9 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 	ctx, cancel := configs.DB.Context()
 	defer cancel()
 
-	var deletedStudent models.StudentDBMongoReceiver
+	var deletedStudent models.StudentDBMongo
 	//result, err := configs.DB.UpdateOne(filter, update, deletedStudent)
-	v := logger.Lava(1, "Use the code above to update the student with deleted_at field")
+	v := logger.Lava("0.1.1", "Use the code above to update the student with deleted_at field")
 	v.LavaStart()
 	result, err := configs.DB.From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -331,7 +327,7 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 
 	v.LavaEnd()
 
-	return types.ResultOk(deletedStudent.ToDB())
+	return types.ResultOk(deletedStudent)
 }
 func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBMongo] {
 	logger.Warning("Permanently deleting student by ID: ", id)
@@ -351,7 +347,7 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBM
 	ctx, cancel := configs.DB.Context()
 	defer cancel()
 
-	var student models.StudentDBMongoReceiver
+	var student models.StudentDBMongo
 	err = configs.DB.FindOne(filter, &student)
 	if err != nil {
 		logger.Debug("Failed to find student for permanent deletion: ", err)
@@ -392,7 +388,7 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDBM
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(student.ToDB())
+	return types.ResultOk(student)
 }
 func (studentType) DeletePermanentAll() types.Result[[]models.StudentDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}

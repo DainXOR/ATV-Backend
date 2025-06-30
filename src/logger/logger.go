@@ -2,6 +2,7 @@ package logger
 
 import (
 	"dainxor/atv/utils"
+	"regexp"
 
 	"fmt"
 	"log"
@@ -39,6 +40,8 @@ const (
 	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
 	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
 	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
+
+	DEFAULT_APP_VERSION = "0.1.0" // Default application version
 
 	TXT_BLACK   = "30m"
 	TXT_RED     = "31m"
@@ -88,7 +91,11 @@ type dnxLogger struct {
 	LogToConsole bool
 	LogLevels    logLevel
 	logAttempts  int
-	appVersion   uint
+
+	appVersion      string
+	appVersionMajor uint64
+	appVersionMinor uint64
+	appVersionPatch uint64
 }
 
 var dnxLoggerInstance *dnxLogger
@@ -110,13 +117,71 @@ func colorWith(txt string, colorString string) string {
 	return colorString + txt + CLR_RESET
 }
 
+func calcMajorVersion(version string) uint64 {
+	extractedStr := utils.Extract("", version, ".")
+	num, _ := strconv.ParseUint(extractedStr, 10, 64)
+	return num
+}
+func calcMinorVersion(version string) uint64 {
+	extractedStr := utils.Extract(".", version, ".")
+	num, _ := strconv.ParseUint(extractedStr, 10, 64)
+	return num
+}
+func calcPatchVersion(version string) uint64 {
+	extractedStr := utils.Extract(".", version, ".")
+	num, _ := strconv.ParseUint(extractedStr, 10, 64)
+	return num
+}
+func compareVersions(ver1, ver2 string) int8 {
+	major1 := calcMajorVersion(ver1)
+	minor1 := calcMinorVersion(ver1)
+	patch1 := calcPatchVersion(ver1)
+
+	major2 := calcMajorVersion(ver2)
+	minor2 := calcMinorVersion(ver2)
+	patch2 := calcPatchVersion(ver2)
+
+	return compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2)
+}
+func compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2 uint64) int8 {
+	if major1 > major2 {
+		return 1
+	} else if major1 < major2 {
+		return -1
+	}
+
+	if minor1 > minor2 {
+		return 1
+	} else if minor1 < minor2 {
+		return -1
+	}
+
+	if patch1 > patch2 {
+		return 1
+	} else if patch1 < patch2 {
+		return -1
+	}
+
+	return 0
+}
+func addToVersion(version string, major, minor, patch uint64) string {
+	majorVersion := calcMajorVersion(version) + major
+	minorVersion := calcMinorVersion(version) + minor
+	patchVersion := calcPatchVersion(version) + patch
+
+	return fmt.Sprintf("%d.%d.%d", majorVersion, minorVersion, patchVersion)
+}
+
 func Init() {
 	dnxLoggerInstance = &dnxLogger{
-		LogToFile:    DEFAULT_LOGS_TO_FILE,
-		LogToConsole: DEFAULT_LOGS_TO_CONSOLE,
-		LogLevels:    DEFAULT_LOG_LEVEL,
-		logAttempts:  0,
-		appVersion:   0,
+		LogToFile:       DEFAULT_LOGS_TO_FILE,
+		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
+		LogLevels:       DEFAULT_LOG_LEVEL,
+		logAttempts:     0,
+		appVersion:      DEFAULT_APP_VERSION,
+		appVersionMajor: calcMajorVersion(DEFAULT_APP_VERSION),
+		appVersionMinor: calcMinorVersion(DEFAULT_APP_VERSION),
+		appVersionPatch: calcPatchVersion(DEFAULT_APP_VERSION),
 
 		DebugLogger:   log.New(os.Stdout, "|"+colorWith(" DEBUG ", CLR_DEBUG)+"| ", log.LstdFlags),
 		InfoLogger:    log.New(os.Stdout, "|"+colorWith(" INFO ", CLR_INFO)+"| ", log.LstdFlags),
@@ -265,11 +330,21 @@ func SetLogToConsole(value bool) {
 	get().LogToConsole = value
 }
 
-func SetAppVersion(version uint) {
+func SetAppVersion(version string) {
+	regex := regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+
+	if !regex.MatchString(version) {
+		Warning("Invalid app version format")
+		return
+	}
+
 	get().appVersion = version
+	get().appVersionMajor = calcMajorVersion(version)
+	get().appVersionMinor = calcMinorVersion(version)
+	get().appVersionPatch = calcPatchVersion(version)
 	Info("App version set to: ", version)
 }
-func AppVersion() uint {
+func AppVersion() string {
 	return get().appVersion
 }
 
@@ -547,48 +622,52 @@ func Fatal(v ...any) {
 	logFatal(false, v...)
 }
 
-func Deprecate(deprecatedVersion uint, removalVersion uint, v ...any) (bool, error) {
+func Deprecate(deprecatedVersion string, removalVersion string, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
 	deprecateTxt := colorWith(" DEPRECATED ", CLR_DEPRECATE)
 	reasonTxt := colorWith(" REASON : ", CLR_DEPR_REASON)
 
-	if AppVersion() >= removalVersion {
-		Fatal(deprecateTxt+": This feature has been removed in version ", removalVersion)
+	if compareVersions(AppVersion(), addToVersion(removalVersion, 0, 1, 0)) > 0 {
+		Fatal(deprecateTxt+": This feature has been removed in version", removalVersion)
 		Fatal(reasonTxt+":", args)
-		return false, fmt.Errorf("feature removed in version %d. %s", removalVersion, args)
 
-	} else if AppVersion() >= deprecatedVersion && AppVersion() < removalVersion {
+	} else if compareVersions(AppVersion(), removalVersion) >= 0 {
+		Error(deprecateTxt+": This feature has been removed in version ", removalVersion)
+		Error(reasonTxt+":", args)
+		return false, fmt.Errorf("feature removed in version %s. %s", removalVersion, args)
+
+	} else if compareVersions(AppVersion(), deprecatedVersion) >= 0 && compareVersions(AppVersion(), removalVersion) < 0 {
 		Warning(deprecateTxt+": This feature is marked for removal in version ", removalVersion)
 		Warning(reasonTxt+":", args)
-		return false, fmt.Errorf("feature deprecated in version %d, will be removed in version %d. %s", deprecatedVersion, removalVersion, args)
+		return false, fmt.Errorf("feature deprecated in version %s, will be removed in version %s. %s", deprecatedVersion, removalVersion, args)
 
-	} else if AppVersion() == deprecatedVersion {
+	} else if compareVersions(AppVersion(), deprecatedVersion) == 0 {
 		Warning(deprecateTxt + ": This feature will be removed in future versions")
 		Warning(reasonTxt+":", args)
-		return true, fmt.Errorf("feature deprecated in version %d. %s", deprecatedVersion, args)
+		return true, fmt.Errorf("feature deprecated in version %s. %s", deprecatedVersion, args)
 	}
 	return true, nil
 }
-func DeprecateMsg(deprecatedVersion uint, removalVersion uint, v ...any) string {
+func DeprecateMsg(deprecatedVersion string, removalVersion string, v ...any) string {
 	_, err := Deprecate(deprecatedVersion, removalVersion, v...)
 	return err.Error()
 }
 
 type volcano struct {
-	version uint
+	version string
 }
 
-func Lava(version uint, v ...any) volcano {
+func Lava(version string, v ...any) volcano {
 	args := utils.Join(v, " ")
 	lavaTxt := colorWith(" LAVA ", CLR_LAVA)
 	coldLavaTxt := colorWith(" COLD LAVA ", CLR_COLD_LAVA)
 	driedLavaTxt := colorWith(" DRIED LAVA ", CLR_DRIED_LAVA)
 
-	if AppVersion() == version {
+	if compareVersions(AppVersion(), version) == 0 {
 		Warning(lavaTxt+": Running code that should be removed, cleaned up or refactored. ", args)
-	} else if AppVersion() >= version+2 {
+	} else if compareVersions(AppVersion(), addToVersion(version, 0, 2, 0)) >= 0 {
 		Warning(coldLavaTxt+": This code must be refactored. ", args)
-	} else if AppVersion() > version+4 {
+	} else if compareVersions(AppVersion(), addToVersion(version, 0, 4, 0)) > 0 {
 		Error(driedLavaTxt+": This code should not be running as is, it is likely a bug. ", args)
 	}
 
@@ -603,9 +682,9 @@ func (v *volcano) LavaStart() {
 
 	if AppVersion() == v.version {
 		Warning(lavaTxt + ": Start of flow")
-	} else if AppVersion() >= v.version+2 {
+	} else if compareVersions(AppVersion(), addToVersion(v.version, 0, 2, 0)) >= 0 {
 		Warning(coldLavaTxt + ": Start of flow")
-	} else if AppVersion() > v.version+4 {
+	} else if compareVersions(AppVersion(), addToVersion(v.version, 0, 4, 0)) > 0 {
 		Error(driedLavaTxt + ": Start of lava cast")
 	}
 }
@@ -616,9 +695,9 @@ func (v *volcano) LavaEnd() {
 
 	if AppVersion() == v.version {
 		Warning(lavaTxt + ": End of flow")
-	} else if AppVersion() >= v.version+2 {
+	} else if compareVersions(AppVersion(), addToVersion(v.version, 0, 2, 0)) >= 0 {
 		Warning(coldLavaTxt + ": End of flow")
-	} else if AppVersion() > v.version+4 {
+	} else if compareVersions(AppVersion(), addToVersion(v.version, 0, 4, 0)) > 0 {
 		Error(driedLavaTxt + ": End of lava cast")
 	}
 }

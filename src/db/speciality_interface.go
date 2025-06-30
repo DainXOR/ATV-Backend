@@ -5,7 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -54,7 +53,7 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var speciality models.SpecialityDBMongoReceiver
+	var speciality models.SpecialityDBMongo
 
 	err = configs.DB.FindOne(filter, &speciality)
 	if err != nil {
@@ -79,13 +78,13 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(speciality.ToDB())
+	return types.ResultOk(speciality)
 }
 func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted specialities
-	usersR := models.SpecialityDBMongo{}.ReceiverList()
+	specialities := []models.SpecialityDBMongo{}
 
-	err := configs.DB.FindAll(filter, &usersR)
+	err := configs.DB.FindAll(filter, &specialities)
 	if err != nil {
 		logger.Error("Failed to get all specialities from MongoDB:", err)
 		httpErr := types.ErrorInternal(
@@ -96,7 +95,6 @@ func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
 		return types.ResultErr[[]models.SpecialityDBMongo](&httpErr)
 	}
 
-	specialities := utils.Map(usersR, models.SpecialityDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved", len(specialities), "specialities from MongoDB database")
 	return types.ResultOk(specialities)
 }

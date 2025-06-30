@@ -5,18 +5,12 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
 	"dainxor/atv/routes"
-	"strconv"
 
 	"cmp"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-)
-
-const (
-	DEFAULT_ROUTE_VERSION = 1       // Default version for the API routes
-	DEFAULT_API_VERSION   = "0.1.1" // Default version for the API
 )
 
 // Move this number so the deprecations are in sync with the API version
@@ -27,11 +21,10 @@ func init() {
 		logger.Warning("Error loading .env file: " + err.Error())
 	}
 
-	envVersion, _ := strconv.ParseUint(os.Getenv("ATV_ROUTE_VERSION"), 10, 32)
-	programVersion := uint(cmp.Or(envVersion, DEFAULT_ROUTE_VERSION))
+	configs.App.EnvInit() // Initialize application configurations
 
 	logger.EnvInit()
-	logger.SetAppVersion(programVersion)
+	logger.SetAppVersion(configs.App.ApiVersion())
 
 	configs.DB.EnvInit()
 	// configs.DB.Migrate(&models.StudentDBMongo{})
@@ -48,22 +41,24 @@ func address() string {
 
 func main() {
 	router := gin.Default()
-	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and log errors
+	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and logs a small trace
 	router.Use(middleware.CORSMiddleware())
+	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
 	routes.MainRoutes(router)
 
 	// Api routes
-	routes.InfoRoutes(router, DEFAULT_API_VERSION, logger.AppVersion()) // Routes for information about the API
-	routes.TestRoutes(router)                                           // Routes for testing purposes
+	routes.InfoRoutes(router, configs.App.ApiVersion(), configs.App.RoutesVersion()) // Routes for information about the API
+	routes.TestRoutes(router)                                                        // Routes for testing purposes
 
 	// Versioned API routes
-	routes.StudentRoutes(router)    // Routes for user management
-	routes.UniversityRoutes(router) // Routes for university management
-	routes.SpecialityRoutes(router) // Routes for speciality management
-	routes.CompanionRoutes(router)  // Routes for companion management
-	routes.SessionRoutes(router)    // Routes for session management
+	routes.StudentRoutes(router)
+	routes.UniversityRoutes(router)
+	routes.SpecialityRoutes(router)
+	routes.CompanionRoutes(router)
+	routes.SessionTypeRoutes(router)
+	routes.SessionRoutes(router)
 
 	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

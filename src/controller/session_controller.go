@@ -37,7 +37,7 @@ func (sessionType) Create(c *gin.Context) {
 	result := db.Session.Create(body)
 
 	if result.IsErr() {
-		logger.Error("Failed to create session in MongoDB: ", result.Error())
+		logger.Warning("Failed to create session in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,
@@ -88,7 +88,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 	studentID := c.Param("student_id")
 	logger.Debug("Getting all sessions by student ID: ", studentID)
 
-	result := db.Session.GetAll()
+	result := db.Session.GetAllByStudentID(studentID)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -101,10 +101,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 		return
 	}
 
-	filtered := utils.Filter(result.Value(), func(session models.SessionDBMongo) bool {
-		return session.IDStudent.Hex() == studentID
-	})
-	sessions := utils.Map(filtered, models.SessionDBMongo.ToResponse)
+	sessions := utils.Map(result.Value(), models.SessionDBMongo.ToResponse)
 
 	if len(sessions) == 0 {
 		logger.Warning("No sessions found for student ID in MongoDB database")

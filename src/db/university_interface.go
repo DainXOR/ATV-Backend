@@ -5,7 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -54,7 +53,7 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var university models.UniversityDBMongoReceiver
+	var university models.UniversityDBMongo
 
 	err = configs.DB.FindOne(filter, &university)
 	if err != nil {
@@ -79,13 +78,13 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 		return types.ResultErr[models.UniversityDBMongo](&httpErr)
 	}
 
-	return types.ResultOk(university.ToDB())
+	return types.ResultOk(university)
 }
 func (universityType) GetAll() types.Result[[]models.UniversityDBMongo] {
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted universities
-	usersR := models.UniversityDBMongo{}.ReceiverList()
+	universities := []models.UniversityDBMongo{}
 
-	err := configs.DB.FindAll(filter, &usersR)
+	err := configs.DB.FindAll(filter, &universities)
 	if err != nil {
 		logger.Error("Failed to get all universities from MongoDB:", err)
 		httpErr := types.ErrorInternal(
@@ -96,7 +95,6 @@ func (universityType) GetAll() types.Result[[]models.UniversityDBMongo] {
 		return types.ResultErr[[]models.UniversityDBMongo](&httpErr)
 	}
 
-	universities := utils.Map(usersR, models.UniversityDBMongoReceiver.ToDB)
 	logger.Debug("Retrieved", len(universities), "universities from MongoDB database")
 	return types.ResultOk(universities)
 }
