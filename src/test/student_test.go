@@ -1,13 +1,10 @@
 package main
 
 import (
-	"cmp"
 	"dainxor/atv/configs"
 	"dainxor/atv/db"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
-	"os"
-	"strconv"
 	"testing"
 
 	"github.com/joho/godotenv"
@@ -19,11 +16,11 @@ func init() {
 		logger.Warning("Error loading .env file: " + err.Error())
 	}
 
-	envVersion, _ := strconv.ParseUint(os.Getenv("ATV_ROUTE_VERSION"), 10, 32)
-	programVersion := uint64(cmp.Or(envVersion, 1))
+	//envVersion, _ := strconv.ParseUint(os.Getenv("ATV_ROUTE_VERSION"), 10, 32)
+	//programVersion := uint64(cmp.Or(envVersion, 1))
 
 	logger.EnvInit()
-	logger.SetAppVersion(programVersion)
+	logger.SetAppVersion("0.1.2")
 
 	configs.DB.EnvInit()
 	// configs.DB.Migrate(&models.StudentDBMongo{})

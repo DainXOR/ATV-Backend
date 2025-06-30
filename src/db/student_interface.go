@@ -198,7 +198,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -261,7 +261,7 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava(2, "Send a more proper code for no changes made")
+		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -293,7 +293,7 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 
 	var deletedStudent models.StudentDBMongo
 	//result, err := configs.DB.UpdateOne(filter, update, deletedStudent)
-	v := logger.Lava(1, "Use the code above to update the student with deleted_at field")
+	v := logger.Lava("0.1.1", "Use the code above to update the student with deleted_at field")
 	v.LavaStart()
 	result, err := configs.DB.From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
 	if err != nil {

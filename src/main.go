@@ -24,7 +24,7 @@ func init() {
 	configs.App.EnvInit() // Initialize application configurations
 
 	logger.EnvInit()
-	logger.SetAppVersion(configs.App.Version())
+	logger.SetAppVersion(configs.App.ApiVersion())
 
 	configs.DB.EnvInit()
 	// configs.DB.Migrate(&models.StudentDBMongo{})

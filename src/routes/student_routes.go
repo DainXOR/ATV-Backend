@@ -12,10 +12,10 @@ func StudentRoutes(router *gin.Engine) {
 	// Grouping the student routes under "api/v#/student"
 	// This allows for better organization and versioning of the API
 	// Grouping can also be done inside other groups
-	router.Group("api/v0/student").Any("", func(ctx *gin.Context) {
+	router.Group("api/v0/user").Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().MovedPermanently(),
 			types.EmptyResponse(
-				logger.DeprecateMsg(0, 1, "Use /api/v1/student/ instead"),
+				logger.DeprecateMsg("0.0.3", "0.1.0", "Use /api/v1/student/ instead"),
 			),
 		)
 	})

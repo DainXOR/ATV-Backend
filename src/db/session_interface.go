@@ -123,7 +123,7 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDBMongo] {
 	return types.ResultOk(session)
 }
 func (sessionType) GetAll() types.Result[[]models.SessionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted sessions
+	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted sessions
 	sessions := []models.SessionDBMongo{}
 
 	err := configs.DB.FindAll(filter, &sessions)
@@ -154,7 +154,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDBM
 		return types.ResultErr[[]models.SessionDBMongo](&httpErr)
 	}
 
-	filter := bson.D{{Key: "id_student", Value: oid}, {Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted sessions
+	filter := bson.D{{Key: "id_student", Value: oid}, models.Filter.NotDeleted()} // Filter to exclude deleted sessions
 	sessions := []models.SessionDBMongo{}
 
 	err = configs.DB.FindAll(filter, &sessions)
