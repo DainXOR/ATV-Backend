@@ -17,6 +17,17 @@ var Student studentType
 
 func (studentType) Create(student models.StudentCreate) types.Result[models.StudentDBMongo] {
 	studentDB := student.ToInsert()
+	if studentDB.IsEmpty() {
+		logger.Error("Error converting student to DB model")
+		httpErr := types.Error(
+			types.Http.C400().UnprocessableEntity(),
+			"Invalid value",
+			"Invalid student data",
+			"Student data: "+student.IDUniversity,
+		)
+		return types.ResultErr[models.StudentDBMongo](&httpErr)
+	}
+
 	result, err := configs.DB.InsertOne(studentDB)
 
 	if err != nil {
@@ -24,7 +35,7 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 		return types.ResultErr[models.StudentDBMongo](err)
 	}
 
-	studentDB.ID, err = models.DBIDFrom(result.InsertedID)
+	studentDB.ID, err = models.ID.ToDB(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
@@ -41,7 +52,7 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 }
 
 func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
-	oid, err := models.DBIDFrom(id)
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -140,7 +151,7 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDBMongo] 
 	return types.ResultOk(student)
 }
 func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted students
+	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted students
 	students := []models.StudentDBMongo{}
 
 	err := configs.DB.FindAll(filter, &students)
@@ -211,7 +222,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 }
 
 func (studentType) PatchByID(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToBson(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(

@@ -39,7 +39,7 @@ func (specialityType) Create(u models.SpecialityCreate) types.Result[models.Spec
 }
 
 func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToBson(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)

@@ -20,10 +20,20 @@ func Extract(prefix string, text string, suffix string) string {
 	}
 
 	for i := range size {
-		if prefix == "" || strings.HasPrefix(text[i:], prefix) {
+		hasPrefix := prefix != "" && strings.HasPrefix(text[i:], prefix)
+		if prefix == "" || hasPrefix {
+			if hasPrefix {
+				i += 1
+			}
+
 			for j := size; j >= 0; j-- {
-				if suffix == "" || strings.HasSuffix(text[i:j], suffix) {
-					return text[i+1 : j-1]
+				hasSuffix := suffix != "" && strings.HasSuffix(text[i:j], suffix)
+				if suffix == "" || hasSuffix {
+					if hasSuffix {
+						j -= 1
+					}
+
+					return text[i:j]
 				}
 			}
 		}

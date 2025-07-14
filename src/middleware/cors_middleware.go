@@ -15,10 +15,10 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func corsOwn() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000, https://fuzzy-fiesta-g6xqxp4w6vw296v-3000.app.github.dev/")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
@@ -37,7 +37,7 @@ func corsLib() gin.HandlerFunc {
 
 	return cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 		AllowWildcard:    true,
@@ -48,7 +48,7 @@ func corsLib() gin.HandlerFunc {
 func corsJamie() gin.HandlerFunc {
 	return jcors.Middleware(jcors.Config{
 		Origins:         "http://localhost:3000, https://fuzzy-fiesta-g6xqxp4w6vw296v-3000.app.github.dev/",
-		Methods:         "GET, PUT, POST, DELETE",
+		Methods:         "GET, PUT, POST, PATCH, DELETE",
 		RequestHeaders:  "Origin, Content-Type, Content-Length",
 		Credentials:     true,
 		ValidateHeaders: false,

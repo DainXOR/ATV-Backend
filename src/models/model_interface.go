@@ -18,6 +18,7 @@ import (
 // Yes, that's it, nothing else is required.
 type DBModelInterface interface {
 	TableName() string
+	IsEmpty() bool
 }
 
 type DBID = bson.ObjectID
@@ -53,13 +54,13 @@ func BsonIDFrom(id any) (bson.ObjectID, error) {
 // Change this if you decide to change the ID type in the database
 func DBIDFrom(id any) (DBID, error) {
 	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.ToDBID() instead")
-	return BsonIDFrom(id)
+	return ID.ToBson(id)
 }
 
 func OmitEmptyID(id string, result *DBID, idName string) bool {
 	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.OmitEmpty() instead")
 	if id != "" {
-		return EnsureID(id, result, idName)
+		return ID.Ensure(id, result, idName)
 	}
 	return true
 }
@@ -108,8 +109,10 @@ func (iID) ToBson(id any) (bson.ObjectID, error) {
 		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
 	}
 }
+
+// Change this if you decide to change the ID type in the database
 func (iID) ToDB(id any) (DBID, error) {
-	return DBIDFrom(id)
+	return ID.ToBson(id)
 }
 
 func (iID) Ensure(id string, result *DBID, idName string) bool {
@@ -173,8 +176,8 @@ func (iFilters) IDOf(idName string, id bson.ObjectID) bson.E {
 	return bson.E{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
 }
 func (iFilters) NotDeleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: TimeZero()} // Filter to exclude deleted records
+	return bson.E{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
 }
 func (iFilters) Deleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: bson.M{"$ne": TimeZero()}} // Filter to include deleted records
+	return bson.E{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
 }

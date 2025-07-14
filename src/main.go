@@ -1,36 +1,37 @@
 package main
 
 import (
-	"dainxor/atv/configs"
-	"dainxor/atv/logger"
-	"dainxor/atv/middleware"
-	"dainxor/atv/routes"
-
 	"cmp"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
+
+	//"github.com/joho/godotenv"
+
+	"dainxor/atv/configs"
+	"dainxor/atv/logger"
+	"dainxor/atv/middleware"
+	"dainxor/atv/routes"
 )
 
-// Move this number so the deprecations are in sync with the API version
+//var envErr = godotenv.Load()
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		logger.Warning("Error loading .env file: " + err.Error())
-	}
+	//if envErr != nil {
+	//	logger.Warning("Error loading .env file: " + envErr.Error())
+	//}
+	//if logger.UsingDefaults() {
+	//	logger.ReloadEnv()
+	//	configs.ReloadAppEnv()
+	//	configs.ReloadDBEnv()
+	//}
 
-	configs.App.EnvInit() // Initialize application configurations
-
-	logger.EnvInit()
 	logger.SetAppVersion(configs.App.ApiVersion())
 
-	configs.DB.EnvInit()
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")
-
 }
 
 // address returns the server address from the environment variable
@@ -40,6 +41,8 @@ func address() string {
 }
 
 func main() {
+	defer configs.DB.Close()
+
 	router := gin.Default()
 	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and logs a small trace
 	router.Use(middleware.CORSMiddleware())
@@ -49,8 +52,8 @@ func main() {
 	routes.MainRoutes(router)
 
 	// Api routes
-	routes.InfoRoutes(router, configs.App.ApiVersion(), configs.App.RoutesVersion()) // Routes for information about the API
-	routes.TestRoutes(router)                                                        // Routes for testing purposes
+	routes.InfoRoutes(router) // Routes for information about the API
+	routes.TestRoutes(router) // Routes for testing purposes
 
 	// Versioned API routes
 	routes.StudentRoutes(router)

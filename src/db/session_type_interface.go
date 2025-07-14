@@ -81,7 +81,7 @@ func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDBMongo
 	return types.ResultOk(sessionType)
 }
 func (sessionTypeType) GetAll() types.Result[[]models.SessionTypeDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted session types
+	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted session types
 	sessionTypes := []models.SessionTypeDBMongo{}
 
 	err := configs.DB.FindAll(filter, &sessionTypes)

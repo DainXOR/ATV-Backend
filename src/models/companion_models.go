@@ -85,6 +85,9 @@ func (c CompanionDBMongo) ToResponse() CompanionResponse {
 		UpdatedAt:        c.UpdatedAt,
 	}
 }
+func (c CompanionDBMongo) IsEmpty() bool {
+	return c == (CompanionDBMongo{})
+}
 
 func (CompanionDBMongo) TableName() string {
 	return "companions"
