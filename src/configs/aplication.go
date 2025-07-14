@@ -3,14 +3,14 @@ package configs
 import (
 	"cmp"
 	"dainxor/atv/logger"
-	"dainxor/atv/utils"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
 	DEFAULT_ROUTE_VERSION = "1"     // Default version for the API routes
-	DEFAULT_API_VERSION   = "0.1.2" // Default version for the API
+	DEFAULT_API_VERSION   = "0.1.3" // Default version for the API
 )
 
 type appType struct {
@@ -44,17 +44,17 @@ func envInit() {
 }
 
 func versionMajor(version string) uint64 {
-	extractedStr := utils.Extract("", version, ".")
+	extractedStr := strings.Split(version, ".")[0]
 	num, _ := strconv.ParseUint(extractedStr, 10, 64)
 	return num
 }
 func versionMinor(version string) uint64 {
-	extractedStr := utils.Extract(".", version, ".")
+	extractedStr := strings.Split(version, ".")[1]
 	num, _ := strconv.ParseUint(extractedStr, 10, 64)
 	return num
 }
 func versionPatch(version string) uint64 {
-	extractedStr := utils.Extract(".", version, "")
+	extractedStr := strings.Split(version, ".")[2]
 	num, _ := strconv.ParseUint(extractedStr, 10, 64)
 	return num
 }

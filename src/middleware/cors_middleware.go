@@ -16,7 +16,7 @@ func CORSMiddleware() gin.HandlerFunc {
 func corsOwn() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		// c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 
@@ -36,21 +36,21 @@ func corsLib() gin.HandlerFunc {
 	//allowedOrigins := []string{front_url + ", " + proxy_url + ", https://fuzzy-fiesta-g6xqxp4w6vw296v-3000.app.github.dev"}
 
 	return cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		AllowWildcard:    true,
-		AllowOriginFunc:  func(origin string) bool { logger.Info(origin); return true },
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		// AllowCredentials: true,
+		AllowWildcard:   true,
+		AllowOriginFunc: func(origin string) bool { logger.Info(origin); return true },
 	})
 }
 
 func corsJamie() gin.HandlerFunc {
 	return jcors.Middleware(jcors.Config{
-		Origins:         "http://localhost:3000, https://fuzzy-fiesta-g6xqxp4w6vw296v-3000.app.github.dev/",
-		Methods:         "GET, PUT, POST, PATCH, DELETE",
-		RequestHeaders:  "Origin, Content-Type, Content-Length",
-		Credentials:     true,
+		Origins:        "http://localhost:3000, https://fuzzy-fiesta-g6xqxp4w6vw296v-3000.app.github.dev/",
+		Methods:        "GET, PUT, POST, PATCH, DELETE",
+		RequestHeaders: "Origin, Content-Type, Content-Length",
+		// Credentials:     true,
 		ValidateHeaders: false,
 	})
 }

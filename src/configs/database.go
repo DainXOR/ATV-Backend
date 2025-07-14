@@ -244,7 +244,7 @@ func (db) ConnectPostgres(connectionString string) {
 // ConnectSQLiteEnv connects to the SQLite database using environment variables
 // It checks for the database name in the environment variables and uses a default if not found
 func (db) ConnectSQLiteEnv() {
-	DB.ConnectSQLite(cmp.Or(DB.connectionString, "atvsqlite.db"))
+	DB.ConnectSQLite(cmp.Or(DB.dbName, "atvsqlite.db"))
 }
 
 // ConnectSQLite connects to the SQLite database using the provided database name
