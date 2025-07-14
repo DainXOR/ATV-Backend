@@ -65,7 +65,7 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDBM
 		return types.ResultErr[models.SessionDBMongo](err)
 	}
 
-	session.ID, err = models.DBIDFrom(result.InsertedID)
+	session.ID, err = models.ID.ToDB(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Error converting inserted ID to PrimitiveID: ", err)

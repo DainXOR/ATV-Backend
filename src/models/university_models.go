@@ -28,16 +28,16 @@ func (u UniversityCreate) ToInsert() UniversityDBMongo {
 	return UniversityDBMongo{
 		Name:      u.Name,
 		Location:  u.Location,
-		CreatedAt: TimeNow(),
-		UpdatedAt: TimeNow(),
-		DeletedAt: TimeZero(),
+		CreatedAt: Time.Now(),
+		UpdatedAt: Time.Now(),
+		DeletedAt: Time.Zero(),
 	}
 }
 func (u UniversityCreate) ToUpdate() UniversityDBMongo {
 	return UniversityDBMongo{
 		Name:      u.Name,
 		Location:  u.Location,
-		UpdatedAt: TimeNow(),
+		UpdatedAt: Time.Now(),
 	}
 }
 
@@ -49,6 +49,9 @@ func (u UniversityDBMongo) ToResponse() UniversityResponse {
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
+}
+func (u UniversityDBMongo) IsEmpty() bool {
+	return u == (UniversityDBMongo{})
 }
 
 func (UniversityDBMongo) TableName() string {

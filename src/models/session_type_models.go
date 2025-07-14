@@ -43,6 +43,9 @@ func (u SessionTypeDBMongo) ToResponse() SessionTypeResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
+func (u SessionTypeDBMongo) IsEmpty() bool {
+	return u == (SessionTypeDBMongo{})
+}
 
 func (SessionTypeDBMongo) TableName() string {
 	return "session_types"

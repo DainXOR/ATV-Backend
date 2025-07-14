@@ -48,13 +48,8 @@ func (dbTypes) Default() string {
 type db struct {
 	dbType string
 
+	dbName           string
 	connectionString string
-
-	user string
-	pass string
-	name string
-	host string
-	port string
 }
 
 var DB db
@@ -80,6 +75,26 @@ func (mongoType) Disconnect() {
 	} else {
 		logger.Warning("MongoDB disconect function is nil, nothing to do")
 	}
+}
+
+func init() {
+	DB.envInit()
+}
+func ReloadDBEnv() {
+	DB.Close()
+	DB.envInit()
+}
+func (db) envInit() error {
+	var exist bool
+	DB.dbType, exist = os.LookupEnv("DB_TYPE")
+	if !exist {
+		logger.Warning("DB_TYPE not found, using default: ", DB.Types().Default())
+		DB.dbType = DB.Types().Default()
+	}
+
+	DB.loadDBConfig()
+	DB.connectDB()
+	return DB.CreateDatabase()
 }
 
 func (db) GormDB() *gorm.DB {
@@ -117,7 +132,7 @@ func (db) FindAll(filter any, result any) error {
 		logger.Fatal("This function ONLY works with slices or pointers to slices")
 	}
 
-	iType, ok := eType.(interface{ TableName() string })
+	iType, ok := eType.(models.DBModelInterface)
 	if !ok {
 		logger.Fatal("Result type does NOT IMPLEMENT TableName method")
 	}
@@ -174,88 +189,18 @@ func (db) PatchOne(filter any, update any, result models.DBModelInterface) types
 // and sets the default values if not found. It also sets the database type.
 func (db) loadDBConfig() {
 	useTesting, exist := os.LookupEnv("DB_TESTING")
-	logger.Lava("0.1.1", "Remove individual database environment variables.")
-	envUser := "DB_USER"
-	envPass := "DB_PASSWORD"
-	envName := "DB_NAME"
-	envHost := "DB_HOST"
-	envPort := "DB_PORT"
 
 	if exist || useTesting == "TRUE" {
 		logger.Debug("Using testing database")
-		envUser += "_TEST"
-		envPass += "_TEST"
-		envName += "_TEST"
-		envHost += "_TEST"
-		envPort += "_TEST"
-
 		DB.connectionString = os.Getenv("CONECTION_STRING_TEST")
+		DB.dbName = os.Getenv("DB_NAME_TEST")
 	} else {
 		logger.Debug("Using production database")
 		DB.connectionString = os.Getenv("CONECTION_STRING")
+		DB.dbName = os.Getenv("DB_NAME")
 	}
-
-	dbType, exist := os.LookupEnv("DB_TYPE")
-	if exist {
-		DB.dbType = dbType
-	} else {
-		logger.Warning("DB_TYPE not found, using default: ", DB.Types().Default())
-		DB.dbType = DB.Types().Default()
-	}
-
-	v := logger.Lava("0.1.1", "Loading database configuration from individual environment variables")
-	v.LavaStart()
-	host, exist := os.LookupEnv(envHost)
-	if exist {
-		DB.host = host
-	} else {
-		logger.Warning(envHost, "not found, using default")
-		DB.host = "localhost"
-	}
-
-	user, exist := os.LookupEnv(envUser)
-	if exist {
-		DB.user = user
-	} else {
-		logger.Warning(envUser, "not found, using default")
-		DB.user = "postgres"
-	}
-
-	pass, exist := os.LookupEnv(envPass)
-	if exist {
-		DB.pass = pass
-	} else {
-		logger.Warning(envPass, "not found, using default")
-		DB.pass = ""
-	}
-
-	name, exist := os.LookupEnv(envName)
-	if exist {
-		DB.name = name
-	} else {
-		logger.Warning(envName, "not found, using default")
-		DB.name = "atv-test"
-	}
-
-	port, exist := os.LookupEnv(envPort)
-	if exist {
-		DB.port = port
-	} else {
-		logger.Warning(envPort, "not found, using default")
-		DB.port = "5432"
-	}
-	v.LavaEnd()
 }
-
-// EnvInit initializes the database connection based on the environment variables
-// It checks for the database type and connects to the appropriate database
-func (db) EnvInit() error {
-	dbType, exist := os.LookupEnv("DB_TYPE")
-	DB.dbType = dbType
-	DB.loadDBConfig()
-
-	logger.Debug("Use default database: ", !exist)
-
+func (db) connectDB() {
 	switch DB.Type() {
 	case DB.Types().Postgres():
 		logger.Debug("Using Postgres database")
@@ -269,58 +214,26 @@ func (db) EnvInit() error {
 		logger.Debug("Using SQLite database")
 		DB.ConnectSQLiteEnv()
 	default:
-		logger.Debug("Using default database")
+		logger.Debug("Using default database:", DB.Types().Default())
 		DB.dbType = DB.Types().Default()
 	}
 
 	logger.Debug("Database connection established")
-	logger.Info("Database type: ", DB.Type())
-
-	return DB.CreateDatabase()
 }
 
 // ConnectPostgresEnv connects to the Postgres database using environment variables
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectPostgresEnv() {
-	useTesting, exist := os.LookupEnv("DB_TESTING")
-	v := logger.Lava("0.1.1", "Using individual database environment variables")
-	v.LavaStart()
-	if exist && useTesting != "TRUE" {
-		DB.ConnectPostgres(
-			os.Getenv("DB_HOST"),
-			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_NAME"),
-			os.Getenv("DB_PORT"),
-		)
-	} else {
-		logger.Info("Using testing database")
-		DB.ConnectPostgres(
-			os.Getenv("DB_HOST_TEST"),
-			os.Getenv("DB_USER_TEST"),
-			os.Getenv("DB_PASSWORD_TEST"),
-			os.Getenv("DB_NAME_TEST"),
-			os.Getenv("DB_PORT_TEST"),
-		)
-	}
-	v.LavaEnd()
+	DB.ConnectPostgres(DB.connectionString)
 }
 
 // ConnectPostgres connects to the Postgres database using the provided credentials
 // It uses the gorm library to establish the connection
-func (db) ConnectPostgres(host string, user string, password string, dbname string, port string) {
+func (db) ConnectPostgres(connectionString string) {
 	var err error
-	v := logger.Lava("0.1.1", "Creating Postgres connection string, use the environment variable CONNECTION_STRING instead")
-	v.LavaStart()
-	dsn := "host=" + host +
-		" user=" + user +
-		" password=" + password +
-		" dbname=" + dbname +
-		" port=" + port +
-		" sslmode=disable"
+	dsn := connectionString
 
-	v.LavaEnd()
-	logger.Info("Connecting to database: ", dsn)
+	logger.Debug("Connecting to database: ", dsn)
 	DB.Gorm().db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -331,8 +244,7 @@ func (db) ConnectPostgres(host string, user string, password string, dbname stri
 // ConnectSQLiteEnv connects to the SQLite database using environment variables
 // It checks for the database name in the environment variables and uses a default if not found
 func (db) ConnectSQLiteEnv() {
-	dbname := os.Getenv("DB_NAME")
-	DB.ConnectSQLite(cmp.Or(dbname, "atvsqlite.db"))
+	DB.ConnectSQLite(cmp.Or(DB.dbName, "atvsqlite.db"))
 }
 
 // ConnectSQLite connects to the SQLite database using the provided database name
@@ -349,35 +261,26 @@ func (db) ConnectSQLite(dbname string) {
 // ConnectMongoDBEnv connects to the MongoDB database using environment variables
 // It checks for the testing environment and uses the appropriate database credentials
 func (db) ConnectMongoDBEnv() {
-	logger.Lava("0.1.1", "Refactor getting MongoDB connection string to be here")
-	DB.ConnectMongoDB(DB.connectionString)
+	DB.ConnectMongoDB(DB.dbName, DB.connectionString)
 }
 
-// ConnectMongoDB connects to the MongoDB database using the provided port
-// It uses the mongo driver to establish the connection
-func (db) ConnectMongoDB(conectionString string) {
-	// Create a Client to a MongoDB server and use Ping to verify that the
-	// server is running.
-
+// Connects to the MongoDB database
+func (db) ConnectMongoDB(dbName, conectionString string) {
 	logger.Debug("Connecting to MongoDB: ", conectionString)
 	clientOpts := options.Client().ApplyURI(conectionString)
 	client, err := mongo.Connect(clientOpts)
-
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Lava("0.1.1", "Clean up this code")
-	// Call Ping to verify that the deployment is up and the Client was
-	// configured successfully. As mentioned in the Ping documentation, this
-	// reduces application resiliency as the server may be temporarily
-	// unavailable when Ping is called.
-	if err = client.Ping(context.TODO(), readpref.Primary()); err != nil {
+	ctx, cancel := DB.Context()
+	defer cancel()
+	if err = client.Ping(ctx, readpref.Primary()); err != nil {
 		logger.Fatal(err)
 	}
 
 	DB.Mongo().client = client
-	DB.Mongo().db = client.Database(DB.name)
+	DB.Mongo().db = client.Database(dbName)
 
 	DB.Mongo().disconectFunc = func() {
 		if err = DB.Mongo().client.Disconnect(context.Background()); err != nil {
@@ -418,24 +321,24 @@ func (db) CreateDatabase() error {
 func (db) CreatePostgresDatabase() error {
 	var exists bool
 	checkQuery := "SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = ?)"
-	if err := DB.GormDB().Raw(checkQuery, DB.name).Scan(&exists).Error; err != nil {
+	if err := DB.GormDB().Raw(checkQuery, DB.dbName).Scan(&exists).Error; err != nil {
 		logger.Error("Error checking database existence: ", err)
 		return err
 	}
 
 	if exists {
-		logger.Debug("Database", DB.name, "already exists")
+		logger.Debug("Database", DB.dbName, "already exists")
 		return nil
 	}
 
 	// Create the new database
-	createQuery := fmt.Sprintf("CREATE DATABASE \"%s\"", DB.name)
+	createQuery := fmt.Sprintf("CREATE DATABASE \"%s\"", DB.dbName)
 	if err := DB.GormDB().Exec(createQuery).Error; err != nil {
-		logger.Error("failed to create database", DB.name, ": ", err)
-		return fmt.Errorf("failed to create database '%s': %w", DB.name, err)
+		logger.Error("failed to create database", DB.dbName, ": ", err)
+		return fmt.Errorf("failed to create database '%s': %w", DB.dbName, err)
 	}
 
-	logger.Debug("Database", DB.name, "created successfully")
+	logger.Debug("Database", DB.dbName, "created successfully")
 	return nil
 }
 
@@ -477,13 +380,20 @@ func (db) Migrate(models ...any) {
 }
 
 // Close closes the database connection
-func (db) ClosePostgres() {
+func closeGormDB() {
 	sqlDB, err := DB.GormDB().DB()
 	if err != nil {
 		logger.Error("Error getting SQL DB: ", err)
 		return
 	}
 	sqlDB.Close()
+	logger.Info("GormDB connection closed")
+}
+func (db) ClosePostgres() {
+	closeGormDB()
+}
+func (db) CloseSQLite() {
+	closeGormDB()
 }
 func (db) CloseMongoDB() {
 	DB.Mongo().Disconnect()
@@ -499,7 +409,7 @@ func (db) Close() {
 		DB.CloseMongoDB()
 
 	case DB.Types().SQLite():
-		logger.Info("No need to close SQLite connection")
+		DB.CloseSQLite()
 
 	default:
 		logger.Warning("Unknown database type, no specific close method available")
