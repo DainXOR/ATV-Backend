@@ -1,7 +1,6 @@
 package main
 
 import (
-	"dainxor/atv/configs"
 	"dainxor/atv/db"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
@@ -19,10 +18,8 @@ func init() {
 	//envVersion, _ := strconv.ParseUint(os.Getenv("ATV_ROUTE_VERSION"), 10, 32)
 	//programVersion := uint64(cmp.Or(envVersion, 1))
 
-	logger.EnvInit()
 	logger.SetAppVersion("0.1.2")
 
-	configs.DB.EnvInit()
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")

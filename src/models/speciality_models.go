@@ -43,6 +43,9 @@ func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
+func (u SpecialityDBMongo) IsEmpty() bool {
+	return u == (SpecialityDBMongo{})
+}
 
 func (SpecialityDBMongo) TableName() string {
 	return "specialities"

@@ -56,14 +56,14 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		CompanionSpeciality: extra["CompanionSpeciality"],
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
-		CreatedAt:           TimeNow(),
-		UpdatedAt:           TimeNow(),
-		DeletedAt:           TimeZero(),
+		CreatedAt:           Time.Now(),
+		UpdatedAt:           Time.Now(),
+		DeletedAt:           Time.Zero(),
 	}
 
-	if !EnsureID(u.IDStudent, &obj.IDStudent, "IDStudent") ||
-		!EnsureID(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
-		!EnsureID(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
+	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
+		!ID.Ensure(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
+		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.OptionalEmpty[SessionDBMongo]()
 	}
 
@@ -81,9 +81,9 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Optional[SessionD
 		UpdatedAt:           TimeNow(),
 	}
 
-	if !OmitEmptyID(u.IDStudent, &obj.IDStudent, "IDStudent") ||
-		!OmitEmptyID(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
-		!OmitEmptyID(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
+	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||
+		!ID.OmitEmpty(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
+		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.OptionalEmpty[SessionDBMongo]()
 	}
 
@@ -105,6 +105,9 @@ func (u SessionDBMongo) ToResponse() SessionResponse {
 		CreatedAt:           u.CreatedAt,
 		UpdatedAt:           u.UpdatedAt,
 	}
+}
+func (u SessionDBMongo) IsEmpty() bool {
+	return u == (SessionDBMongo{})
 }
 
 func (SessionDBMongo) TableName() string {

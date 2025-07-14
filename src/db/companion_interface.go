@@ -140,7 +140,7 @@ func (companionType) GetByEmail(email string) types.Result[models.CompanionDBMon
 	return types.ResultOk(companion)
 }
 func (companionType) GetAll() types.Result[[]models.CompanionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.TimeZero()}} // Filter to exclude deleted companions
+	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted companions
 	companions := []models.CompanionDBMongo{}
 
 	err := configs.DB.FindAll(filter, &companions)

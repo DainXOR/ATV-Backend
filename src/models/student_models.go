@@ -58,7 +58,7 @@ type StudentResponse struct {
 // ToInsert and ToUpdate converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion into the MongoDB database
 func (user StudentCreate) ToInsert() StudentDBMongo {
-	idu, err := DBIDFrom(user.IDUniversity)
+	idu, err := ID.ToDB(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
@@ -75,9 +75,9 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 		Semester:         user.Semester,
 		IDUniversity:     idu,
 		PhoneNumber:      user.PhoneNumber,
-		CreatedAt:        TimeNow(),
-		UpdatedAt:        TimeNow(),
-		DeletedAt:        TimeZero(),
+		CreatedAt:        Time.Now(),
+		UpdatedAt:        Time.Now(),
+		DeletedAt:        Time.Zero(),
 	}
 }
 
@@ -92,10 +92,10 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
 		PhoneNumber:      user.PhoneNumber,
-		UpdatedAt:        TimeNow(),
+		UpdatedAt:        Time.Now(),
 	}
 
-	if !OmitEmptyID(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
+	if !ID.OmitEmpty(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
 		return StudentDBMongo{}
 	}
 
@@ -119,6 +119,9 @@ func (user StudentDBMongo) ToResponse() StudentResponse {
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
 	}
+}
+func (user StudentDBMongo) IsEmpty() bool {
+	return user == (StudentDBMongo{})
 }
 
 // TableName returns the name of the table in the database for the UserDB struct
