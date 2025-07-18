@@ -23,7 +23,7 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 		return types.ResultErr[models.UniversityDBMongo](err)
 	}
 
-	universityDB.ID, err = models.DBIDFrom(result.InsertedID)
+	universityDB.ID, err = models.ID.ToDB(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
@@ -39,12 +39,12 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 }
 
 func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToBson(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"University ID: "+id,

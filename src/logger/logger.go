@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type logLevel = int
@@ -42,6 +42,7 @@ const (
 	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
 	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
 	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
+	DEFAULT_COLOR_LOGGING        = true      // Default to color logging
 
 	DEFAULT_APP_VERSION = "0.1.0" // Default application version
 
@@ -91,6 +92,7 @@ type dnxLogger struct {
 
 	LogToFile    bool
 	LogToConsole bool
+	LogWithColor bool // Whether to use color in logs
 	LogLevels    logLevel
 	logAttempts  int
 
@@ -108,6 +110,7 @@ func init() {
 	dnxLoggerInstance = &dnxLogger{
 		LogToFile:       DEFAULT_LOGS_TO_FILE,
 		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
+		LogWithColor:    DEFAULT_COLOR_LOGGING,
 		LogLevels:       DEFAULT_LOG_LEVEL,
 		logAttempts:     0,
 		appVersion:      DEFAULT_APP_VERSION,
@@ -133,7 +136,6 @@ func init() {
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
-	_ = godotenv.Load()
 	// The only purpose of this line is to load the .env file
 	// via godotenv/autoload before the logger env variables are loaded
 
@@ -141,6 +143,7 @@ func envInit() {
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
 	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
 	logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
+	logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
 
 	if existMinLevel {
 		Info("Setting minimum log level to ", minLogLevel)
@@ -189,6 +192,19 @@ func envInit() {
 	} else {
 		Debug("DNX_LOG_FILE not set, using default value: ", DEFAULT_LOGS_TO_FILE)
 	}
+	if existLogWithColor {
+		b, err := strconv.ParseBool(logWithColor)
+		if err != nil {
+			Warning("Failed to parse DNX_LOG_WITH_COLOR value")
+			Warning("Defaulting to color logging: ", DEFAULT_COLOR_LOGGING)
+			SetLogWithColor(DEFAULT_COLOR_LOGGING)
+		} else {
+			SetLogWithColor(b)
+			get().usingDefaults = false // If any environment variable is set, we are not using defaults
+		}
+	} else {
+		Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
+	}
 
 	Debug("Logger environment variables loaded")
 }
@@ -208,9 +224,17 @@ func UsingDefaults() bool {
 	return get().usingDefaults
 }
 func colorTxt(txt string, textColor string, bgColor string) string {
+	if !LogsWithColor() {
+		return txt // If color logging is disabled, return the text as is
+	}
+
 	return CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
 }
 func colorWith(txt string, colorString string) string {
+	if !LogsWithColor() {
+		return txt // If color logging is disabled, return the text as is
+	}
+
 	return colorString + txt + CLR_RESET
 }
 
@@ -241,7 +265,6 @@ func compareVersions(ver1, ver2 string) int8 {
 	return compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2)
 }
 func compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2 uint64) int8 {
-	Debug("Comparing versions:", major1, minor1, patch1, "and", major2, minor2, patch2)
 	if major1 > major2 {
 		return 1
 	} else if major1 < major2 {
@@ -353,6 +376,19 @@ func LogsToConsole() bool {
 func SetLogToConsole(value bool) {
 	Info("Console logging set to ", value)
 	get().LogToConsole = value
+}
+
+func LogsWithColor() bool {
+	return get().LogWithColor
+}
+func SetLogWithColor(value bool) {
+	if value {
+		Info("Color logging enabled")
+	} else {
+		Info("Color logging disabled")
+	}
+
+	get().LogWithColor = value
 }
 
 func SetAppVersion(version string) {
