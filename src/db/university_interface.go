@@ -39,7 +39,7 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 }
 
 func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] {
-	oid, err := models.ID.ToBson(id)
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
