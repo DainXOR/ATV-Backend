@@ -38,11 +38,11 @@ const (
 
 	DEFAULT_LOGS_TO_FILE         = false     // Default to not logging to file
 	DEFAULT_LOGS_TO_CONSOLE      = true      // Default to logging to console
+	DEFAULT_COLOR_LOGGING        = false     // Default to color logging
 	DEFAULT_LOG_LEVEL            = LEVEL_ALL // Default logging level
 	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
 	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
 	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
-	DEFAULT_COLOR_LOGGING        = true      // Default to color logging
 
 	DEFAULT_APP_VERSION = "0.1.0" // Default application version
 
@@ -92,7 +92,7 @@ type dnxLogger struct {
 
 	LogToFile    bool
 	LogToConsole bool
-	LogWithColor bool // Whether to use color in logs
+	ColorLogs    bool
 	LogLevels    logLevel
 	logAttempts  int
 
@@ -107,10 +107,13 @@ type dnxLogger struct {
 var dnxLoggerInstance *dnxLogger
 
 func init() {
+	defaultInit()
+}
+func defaultInit() {
 	dnxLoggerInstance = &dnxLogger{
 		LogToFile:       DEFAULT_LOGS_TO_FILE,
 		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
-		LogWithColor:    DEFAULT_COLOR_LOGGING,
+		ColorLogs:       DEFAULT_COLOR_LOGGING,
 		LogLevels:       DEFAULT_LOG_LEVEL,
 		logAttempts:     0,
 		appVersion:      DEFAULT_APP_VERSION,
@@ -119,11 +122,11 @@ func init() {
 		appVersionPatch: patchVersionOf(DEFAULT_APP_VERSION),
 		usingDefaults:   true,
 
-		DebugLogger:   log.New(os.Stdout, "|"+colorWith(" DEBUG ", CLR_DEBUG)+"| ", log.LstdFlags),
-		InfoLogger:    log.New(os.Stdout, "|"+colorWith(" INFO ", CLR_INFO)+"| ", log.LstdFlags),
-		WarningLogger: log.New(os.Stdout, "|"+colorWith(" WARNING ", CLR_WARN)+"| ", log.LstdFlags),
-		ErrorLogger:   log.New(os.Stderr, "|"+colorWith(" ERROR ", CLR_ERROR)+"| ", log.LstdFlags),
-		FatalLogger:   log.New(os.Stderr, "|"+colorWith(" FATAL ", CLR_FATAL)+"| ", log.LstdFlags),
+		DebugLogger:   log.New(os.Stdout, "| DEBUG | ", log.LstdFlags),
+		InfoLogger:    log.New(os.Stdout, "| INFO | ", log.LstdFlags),
+		WarningLogger: log.New(os.Stdout, "| WARNING | ", log.LstdFlags),
+		ErrorLogger:   log.New(os.Stderr, "| ERROR | ", log.LstdFlags),
+		FatalLogger:   log.New(os.Stderr, "| FATAL | ", log.LstdFlags),
 	}
 
 	envInit() // Initialize environment variables for logger
@@ -136,6 +139,7 @@ func init() {
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
+  
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
 	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
@@ -201,6 +205,11 @@ func envInit() {
 		}
 	} else {
 		Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
+		get().DebugLogger = log.New(os.Stdout, "|"+colorWith(" DEBUG ", CLR_DEBUG)+"| ", log.LstdFlags)
+		get().InfoLogger = log.New(os.Stdout, "|"+colorWith(" INFO ", CLR_INFO)+"| ", log.LstdFlags)
+		get().WarningLogger = log.New(os.Stdout, "|"+colorWith(" WARNING ", CLR_WARN)+"| ", log.LstdFlags)
+		get().ErrorLogger = log.New(os.Stderr, "|"+colorWith(" ERROR ", CLR_ERROR)+"| ", log.LstdFlags)
+		get().FatalLogger = log.New(os.Stderr, "|"+colorWith(" FATAL ", CLR_FATAL)+"| ", log.LstdFlags)
 	}
 
 	Debug("Logger environment variables loaded")
@@ -215,6 +224,9 @@ func ReloadEnv() {
 // It abstracts the initialization logic and provides a single point of access to the logger instance.
 // It ensures that the logger is initialized only once, and provides a consistent interface for logging.
 func get() *dnxLogger {
+	if dnxLoggerInstance == nil {
+		defaultInit()
+	}
 	return dnxLoggerInstance
 }
 func UsingDefaults() bool {
@@ -376,7 +388,7 @@ func SetLogToConsole(value bool) {
 }
 
 func LogsWithColor() bool {
-	return get().LogWithColor
+	return get().ColorLogs
 }
 func SetLogWithColor(value bool) {
 	if value {
@@ -385,7 +397,7 @@ func SetLogWithColor(value bool) {
 		Info("Color logging disabled")
 	}
 
-	get().LogWithColor = value
+	get().ColorLogs = value
 }
 
 func SetAppVersion(version string) {
