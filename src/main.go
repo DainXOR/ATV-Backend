@@ -18,17 +18,7 @@ import (
 //var envErr = godotenv.Load()
 
 func init() {
-	//if envErr != nil {
-	//	logger.Warning("Error loading .env file: " + envErr.Error())
-	//}
-	//if logger.UsingDefaults() {
-	//	logger.ReloadEnv()
-	//	configs.ReloadAppEnv()
-	//	configs.ReloadDBEnv()
-	//}
-
 	logger.SetAppVersion(configs.App.ApiVersion())
-
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")

@@ -10,7 +10,7 @@ import (
 
 const (
 	DEFAULT_ROUTE_VERSION = "1"     // Default version for the API routes
-	DEFAULT_API_VERSION   = "0.1.3" // Default version for the API
+	DEFAULT_API_VERSION   = "0.1.4" // Default version for the API
 )
 
 type appType struct {
