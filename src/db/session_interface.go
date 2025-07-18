@@ -141,7 +141,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDBMongo] {
 	return types.ResultOk(sessions)
 }
 func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDBMongo] {
-	oid, err := models.DBIDFrom(id)
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
