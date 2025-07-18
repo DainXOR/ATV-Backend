@@ -136,8 +136,6 @@ func init() {
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
-	// The only purpose of this line is to load the .env file
-	// via godotenv/autoload before the logger env variables are loaded
 
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
