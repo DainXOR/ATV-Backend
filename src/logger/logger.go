@@ -14,9 +14,9 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type logLevel = int
+type logLevel int
 
-const (
+const ( // Log levels
 	LEVEL_DEBUG   logLevel = 1 << iota // 0b00001
 	LEVEL_INFO                         // 0b00010
 	LEVEL_WARNING                      // 0b00100
@@ -27,25 +27,34 @@ const (
 	LEVEL_NONE logLevel = 0 // 0b00000
 )
 
-func hasLogLevel(options logLevel, level logLevel) bool {
-	return options&level == level
+func (l logLevel) String() string {
+	switch l {
+	case LEVEL_DEBUG:
+		return "DEBUG"
+	case LEVEL_INFO:
+		return "INFO"
+	case LEVEL_WARNING:
+		return "WARNING"
+	case LEVEL_ERROR:
+		return "ERROR"
+	case LEVEL_FATAL:
+		return "FATAL"
+	case LEVEL_ALL:
+		return "ALL"
+	case LEVEL_NONE:
+		return "NONE"
+	default:
+		return fmt.Sprintf("UNKNOWN(%d)", l)
+	}
 }
 
-const (
+const ( // File log constants
 	LOG_PATH      = "../artifacts/"
 	LOG_FILE      = "logs.log"
 	LOG_FULL_PATH = LOG_PATH + LOG_FILE
+)
 
-	DEFAULT_LOGS_TO_FILE         = false     // Default to not logging to file
-	DEFAULT_LOGS_TO_CONSOLE      = true      // Default to logging to console
-	DEFAULT_COLOR_LOGGING        = false     // Default to color logging
-	DEFAULT_LOG_LEVEL            = LEVEL_ALL // Default logging level
-	ENABLE_LOG_ATTEMPTS_MESSAGES = true      // Enable warning log attempts messages
-	DEFAULT_MAX_LOG_ATTEMPTS     = 15        // Default maximum log attempts before panic
-	DEFAULT_WARNING_LOG_ATTEMPTS = 10        // Default maximum log attempts before warning
-
-	DEFAULT_APP_VERSION = "0.1.0" // Default application version
-
+const ( // Color constants
 	TXT_BLACK   = "30m"
 	TXT_RED     = "31m"
 	TXT_GREEN   = "32m"
@@ -67,21 +76,64 @@ const (
 	CLR_START = "\033["
 	CLR_RESET = "\033[0m"
 
-	CLR_DEBUG = CLR_START + BG_GREEN + ";" + TXT_BLACK  // Green background with black text for debug messages
-	CLR_INFO  = CLR_START + BG_CYAN + ";" + TXT_BLACK   // Cyan background with black text for info messages
-	CLR_WARN  = CLR_START + BG_YELLOW + ";" + TXT_BLACK // Yellow background with black text for warning messages
-	CLR_ERROR = CLR_START + BG_RED + ";" + TXT_BLACK    // Red background with black text for error messages
-	CLR_FATAL = CLR_START + BG_RED + ";" + TXT_WHITE    // Red background with white text for fatal messages
+	CLR_DEBUG = CLR_START + BG_GREEN + ";" + TXT_BLACK
+	CLR_INFO  = CLR_START + BG_CYAN + ";" + TXT_BLACK
+	CLR_WARN  = CLR_START + BG_YELLOW + ";" + TXT_BLACK
+	CLR_ERROR = CLR_START + BG_RED + ";" + TXT_BLACK
+	CLR_FATAL = CLR_START + BG_RED + ";" + TXT_WHITE
 
-	CLR_DEPRECATE   = CLR_START + BG_MAGENTA + ";" + TXT_WHITE // Magenta background with white text for deprecation messages
-	CLR_DEPR_REASON = CLR_START + BG_YELLOW + ";" + TXT_WHITE  // Yellow background with white text for deprecation reason messages
+	CLR_DEPRECATE   = CLR_START + BG_MAGENTA + ";" + TXT_WHITE
+	CLR_DEPR_REASON = CLR_START + BG_YELLOW + ";" + TXT_WHITE
 
-	CLR_LAVA       = CLR_START + BG_WHITE + ";" + TXT_BLACK  // White background with black text for lava messages
-	CLR_COLD_LAVA  = CLR_START + BG_YELLOW + ";" + TXT_BLACK // Yellow background with black text for cold lava messages
-	CLR_DRIED_LAVA = CLR_START + BG_RED + ";" + TXT_BLACK    // Red background with black text for dried lava messages
+	CLR_LAVA       = CLR_START + BG_WHITE + ";" + TXT_BLACK
+	CLR_COLD_LAVA  = CLR_START + BG_YELLOW + ";" + TXT_BLACK
+	CLR_DRIED_LAVA = CLR_START + BG_RED + ";" + TXT_BLACK
 
-	CLR_FILE = CLR_START + BG_BLUE + ";" + TXT_WHITE // Blue background with white text for file paths
+	CLR_FILE = CLR_START + BG_BLUE + ";" + TXT_WHITE
 )
+
+const ( // Default logger settings
+	DEFAULT_LOGS_TO_FILE         = false
+	DEFAULT_LOGS_TO_CONSOLE      = true
+	DEFAULT_COLOR_LOGGING        = false
+	DEFAULT_LOG_LEVEL            = LEVEL_ALL
+	ENABLE_LOG_ATTEMPTS_MESSAGES = true
+	DEFAULT_MAX_LOG_ATTEMPTS     = 15
+	DEFAULT_WARNING_LOG_ATTEMPTS = 10
+
+	DEFAULT_LOGGER_FLAGS = log.Ldate | log.Ltime
+
+	DEFAULT_APP_VERSION = "0.1.0"
+)
+
+var ( // Default color functions for logging
+	colorAsDebug   = colorApplier(TXT_BLACK, BG_GREEN)
+	colorAsInfo    = colorApplier(TXT_BLACK, BG_CYAN)
+	colorAsWarning = colorApplier(TXT_BLACK, BG_YELLOW)
+	colorAsError   = colorApplier(TXT_BLACK, BG_RED)
+	colorAsFatal   = colorApplier(TXT_WHITE, BG_RED)
+
+	colorAsDeprecate  = colorApplier(TXT_WHITE, BG_MAGENTA)
+	colorAsDeprReason = colorApplier(TXT_WHITE, BG_YELLOW)
+
+	colorAsLava      = colorApplier(TXT_BLACK, BG_WHITE)
+	colorAsColdLava  = colorApplier(TXT_BLACK, BG_YELLOW)
+	colorAsDriedLava = colorApplier(TXT_BLACK, BG_RED)
+
+	colorAsFile = colorApplier(TXT_WHITE, BG_BLUE)
+)
+
+func colorApplier(textColor, bgColor string) func(txt string) string {
+	if !LogsWithColor() {
+		return func(txt string) string {
+			return txt // If color logging is disabled, return the text as is
+		}
+	}
+
+	return func(txt string) string {
+		return CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
+	}
+}
 
 type dnxLogger struct {
 	DebugLogger   *log.Logger
@@ -89,6 +141,10 @@ type dnxLogger struct {
 	WarningLogger *log.Logger
 	ErrorLogger   *log.Logger
 	FatalLogger   *log.Logger
+
+	normalLogger *log.Logger
+	errorLogger  *log.Logger
+	altLogger    *log.Logger
 
 	LogToFile    bool
 	LogToConsole bool
@@ -127,6 +183,10 @@ func defaultInit() {
 		WarningLogger: log.New(os.Stdout, "| WARNING | ", log.LstdFlags),
 		ErrorLogger:   log.New(os.Stderr, "| ERROR | ", log.LstdFlags),
 		FatalLogger:   log.New(os.Stderr, "| FATAL | ", log.LstdFlags),
+
+		normalLogger: log.New(os.Stdout, "", log.LstdFlags),
+		errorLogger:  log.New(os.Stderr, "", log.LstdFlags),
+		altLogger:    log.New(os.Stdout, "", log.LstdFlags),
 	}
 
 	envInit() // Initialize environment variables for logger
@@ -135,7 +195,7 @@ func defaultInit() {
 		tryCreateLogFile() // Create the path if it doesn't exist, else it will set log to console only
 	}
 
-	Info("Logger initialized")
+	Debug("Logger initialized")
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
@@ -147,7 +207,7 @@ func envInit() {
 	logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
 
 	if existMinLevel {
-		Info("Setting minimum log level to ", minLogLevel)
+		Debug("Setting minimum log level to ", minLogLevel)
 		get().usingDefaults = !SetMinLogLevel(LogLevelValue(minLogLevel)) // If any environment variable is set, we are not using defaults
 	} else {
 		Debug("DNX_LOG_MIN_LEVEL not set, using default level: ", currentLogLevels())
@@ -155,12 +215,12 @@ func envInit() {
 	if existDisableLevels {
 		levels := strings.Split(disableLevels, "|")
 		options := LEVEL_NONE
-		Info("Disabling log levels:")
+		Debug("Disabling log levels:")
 
 		for _, level := range levels {
 			level = strings.TrimSpace(level)
 			options |= LogLevelValue(level)
-			Info(" - ", level)
+			Debug(" - ", level)
 		}
 
 		get().usingDefaults = !DisableLogOptions(options) && get().usingDefaults // If any environment variable is set, we are not using defaults
@@ -205,11 +265,11 @@ func envInit() {
 		}
 	} else {
 		Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
-		get().DebugLogger = log.New(os.Stdout, "|"+colorWith(" DEBUG ", CLR_DEBUG)+"| ", log.LstdFlags)
-		get().InfoLogger = log.New(os.Stdout, "|"+colorWith(" INFO ", CLR_INFO)+"| ", log.LstdFlags)
-		get().WarningLogger = log.New(os.Stdout, "|"+colorWith(" WARNING ", CLR_WARN)+"| ", log.LstdFlags)
-		get().ErrorLogger = log.New(os.Stderr, "|"+colorWith(" ERROR ", CLR_ERROR)+"| ", log.LstdFlags)
-		get().FatalLogger = log.New(os.Stderr, "|"+colorWith(" FATAL ", CLR_FATAL)+"| ", log.LstdFlags)
+		get().DebugLogger.SetPrefix("|" + colorWith(" DEBUG ", CLR_DEBUG) + "| ")
+		get().DebugLogger.SetPrefix("|" + colorWith(" INFO ", CLR_INFO) + "| ")
+		get().WarningLogger.SetPrefix("|" + colorWith(" WARNING ", CLR_WARN) + "| ")
+		get().ErrorLogger.SetPrefix("|" + colorWith(" ERROR ", CLR_ERROR) + "| ")
+		get().FatalLogger.SetPrefix("|" + colorWith(" FATAL ", CLR_FATAL) + "| ")
 	}
 
 	Debug("Logger environment variables loaded")
@@ -217,6 +277,10 @@ func envInit() {
 
 func ReloadEnv() {
 	envInit()
+}
+
+func hasLogLevel(options logLevel, level logLevel) bool {
+	return options&level == level
 }
 
 // Returns the singleton instance of dnxLogger, initializing it if necessary.
@@ -305,7 +369,7 @@ func addToVersion(version string, major, minor, patch uint64) string {
 func tryCreateLogFile() bool {
 	if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
 		logWarning(true, "Log directory does not exist")
-		logInfo(true, "Attempting to create log directory at ", LOG_PATH)
+		logDebug(true, "Attempting to create log directory at ", LOG_PATH)
 		err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
 
 		if err != nil {
@@ -315,7 +379,7 @@ func tryCreateLogFile() bool {
 			return false
 
 		} else {
-			logInfo(true, "Log directory created at ", LOG_PATH)
+			logDebug(true, "Log directory created at ", LOG_PATH)
 		}
 	}
 
@@ -329,12 +393,12 @@ func tryCreateLogFile() bool {
 			return false
 		} else {
 			file.Close()
-			logInfo(true, "Log file created at ", LOG_FULL_PATH)
+			logDebug(true, "Log file created at ", LOG_FULL_PATH)
 			return true
 		}
 	}
 
-	Info("Log file already exists at ", LOG_FULL_PATH)
+	Debug("Log file already exists at ", LOG_FULL_PATH)
 	return true
 }
 
@@ -364,7 +428,7 @@ func resetLogAttempts(forceNoFileWrite bool) bool {
 
 	} else if get().logAttempts > 1 {
 		get().logAttempts = 0
-		logInfo(forceNoFileWrite, "Log attempts reset (", get().logAttempts, ")")
+		logDebug(forceNoFileWrite, "Log attempts reset (", get().logAttempts, ")")
 		return true
 	}
 
@@ -375,7 +439,7 @@ func LogsToFile() bool {
 	return get().LogToFile
 }
 func SetLogToFile(value bool) {
-	logInfo(!value, "File logging set to ", value)
+	logDebug(!value, "File logging set to ", value)
 	get().LogToFile = value
 }
 
@@ -383,7 +447,7 @@ func LogsToConsole() bool {
 	return get().LogToConsole
 }
 func SetLogToConsole(value bool) {
-	Info("Console logging set to ", value)
+	Debug("Console logging set to ", value)
 	get().LogToConsole = value
 }
 
@@ -392,9 +456,9 @@ func LogsWithColor() bool {
 }
 func SetLogWithColor(value bool) {
 	if value {
-		Info("Color logging enabled")
+		Debug("Color logging enabled")
 	} else {
-		Info("Color logging disabled")
+		Debug("Color logging disabled")
 	}
 
 	get().ColorLogs = value
@@ -412,7 +476,7 @@ func SetAppVersion(version string) {
 	get().appVersionMajor = majorVersionOf(version)
 	get().appVersionMinor = minorVersionOf(version)
 	get().appVersionPatch = patchVersionOf(version)
-	Info("App version set to: ", version)
+	Debug("App version set to: ", version)
 }
 
 // Returns the application version is supposed to be the current
@@ -454,11 +518,11 @@ func SetLogLevels(options logLevel) bool {
 		Warning("Invalid logging options")
 		return false
 	} else if options == LEVEL_ALL {
-		Info("Logging options set to ALL")
+		Debug("Logging options set to ALL")
 		get().LogLevels = LEVEL_ALL
 		return true
 	} else if options == LEVEL_NONE {
-		Info("Logging options set to NONE")
+		Debug("Logging options set to NONE")
 		get().LogLevels = LEVEL_NONE
 		return true
 	}
@@ -481,7 +545,7 @@ func SetLogLevels(options logLevel) bool {
 		msg += "| FATAL |"
 	}
 
-	Info("Logging options set to: ", msg)
+	Debug("Logging options set to: ", msg)
 	get().LogLevels = options
 	return true
 }
@@ -490,11 +554,11 @@ func EnableLogOptions(options logLevel) bool {
 		Warning("Invalid logging option")
 		return false
 	} else if options == LEVEL_ALL {
-		Info("Enabled all logging options")
+		Debug("Enabled all logging options")
 		SetLogLevels(LEVEL_ALL)
 		return true
 	} else if options == LEVEL_NONE {
-		Info("Disabled all logging options")
+		Debug("Disabled all logging options")
 		SetLogLevels(LEVEL_NONE)
 		return true
 	}
@@ -517,7 +581,7 @@ func EnableLogOptions(options logLevel) bool {
 		msg += "| FATAL |"
 	}
 
-	Info("Enabled logging options: ", msg)
+	Debug("Enabled logging options: ", msg)
 	get().LogLevels |= options
 	return true
 }
@@ -545,7 +609,7 @@ func DisableLogOptions(options logLevel) bool {
 		msg += "| FATAL |"
 	}
 
-	Info("Disabled logging options: ", msg)
+	Debug("Disabled logging options: ", msg)
 	get().LogLevels &= ^options
 	return true
 }
@@ -575,7 +639,7 @@ func SetMinLogLevel(level logLevel) bool {
 		msg = "NONE"
 	}
 
-	Info("Minimum logging level set to: ", msg)
+	Debug("Minimum logging level set to: ", msg)
 	SetLogLevels(level)
 	return true
 }
@@ -659,9 +723,9 @@ func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth 
 	registerLogAttempt(forceNoFileWrite)
 
 	orignalPrefix := logger.Prefix()
-	extraPrefix := utils.CallOrigin(4 + extraTraceDepth)
-	extraPrefix = colorWith(extraPrefix, CLR_FILE)
-	extraPrefix += ":"
+	filePrefix := utils.CallOrigin(4 + extraTraceDepth)
+	filePrefix = colorWith(filePrefix, CLR_FILE)
+	filePrefix += ":"
 
 	stringValues := utils.AsStrings(v)
 	stringValues = utils.Podate(stringValues, "[ ]")
@@ -669,12 +733,12 @@ func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth 
 	trimmedArgs = strings.Trim(trimmedArgs, "[]")
 
 	if LogsToConsole() {
-		logger.Println(extraPrefix, trimmedArgs)
+		logger.Println(filePrefix, trimmedArgs)
 	}
 
 	// This might be short-circuited, but idk if it is, so I will leave it like this
 	if !forceNoFileWrite && LogsToFile() {
-		if !writeToFile(logger, extraPrefix, trimmedArgs) {
+		if !writeToFile(logger, filePrefix, trimmedArgs) {
 			SetLogToFile(false)
 		}
 	}
