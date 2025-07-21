@@ -15,5 +15,11 @@ func SessionRoutes(router *gin.Engine) {
 		sessionRouter.GET("/:id", controller.Session.GetByID)
 		sessionRouter.GET("/all", controller.Session.GetAll)
 		sessionRouter.GET("/student/:student_id", controller.Session.GetAllByStudentID)
+
+		sessionRouter.PUT("/:id", controller.Session.UpdateByID)
+
+		sessionRouter.PATCH("/:id", controller.Session.PatchByID)
+
+		sessionRouter.DELETE("/:id", controller.Session.DeleteByID)
 	}
 }
