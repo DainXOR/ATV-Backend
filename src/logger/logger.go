@@ -199,7 +199,7 @@ func defaultInit() {
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
-
+  
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
 	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
