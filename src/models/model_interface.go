@@ -131,6 +131,10 @@ func (iID) Ensure(id string, result *DBID, idName string) bool {
 	return true
 }
 func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
+	if id == "" {
+		return true
+	}
+
 	idObj, err := ID.ToDB(id)
 	if err != nil {
 		logger.Warning("Failed to convert", idName, "to ObjectID:", err)

@@ -57,7 +57,7 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,
@@ -170,11 +170,11 @@ func (studentType) GetAll() types.Result[[]models.StudentDBMongo] {
 }
 
 func (studentType) UpdateByID(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,
@@ -209,9 +209,8 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
-			types.Http.C200().Accepted(),
+			types.Http.C300().NotModified(),
 			"No changes made",
 			"Student with ID "+id+" was not modified",
 		)
@@ -222,7 +221,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 }
 
 func (studentType) PatchByID(id string, student models.StudentCreate) types.Result[models.StudentDBMongo] {
-	oid, err := models.ID.ToBson(id)
+	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
@@ -285,11 +284,11 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 }
 
 func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
-	oid, err := bson.ObjectIDFromHex(id)
+	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,
@@ -298,26 +297,21 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "deleted_at", Value: time.Now()}}}}
-	ctx, cancel := configs.DB.Context()
-	defer cancel()
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "deleted_at", Value: models.Time.Now()}}}}
 
 	var deletedStudent models.StudentDBMongo
-	//result, err := configs.DB.UpdateOne(filter, update, deletedStudent)
-	v := logger.Lava("0.1.1", "Use the code above to update the student with deleted_at field")
-	v.LavaStart()
-	result, err := configs.DB.From(models.StudentDBMongo{}).UpdateOne(ctx, filter, update)
-	if err != nil {
-		logger.Error("Failed to delete student in MongoDB: ", err)
+	result := configs.DB.UpdateOne(filter, update, &deletedStudent)
+	if result.IsErr() {
+		logger.Error("Failed to delete student in MongoDB: ", result.Error())
 		httpErr := types.ErrorInternal(
 			"Failed to delete student",
-			err.Error(),
+			result.Error().Error(),
 			"Student ID: "+id,
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
 
-	if result.MatchedCount == 0 {
+	if result.Value().MatchedCount == 0 {
 		httpErr := types.ErrorNotFound(
 			"Student not found",
 			"Student with ID "+id+" not found",
@@ -335,8 +329,6 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)
 	}
-
-	v.LavaEnd()
 
 	return types.ResultOk(deletedStudent)
 }

@@ -12,6 +12,9 @@ func Apply[T, R any](value T, fn func(T) R) func() R {
 		return fn(value)
 	}
 }
+func Transform[T, R any](value T, fn func(T) R) R {
+	return fn(value)
+}
 func Extract(prefix string, text string, suffix string) string {
 	size := len(text)
 

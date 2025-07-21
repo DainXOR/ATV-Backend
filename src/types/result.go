@@ -27,29 +27,42 @@ func (r Result[T]) IsErr() bool {
 	return r.err != nil
 }
 
-func (r *Result[T]) Value() T {
+func (r Result[T]) Value() T {
 	return r.value.Get()
 }
-func (r *Result[T]) ValueOr(value T) T {
+func (r Result[T]) ValueOr(value T) T {
 	if r.IsOk() {
 		return r.Value()
 	}
 	return value
 }
 
-func (r *Result[T]) Error() error {
+func (r Result[T]) Error() error {
 	return r.err
 }
-func (r *Result[T]) ErrorOr(err error) error {
+func (r Result[T]) ErrorOr(err error) error {
 	if r.IsErr() {
 		return r.Error()
 	}
 	return err
 }
 
-func (r *Result[T]) GetRaw() (T, error) {
+func (r Result[T]) GetRaw() (T, error) {
 	return r.Value(), r.Error()
 }
-func (r *Result[T]) Get() (Optional[T], error) {
+func (r Result[T]) Get() (Optional[T], error) {
 	return r.value, r.err
+}
+
+func (r Result[T]) Then(fn func(T) Result[T]) Result[T] {
+	if r.IsOk() {
+		return fn(r.Value())
+	}
+	return r
+}
+func (r Result[T]) Or(fn func(error) Result[T]) Result[T] {
+	if r.IsErr() {
+		return fn(r.Error())
+	}
+	return r
 }

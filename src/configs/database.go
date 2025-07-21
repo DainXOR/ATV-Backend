@@ -153,22 +153,22 @@ func (db) InsertOne(document models.DBModelInterface) (*mongo.InsertOneResult, e
 
 	return DB.From(document).InsertOne(ctx, document)
 }
-func (db) UpdateOne(filter any, update any, result models.DBModelInterface) (*mongo.UpdateResult, error) {
+func (db) UpdateOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
 	ctx, cancel := DB.Context()
 	defer cancel()
 
 	updateResult, err := DB.From(result).UpdateOne(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to update document:", err)
-		return nil, err
+		return types.ResultErr[mongo.UpdateResult](err)
 	}
 
 	err = DB.FindOne(filter, result)
 	if err != nil {
 		logger.Error("Failed to find updated document:", err)
-		return nil, err
+		return types.ResultErr[mongo.UpdateResult](err)
 	}
-	return updateResult, nil
+	return types.ResultOk(*updateResult)
 }
 func (db) PatchOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
 	ctx, cancel := DB.Context()
