@@ -2,6 +2,7 @@ package models
 
 import (
 	"dainxor/atv/types"
+	"errors"
 )
 
 type SessionDBMongo struct {
@@ -16,6 +17,7 @@ type SessionDBMongo struct {
 	IDSessionType       DBID       `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes        string     `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	Date                string     `json:"date,omitempty" bson:"date,omitempty"`
+	Status              status     `json:"status,omitempty" bson:"status,omitempty"`
 	CreatedAt           DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt           DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
 	DeletedAt           DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
@@ -27,6 +29,7 @@ type SessionCreate struct {
 	IDCompanion   string `json:"id_companion,omitempty" bson:"id_companion,omitempty"`
 	IDSessionType string `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes  string `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
+	Status        string `json:"status,omitempty" bson:"status,omitempty"`
 	Date          string `json:"date,omitempty" bson:"date,omitempty"`
 }
 
@@ -43,8 +46,39 @@ type SessionResponse struct {
 	IDSessionType       string     `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes        string     `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	Date                string     `json:"date,omitempty" bson:"date,omitempty"`
+	Status              string     `json:"status,omitempty" bson:"status,omitempty"`
 	CreatedAt           DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt           DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+}
+
+type status = uint8
+
+const (
+	STATUS_UNKNOWN   status = iota // 0
+	STATUS_PENDING                 // 1
+	STATUS_COMPLETED               // 2
+	STATUS_CANCELLED               // 3
+)
+
+var STATUS = map[status]string{
+	STATUS_PENDING:   "Pendiente",
+	STATUS_COMPLETED: "Completado",
+	STATUS_CANCELLED: "Cancelado",
+}
+
+func statusName(code status) string {
+	if name, exists := STATUS[code]; exists {
+		return name
+	}
+	return "Desconocido"
+}
+func statusCode(name string) status {
+	for state, stateName := range STATUS {
+		if stateName == name {
+			return state
+		}
+	}
+	return 0
 }
 
 func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionDBMongo] {
@@ -56,6 +90,7 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		CompanionSpeciality: extra["CompanionSpeciality"],
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
+		Status:              statusCode(u.Status),
 		CreatedAt:           Time.Now(),
 		UpdatedAt:           Time.Now(),
 		DeletedAt:           Time.Zero(),
@@ -69,7 +104,7 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 
 	return types.OptionalOf(obj)
 }
-func (u SessionCreate) ToUpdate(extra map[string]string) types.Optional[SessionDBMongo] {
+func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDBMongo] {
 	obj := SessionDBMongo{
 		StudentName:         extra["StudentName"],
 		StudentSurname:      extra["StudentSurname"],
@@ -78,16 +113,17 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Optional[SessionD
 		CompanionSpeciality: extra["CompanionSpeciality"],
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
+		Status:              statusCode(u.Status),
 		UpdatedAt:           TimeNow(),
 	}
 
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.OmitEmpty(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
-		return types.OptionalEmpty[SessionDBMongo]()
+		return types.ResultErr[SessionDBMongo](errors.New("Invalid session data"))
 	}
 
-	return types.OptionalOf(obj)
+	return types.ResultOk(obj)
 }
 func (u SessionDBMongo) ToResponse() SessionResponse {
 	return SessionResponse{
@@ -102,6 +138,7 @@ func (u SessionDBMongo) ToResponse() SessionResponse {
 		IDSessionType:       u.IDSessionType.Hex(),
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
+		Status:              statusName(u.Status),
 		CreatedAt:           u.CreatedAt,
 		UpdatedAt:           u.UpdatedAt,
 	}
