@@ -26,6 +26,9 @@ func OptionalEmpty[T any]() Optional[T] {
 func (o Optional[T]) IsPresent() bool {
 	return o.present
 }
+func (o Optional[T]) IsEmpty() bool {
+	return !o.IsPresent()
+}
 
 func (o Optional[T]) Get() T {
 	return o.value
@@ -36,4 +39,15 @@ func (o Optional[T]) GetOr(defaultValue T) T {
 		return o.value
 	}
 	return defaultValue
+}
+
+func (o Optional[T]) IfPresent(fn func(T) Optional[T]) Optional[T] {
+	if o.present {
+		if res := fn(o.value); res.IsPresent() {
+			return res
+		} else {
+			return OptionalEmpty[T]()
+		}
+	}
+	return o
 }
