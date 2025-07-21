@@ -57,7 +57,7 @@ func (studentType) GetByID(id string) types.Result[models.StudentDBMongo] {
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,
@@ -302,10 +302,10 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDBMongo] {
 	var deletedStudent models.StudentDBMongo
 	result := configs.DB.UpdateOne(filter, update, &deletedStudent)
 	if result.IsErr() {
-		logger.Error("Failed to delete student in MongoDB: ", err)
+		logger.Error("Failed to delete student in MongoDB: ", result.Error())
 		httpErr := types.ErrorInternal(
 			"Failed to delete student",
-			err.Error(),
+			result.Error().Error(),
 			"Student ID: "+id,
 		)
 		return types.ResultErr[models.StudentDBMongo](&httpErr)

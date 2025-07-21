@@ -1,29 +1,30 @@
 package models
 
 import (
+	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"errors"
 )
 
 type SessionDBMongo struct {
-	ID                  DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
-	IDStudent           DBID       `json:"id_student,omitempty" bson:"id_student,omitempty"`
-	StudentName         string     `json:"first_name_student,omitempty" bson:"first_name_student,omitempty"`
-	StudentSurname      string     `json:"last_name_student,omitempty" bson:"last_name_student,omitempty"`
-	IDCompanion         DBID       `json:"id_companion,omitempty" bson:"id_companion,omitempty"`
-	CompanionName       string     `json:"first_name_companion,omitempty" bson:"first_name_companion,omitempty"`
-	CompanionSurname    string     `json:"last_name_companion,omitempty" bson:"last_name_companion,omitempty"`
-	CompanionSpeciality string     `json:"companion_speciality,omitempty" bson:"companion_speciality,omitempty"`
-	IDSessionType       DBID       `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
-	SessionNotes        string     `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
-	Date                string     `json:"date,omitempty" bson:"date,omitempty"`
-	Status              status     `json:"status,omitempty" bson:"status,omitempty"`
-	CreatedAt           DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt           DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt           DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
+	ID                  DBID          `json:"_id,omitempty" bson:"_id,omitempty"`
+	IDStudent           DBID          `json:"id_student,omitempty" bson:"id_student,omitempty"`
+	StudentName         string        `json:"first_name_student,omitempty" bson:"first_name_student,omitempty"`
+	StudentSurname      string        `json:"last_name_student,omitempty" bson:"last_name_student,omitempty"`
+	IDCompanion         DBID          `json:"id_companion,omitempty" bson:"id_companion,omitempty"`
+	CompanionName       string        `json:"first_name_companion,omitempty" bson:"first_name_companion,omitempty"`
+	CompanionSurname    string        `json:"last_name_companion,omitempty" bson:"last_name_companion,omitempty"`
+	CompanionSpeciality string        `json:"companion_speciality,omitempty" bson:"companion_speciality,omitempty"`
+	IDSessionType       DBID          `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
+	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
+	Date                string        `json:"date,omitempty" bson:"date,omitempty"`
+	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
+	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
 }
 
-// SessionCreate represents the request body for creating a new session
+// SessionCreate represents the request body for creating a new session or updating an existing one
 type SessionCreate struct {
 	IDStudent     string `json:"id_student,omitempty" bson:"id_student,omitempty"`
 	IDCompanion   string `json:"id_companion,omitempty" bson:"id_companion,omitempty"`
@@ -51,34 +52,36 @@ type SessionResponse struct {
 	UpdatedAt           DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-type status = uint8
+type sessionStatus uint8
 
 const (
-	STATUS_UNKNOWN   status = iota // 0
-	STATUS_PENDING                 // 1
-	STATUS_COMPLETED               // 2
-	STATUS_CANCELLED               // 3
+	STATUS_UNKNOWN sessionStatus = iota + 1
+	STATUS_PENDING
+	STATUS_COMPLETED
+	STATUS_CANCELLED
 )
 
-var STATUS = map[status]string{
+var STATUS = map[sessionStatus]string{
 	STATUS_PENDING:   "Pendiente",
 	STATUS_COMPLETED: "Completado",
 	STATUS_CANCELLED: "Cancelado",
 }
 
-func statusName(code status) string {
+func statusName(code sessionStatus) string {
 	if name, exists := STATUS[code]; exists {
 		return name
 	}
 	return "Desconocido"
 }
-func statusCode(name string) status {
+func statusCode(name string) sessionStatus {
+	logger.Debug("Converting status name to code:", name)
 	for state, stateName := range STATUS {
+		logger.Debug("Checking status name:", stateName)
 		if stateName == name {
 			return state
 		}
 	}
-	return 0
+	return STATUS_UNKNOWN
 }
 
 func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionDBMongo] {
@@ -114,7 +117,7 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDBM
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
 		Status:              statusCode(u.Status),
-		UpdatedAt:           TimeNow(),
+		UpdatedAt:           Time.Now(),
 	}
 
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||

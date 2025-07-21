@@ -17,38 +17,15 @@ var Session sessionType
 
 func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDBMongo] {
 	logger.Debug("Creating session with data: ", u)
-	studentResult := Student.GetByID(u.IDStudent)
-	if studentResult.IsErr() {
-		httpErr := studentResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get student by ID: ", httpErr)
-		return types.ResultErr[models.SessionDBMongo](httpErr)
-	}
 
-	companionResult := Companion.GetByID(u.IDCompanion)
-	if companionResult.IsErr() {
-		httpErr := companionResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get companion by ID: ", httpErr)
-		return types.ResultErr[models.SessionDBMongo](httpErr)
-	}
-	student := studentResult.Value()
-	companion := companionResult.Value()
+	sessionOptional := utils.Transform(getExtraInfo(u), func(res types.Result[map[string]string]) types.Optional[models.SessionDBMongo] {
+		if res.IsErr() {
+			return types.OptionalEmpty[models.SessionDBMongo]()
+		}
+		return u.ToInsert(res.Value())
+	})
 
-	specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
-	if specialityResult.IsErr() {
-		httpErr := specialityResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get speciality by ID: ", httpErr)
-		return types.ResultErr[models.SessionDBMongo](httpErr)
-	}
-
-	extraInfo := make(map[string]string, 5)
-	extraInfo["StudentName"] = student.FirstName
-	extraInfo["StudentSurname"] = student.LastName
-	extraInfo["CompanionName"] = companion.FirstName
-	extraInfo["CompanionSurname"] = companion.LastName
-	extraInfo["CompanionSpeciality"] = specialityResult.Value().Name
-
-	sessionOptional := u.ToInsert(extraInfo)
-	if !sessionOptional.IsPresent() {
+	if sessionOptional.IsEmpty() {
 		logger.Warning("Failed to create session: Invalid session data")
 		httpErr := types.ErrorInternal(
 			"Failed to create session",
@@ -58,6 +35,7 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDBM
 		return types.ResultErr[models.SessionDBMongo](&httpErr)
 	}
 	session := sessionOptional.Get()
+	logger.Debug("Session object to insert: ", session)
 	result, err := configs.DB.InsertOne(session)
 
 	if err != nil {
@@ -81,7 +59,7 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDBM
 }
 
 func (sessionType) GetByID(id string) types.Result[models.SessionDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -252,12 +230,14 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 		return types.ResultErr[models.SessionDBMongo](&httpErr)
 	}
 
-	sessionData := utils.Transform(getExtraInfo(session), func(res types.Result[map[string]string]) types.Result[models.SessionDBMongo] {
-		if res.IsErr() {
-			return types.ResultErr[models.SessionDBMongo](res.Error())
-		}
-		return session.ToUpdate(res.Value())
-	})
+	sessionData := utils.Transform(getExtraInfoAllowEmpty(session),
+		func(res types.Result[map[string]string]) types.Result[models.SessionDBMongo] {
+			if res.IsErr() {
+				return types.ResultErr[models.SessionDBMongo](res.Error())
+			}
+			return session.ToUpdate(res.Value())
+		},
+	)
 	if sessionData.IsErr() {
 		logger.Warning("Failed to update session:", sessionData.Error())
 		httpErr := types.ErrorInternal(
@@ -324,10 +304,10 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDBMongo] {
 	var deletedSession models.SessionDBMongo
 	result := configs.DB.UpdateOne(filter, update, &deletedSession)
 	if result.IsErr() {
-		logger.Error("Failed to delete session in MongoDB: ", err)
+		logger.Error("Failed to delete session in MongoDB: ", result.Error())
 		httpErr := types.ErrorInternal(
 			"Failed to delete session",
-			err.Error(),
+			result.Error().Error(),
 			"Session ID: "+id,
 		)
 		return types.ResultErr[models.SessionDBMongo](&httpErr)
@@ -385,6 +365,51 @@ func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] 
 	extraInfo["CompanionName"] = companion.FirstName
 	extraInfo["CompanionSurname"] = companion.LastName
 	extraInfo["CompanionSpeciality"] = specialityResult.Value().Name
+
+	return types.ResultOk(extraInfo)
+}
+
+func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[string]string] {
+	var student models.StudentDBMongo
+	if session.IDStudent != "" {
+		studentResult := Student.GetByID(session.IDStudent)
+		if studentResult.IsErr() {
+			httpErr := studentResult.Error().(*types.HttpError)
+			logger.Warning("Failed to get student by ID: ", httpErr)
+			return types.ResultErr[map[string]string](httpErr)
+		}
+
+		student = studentResult.Value()
+	}
+
+	var companion models.CompanionDBMongo
+	var speciality models.SpecialityDBMongo
+	if session.IDCompanion != "" {
+		companionResult := Companion.GetByID(session.IDCompanion)
+		if companionResult.IsErr() {
+			httpErr := companionResult.Error().(*types.HttpError)
+			logger.Warning("Failed to get companion by ID: ", httpErr)
+			return types.ResultErr[map[string]string](httpErr)
+		}
+
+		companion = companionResult.Value()
+
+		specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
+		if specialityResult.IsErr() {
+			httpErr := specialityResult.Error().(*types.HttpError)
+			logger.Warning("Failed to get speciality by ID: ", httpErr)
+			return types.ResultErr[map[string]string](httpErr)
+		}
+
+		speciality = specialityResult.Value()
+	}
+
+	extraInfo := make(map[string]string, 5)
+	extraInfo["StudentName"] = student.FirstName
+	extraInfo["StudentSurname"] = student.LastName
+	extraInfo["CompanionName"] = companion.FirstName
+	extraInfo["CompanionSurname"] = companion.LastName
+	extraInfo["CompanionSpeciality"] = speciality.Name
 
 	return types.ResultOk(extraInfo)
 }
