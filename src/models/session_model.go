@@ -1,7 +1,6 @@
 package models
 
 import (
-	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"errors"
 )
@@ -74,9 +73,7 @@ func statusName(code sessionStatus) string {
 	return "Desconocido"
 }
 func statusCode(name string) sessionStatus {
-	logger.Debug("Converting status name to code:", name)
 	for state, stateName := range STATUS {
-		logger.Debug("Checking status name:", stateName)
 		if stateName == name {
 			return state
 		}
