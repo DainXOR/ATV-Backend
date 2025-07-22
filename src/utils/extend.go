@@ -7,9 +7,14 @@ import (
 
 type Predicate[T any] func(T) bool
 
-func Apply[T, R any](value T, fn func(T) R) func() R {
+func Curry[T, R any](value T, fn func(T) R) func() R {
 	return func() R {
 		return fn(value)
+	}
+}
+func Partial[T, U, R any](value T, fn func(T, U) R) func(arg U) R {
+	return func(arg U) R {
+		return fn(value, arg)
 	}
 }
 func Transform[T, R any](value T, fn func(T) R) R {
@@ -63,6 +68,11 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 	}
 	return result
 }
+func ForEach[T any](slice []T, action func(int, T)) {
+	for i, value := range slice {
+		action(i, value)
+	}
+}
 func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	result := initial
 
@@ -71,6 +81,30 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	}
 	return result
 }
+
+func DForEach[K comparable, V any](m map[K]V, action func(K, V)) {
+	for k, v := range m {
+		action(k, v)
+	}
+}
+func DMap[K comparable, V, U any](m map[K]V, mapper func(K, V) U) map[K]U {
+	result := make(map[K]U, len(m))
+
+	for k, v := range m {
+		result[k] = mapper(k, v)
+	}
+	return result
+}
+func DFlatten[K comparable, V, S any](m map[K]V, flattener func(K, V) S) []S {
+	result := make([]S, 0, len(m))
+
+	for k, v := range m {
+		result = append(result, flattener(k, v))
+	}
+
+	return result
+}
+
 func AsStrings(slice []any) []string {
 	return Map(slice, func(e any) string { return fmt.Sprint(e) })
 }
@@ -79,7 +113,6 @@ func Podate(slice []string, cutset string) []string {
 		return strings.Trim(e, cutset)
 	})
 }
-
 func Join(v []any, sep string) string {
 	values := AsStrings(v)
 	joinedArgs := strings.Join(values, sep)

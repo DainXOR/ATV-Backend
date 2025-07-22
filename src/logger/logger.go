@@ -14,98 +14,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type logLevel int
-
-const ( // Log levels
-	LEVEL_DEBUG   logLevel = 1 << iota // 0b00001
-	LEVEL_INFO                         // 0b00010
-	LEVEL_WARNING                      // 0b00100
-	LEVEL_ERROR                        // 0b01000
-	LEVEL_FATAL                        // 0b10000
-
-	LEVEL_ALL           = LEVEL_DEBUG | LEVEL_INFO | LEVEL_WARNING | LEVEL_ERROR | LEVEL_FATAL
-	LEVEL_NONE logLevel = 0 // 0b00000
-)
-
-func (l logLevel) String() string {
-	switch l {
-	case LEVEL_DEBUG:
-		return "DEBUG"
-	case LEVEL_INFO:
-		return "INFO"
-	case LEVEL_WARNING:
-		return "WARNING"
-	case LEVEL_ERROR:
-		return "ERROR"
-	case LEVEL_FATAL:
-		return "FATAL"
-	case LEVEL_ALL:
-		return "ALL"
-	case LEVEL_NONE:
-		return "NONE"
-	default:
-		return fmt.Sprintf("UNKNOWN(%d)", l)
-	}
-}
-
-const ( // File log constants
-	LOG_PATH      = "../artifacts/"
-	LOG_FILE      = "logs.log"
-	LOG_FULL_PATH = LOG_PATH + LOG_FILE
-)
-
-const ( // Color constants
-	TXT_BLACK   = "30m"
-	TXT_RED     = "31m"
-	TXT_GREEN   = "32m"
-	TXT_YELLOW  = "33m"
-	TXT_BLUE    = "34m"
-	TXT_MAGENTA = "35m"
-	TXT_CYAN    = "36m"
-	TXT_WHITE   = "37m"
-
-	BG_BLACK   = "40"
-	BG_RED     = "41"
-	BG_GREEN   = "42"
-	BG_YELLOW  = "43"
-	BG_BLUE    = "44"
-	BG_MAGENTA = "45"
-	BG_CYAN    = "46"
-	BG_WHITE   = "47"
-
-	CLR_START = "\033["
-	CLR_RESET = "\033[0m"
-
-	CLR_DEBUG = CLR_START + BG_GREEN + ";" + TXT_BLACK
-	CLR_INFO  = CLR_START + BG_CYAN + ";" + TXT_BLACK
-	CLR_WARN  = CLR_START + BG_YELLOW + ";" + TXT_BLACK
-	CLR_ERROR = CLR_START + BG_RED + ";" + TXT_BLACK
-	CLR_FATAL = CLR_START + BG_RED + ";" + TXT_WHITE
-
-	CLR_DEPRECATE   = CLR_START + BG_MAGENTA + ";" + TXT_WHITE
-	CLR_DEPR_REASON = CLR_START + BG_YELLOW + ";" + TXT_WHITE
-
-	CLR_LAVA       = CLR_START + BG_WHITE + ";" + TXT_BLACK
-	CLR_COLD_LAVA  = CLR_START + BG_YELLOW + ";" + TXT_BLACK
-	CLR_DRIED_LAVA = CLR_START + BG_RED + ";" + TXT_BLACK
-
-	CLR_FILE = CLR_START + BG_BLUE + ";" + TXT_WHITE
-)
-
-const ( // Default logger settings
-	DEFAULT_LOGS_TO_FILE         = false
-	DEFAULT_LOGS_TO_CONSOLE      = true
-	DEFAULT_COLOR_LOGGING        = false
-	DEFAULT_LOG_LEVEL            = LEVEL_ALL
-	ENABLE_LOG_ATTEMPTS_MESSAGES = true
-	DEFAULT_MAX_LOG_ATTEMPTS     = 15
-	DEFAULT_WARNING_LOG_ATTEMPTS = 10
-
-	DEFAULT_LOGGER_FLAGS = log.Ldate | log.Ltime
-
-	DEFAULT_APP_VERSION = "0.1.0"
-)
-
 var ( // Default color functions for logging
 	colorAsDebug   = colorApplier(TXT_BLACK, BG_GREEN)
 	colorAsInfo    = colorApplier(TXT_BLACK, BG_CYAN)
@@ -123,7 +31,7 @@ var ( // Default color functions for logging
 	colorAsFile = colorApplier(TXT_WHITE, BG_BLUE)
 )
 
-func colorApplier(textColor, bgColor string) func(txt string) string {
+func colorApplier(textColor, bgColor ansiCode) func(txt string) string {
 	if !LogsWithColor() {
 		return func(txt string) string {
 			return txt // If color logging is disabled, return the text as is
@@ -131,7 +39,7 @@ func colorApplier(textColor, bgColor string) func(txt string) string {
 	}
 
 	return func(txt string) string {
-		return CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
+		return txt //CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
 	}
 }
 
@@ -141,10 +49,6 @@ type dnxLogger struct {
 	WarningLogger *log.Logger
 	ErrorLogger   *log.Logger
 	FatalLogger   *log.Logger
-
-	normalLogger *log.Logger
-	errorLogger  *log.Logger
-	altLogger    *log.Logger
 
 	LogToFile    bool
 	LogToConsole bool
@@ -183,10 +87,6 @@ func defaultInit() {
 		WarningLogger: log.New(os.Stdout, "| WARNING | ", log.LstdFlags),
 		ErrorLogger:   log.New(os.Stderr, "| ERROR | ", log.LstdFlags),
 		FatalLogger:   log.New(os.Stderr, "| FATAL | ", log.LstdFlags),
-
-		normalLogger: log.New(os.Stdout, "", log.LstdFlags),
-		errorLogger:  log.New(os.Stderr, "", log.LstdFlags),
-		altLogger:    log.New(os.Stdout, "", log.LstdFlags),
 	}
 
 	envInit() // Initialize environment variables for logger
@@ -199,7 +99,7 @@ func defaultInit() {
 }
 func envInit() {
 	Debug("Loading environment variables for logger")
-  
+
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
 	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
 	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
@@ -265,11 +165,11 @@ func envInit() {
 		}
 	} else {
 		Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
-		get().DebugLogger.SetPrefix("|" + colorWith(" DEBUG ", CLR_DEBUG) + "| ")
-		get().DebugLogger.SetPrefix("|" + colorWith(" INFO ", CLR_INFO) + "| ")
-		get().WarningLogger.SetPrefix("|" + colorWith(" WARNING ", CLR_WARN) + "| ")
-		get().ErrorLogger.SetPrefix("|" + colorWith(" ERROR ", CLR_ERROR) + "| ")
-		get().FatalLogger.SetPrefix("|" + colorWith(" FATAL ", CLR_FATAL) + "| ")
+		get().DebugLogger.SetPrefix("|" + CLR_DEBUG.Apply(" DEBUG ") + "| ")
+		get().InfoLogger.SetPrefix("|" + CLR_INFO.Apply(" INFO ") + "| ")
+		get().WarningLogger.SetPrefix("|" + CLR_WARN.Apply(" WARNING ") + "| ")
+		get().ErrorLogger.SetPrefix("|" + CLR_ERROR.Apply(" ERROR ") + "| ")
+		get().FatalLogger.SetPrefix("|" + CLR_FATAL.Apply(" FATAL ") + "| ")
 	}
 
 	Debug("Logger environment variables loaded")
@@ -301,14 +201,14 @@ func colorTxt(txt string, textColor string, bgColor string) string {
 		return txt // If color logging is disabled, return the text as is
 	}
 
-	return CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
+	return txt //CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
 }
 func colorWith(txt string, colorString string) string {
 	if !LogsWithColor() {
 		return txt // If color logging is disabled, return the text as is
 	}
 
-	return colorString + txt + CLR_RESET
+	return txt //colorString + txt + CLR_RESET
 }
 
 func majorVersionOf(version string) uint64 {
@@ -724,7 +624,7 @@ func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth 
 
 	orignalPrefix := logger.Prefix()
 	filePrefix := utils.CallOrigin(4 + extraTraceDepth)
-	filePrefix = colorWith(filePrefix, CLR_FILE)
+	filePrefix = CLR_FILE.Apply(filePrefix)
 	filePrefix += ":"
 
 	stringValues := utils.AsStrings(v)
@@ -803,8 +703,8 @@ func Fatal(v ...any) {
 
 func Deprecate(deprecatedVersion string, removalVersion string, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
-	deprecateTxt := colorWith(" DEPRECATED:", CLR_DEPRECATE)
-	reasonTxt := colorWith(" REASON:", CLR_DEPR_REASON)
+	deprecateTxt := CLR_DEPRECATE.Apply(" DEPRECATED:")
+	reasonTxt := CLR_DEPR_REASON.Apply(" REASON:")
 
 	if compareVersions(AppVersion(), addToVersion(removalVersion, 0, 1, 0)) >= 0 {
 		iLogFatal(false, 1, deprecateTxt, "This feature has been removed in version", removalVersion)
@@ -844,9 +744,9 @@ type volcano struct {
 
 func Lava(version string, v ...any) volcano {
 	args := utils.Join(v, " ")
-	lavaTxt := colorWith(" LAVA:", CLR_LAVA)
-	coldLavaTxt := colorWith(" COLD LAVA:", CLR_COLD_LAVA)
-	driedLavaTxt := colorWith(" DRIED LAVA:", CLR_DRIED_LAVA)
+	lavaTxt := CLR_LAVA.Apply(" LAVA:")
+	coldLavaTxt := CLR_COLD_LAVA.Apply(" COLD LAVA:")
+	driedLavaTxt := CLR_DRIED_LAVA.Apply(" DRIED LAVA:")
 
 	coldVersion := addToVersion(version, 0, 0, 2)
 	driedVersion := addToVersion(version, 0, 0, 4)
