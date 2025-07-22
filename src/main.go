@@ -7,8 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 
-	//"github.com/joho/godotenv"
-
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
