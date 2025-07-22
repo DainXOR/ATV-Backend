@@ -58,12 +58,14 @@ const (
 	STATUS_PENDING
 	STATUS_COMPLETED
 	STATUS_CANCELLED
+	STATUS_UNATTENDED
 )
 
 var STATUS = map[sessionStatus]string{
-	STATUS_PENDING:   "Pendiente",
-	STATUS_COMPLETED: "Completado",
-	STATUS_CANCELLED: "Cancelado",
+	STATUS_PENDING:    "Pendiente",
+	STATUS_COMPLETED:  "Completado",
+	STATUS_CANCELLED:  "Cancelado",
+	STATUS_UNATTENDED: "No asistió",
 }
 
 func statusName(code sessionStatus) string {
