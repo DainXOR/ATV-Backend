@@ -44,7 +44,7 @@ func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDBMongo
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"SessionType ID: "+id,

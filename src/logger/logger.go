@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -31,7 +30,7 @@ var ( // Default color functions for logging
 	colorAsFile = colorApplier(TXT_WHITE, BG_BLUE)
 )
 
-func colorApplier(textColor, bgColor ansiCode) func(txt string) string {
+func colorApplier(textColor, bgColor AnsiCode) func(txt string) string {
 	if !LogsWithColor() {
 		return func(txt string) string {
 			return txt // If color logging is disabled, return the text as is
@@ -71,16 +70,16 @@ func init() {
 }
 func defaultInit() {
 	dnxLoggerInstance = &dnxLogger{
-		LogToFile:       DEFAULT_LOGS_TO_FILE,
-		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
-		ColorLogs:       DEFAULT_COLOR_LOGGING,
-		LogLevels:       DEFAULT_LOG_LEVEL,
-		logAttempts:     0,
-		appVersion:      DEFAULT_APP_VERSION,
-		appVersionMajor: majorVersionOf(DEFAULT_APP_VERSION),
-		appVersionMinor: minorVersionOf(DEFAULT_APP_VERSION),
-		appVersionPatch: patchVersionOf(DEFAULT_APP_VERSION),
-		usingDefaults:   true,
+		//		LogToFile:       DEFAULT_LOGS_TO_FILE,
+		//		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
+		//		ColorLogs:       DEFAULT_COLOR_LOGGING,
+		//		LogLevels:       DEFAULT_LOG_LEVEL,
+		//		logAttempts:     0,
+		//		appVersion:      DEFAULT_APP_VERSION,
+		//		appVersionMajor: majorVersionOf(DEFAULT_APP_VERSION),
+		//		appVersionMinor: minorVersionOf(DEFAULT_APP_VERSION),
+		//		appVersionPatch: patchVersionOf(DEFAULT_APP_VERSION),
+		usingDefaults: true,
 
 		DebugLogger:   log.New(os.Stdout, "| DEBUG | ", log.LstdFlags),
 		InfoLogger:    log.New(os.Stdout, "| INFO | ", log.LstdFlags),
@@ -107,23 +106,29 @@ func envInit() {
 	logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
 
 	if existMinLevel {
+		level, err := Level.Get(minLogLevel)
+		if err != nil {
+			Warning("Failed to parse DNX_LOG_MIN_LEVEL value, using default level: ", currentLogLevels())
+			level = Level.All()
+		}
+
 		Debug("Setting minimum log level to ", minLogLevel)
-		get().usingDefaults = !SetMinLogLevel(LogLevelValue(minLogLevel)) // If any environment variable is set, we are not using defaults
+		get().usingDefaults = !SetMinLogLevel(level) // If any environment variable is set, we are not using defaults
 	} else {
 		Debug("DNX_LOG_MIN_LEVEL not set, using default level: ", currentLogLevels())
 	}
 	if existDisableLevels {
 		levels := strings.Split(disableLevels, "|")
-		options := LEVEL_NONE
+		//options := LEVEL_NONE
 		Debug("Disabling log levels:")
 
 		for _, level := range levels {
 			level = strings.TrimSpace(level)
-			options |= LogLevelValue(level)
+			//options |= LogLevelValue(level)
 			Debug(" - ", level)
 		}
 
-		get().usingDefaults = !DisableLogOptions(options) && get().usingDefaults // If any environment variable is set, we are not using defaults
+		//get().usingDefaults = !DisableLogOptions(options) && get().usingDefaults // If any environment variable is set, we are not using defaults
 	} else {
 		Debug("DNX_LOG_DISABLE_LEVELS not set, keeping current log levels: ", currentLogLevels())
 	}
@@ -131,40 +136,40 @@ func envInit() {
 		b, err := strconv.ParseBool(logConsole)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_CONSOLE value")
-			Warning("Defaulting to console logging: ", DEFAULT_LOGS_TO_CONSOLE)
-			SetLogToConsole(DEFAULT_LOGS_TO_CONSOLE)
+			//Warning("Defaulting to console logging: ", DEFAULT_LOGS_TO_CONSOLE)
+			//SetLogToConsole(DEFAULT_LOGS_TO_CONSOLE)
 		} else {
 			SetLogToConsole(b)
 			get().usingDefaults = false // If any environment variable is set, we are not using defaults
 		}
 	} else {
-		Debug("DNX_LOG_CONSOLE not set, using default value: ", DEFAULT_LOGS_TO_CONSOLE)
+		//Debug("DNX_LOG_CONSOLE not set, using default value: ", DEFAULT_LOGS_TO_CONSOLE)
 	}
 	if existLogFile {
 		b, err := strconv.ParseBool(logFile)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_FILE value")
-			Warning("Defaulting to file logging: ", DEFAULT_LOGS_TO_FILE)
-			SetLogToFile(DEFAULT_LOGS_TO_FILE)
+			//Warning("Defaulting to file logging: ", DEFAULT_LOGS_TO_FILE)
+			//SetLogToFile(DEFAULT_LOGS_TO_FILE)
 		} else {
 			SetLogToFile(b)
 			get().usingDefaults = false // If any environment variable is set, we are not using defaults
 		}
 	} else {
-		Debug("DNX_LOG_FILE not set, using default value: ", DEFAULT_LOGS_TO_FILE)
+		//Debug("DNX_LOG_FILE not set, using default value: ", DEFAULT_LOGS_TO_FILE)
 	}
 	if existLogWithColor {
 		b, err := strconv.ParseBool(logWithColor)
 		if err != nil {
 			Warning("Failed to parse DNX_LOG_WITH_COLOR value")
-			Warning("Defaulting to color logging: ", DEFAULT_COLOR_LOGGING)
-			SetLogWithColor(DEFAULT_COLOR_LOGGING)
+			//Warning("Defaulting to color logging: ", DEFAULT_COLOR_LOGGING)
+			//SetLogWithColor(DEFAULT_COLOR_LOGGING)
 		} else {
 			SetLogWithColor(b)
 			get().usingDefaults = false // If any environment variable is set, we are not using defaults
 		}
 	} else {
-		Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
+		//Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
 		get().DebugLogger.SetPrefix("|" + CLR_DEBUG.Apply(" DEBUG ") + "| ")
 		get().InfoLogger.SetPrefix("|" + CLR_INFO.Apply(" INFO ") + "| ")
 		get().WarningLogger.SetPrefix("|" + CLR_WARN.Apply(" WARNING ") + "| ")
@@ -180,7 +185,7 @@ func ReloadEnv() {
 }
 
 func hasLogLevel(options logLevel, level logLevel) bool {
-	return options&level == level
+	return options.Has(level)
 }
 
 // Returns the singleton instance of dnxLogger, initializing it if necessary.
@@ -267,58 +272,60 @@ func addToVersion(version string, major, minor, patch uint64) string {
 }
 
 func tryCreateLogFile() bool {
-	if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
-		logWarning(true, "Log directory does not exist")
-		logDebug(true, "Attempting to create log directory at ", LOG_PATH)
-		err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
+	/*
+		if _, err := os.Stat(LOG_PATH); os.IsNotExist(err) {
+			logWarning(true, "Log directory does not exist")
+			logDebug(true, "Attempting to create log directory at ", LOG_PATH)
+			err := os.MkdirAll(filepath.Dir(LOG_PATH), 0755)
 
-		if err != nil {
-			logError(true, "Failed to create log directory: ", err)
-			logWarning(true, "Defaulting to no file logging")
-			SetLogToFile(false)
-			return false
+			if err != nil {
+				logError(true, "Failed to create log directory: ", err)
+				logWarning(true, "Defaulting to no file logging")
+				SetLogToFile(false)
+				return false
 
-		} else {
-			logDebug(true, "Log directory created at ", LOG_PATH)
+			} else {
+				logDebug(true, "Log directory created at ", LOG_PATH)
+			}
 		}
-	}
 
-	if _, err := os.Stat(LOG_FULL_PATH); os.IsNotExist(err) {
-		file, err := os.Create(LOG_FULL_PATH)
+		if _, err := os.Stat(LOG_FULL_PATH); os.IsNotExist(err) {
+			file, err := os.Create(LOG_FULL_PATH)
 
-		if err != nil {
-			logError(true, "Failed to create log file: ", err)
-			logWarning(true, "Defaulting to no file logging")
-			SetLogToFile(false)
-			return false
-		} else {
-			file.Close()
-			logDebug(true, "Log file created at ", LOG_FULL_PATH)
-			return true
+			if err != nil {
+				logError(true, "Failed to create log file: ", err)
+				logWarning(true, "Defaulting to no file logging")
+				SetLogToFile(false)
+				return false
+			} else {
+				file.Close()
+				logDebug(true, "Log file created at ", LOG_FULL_PATH)
+				return true
+			}
 		}
-	}
 
-	Debug("Log file already exists at ", LOG_FULL_PATH)
+		Debug("Log file already exists at ", LOG_FULL_PATH)
+	*/
 	return true
 }
 
 func registerLogAttempt(forceNoFileWrite bool) bool {
 	get().logAttempts++
+	/*
+		if get().logAttempts > DEFAULT_WARNING_LOG_ATTEMPTS && get().logAttempts < DEFAULT_MAX_LOG_ATTEMPTS {
+			if ENABLE_LOG_ATTEMPTS_MESSAGES {
+				logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
+			}
+			return false
 
-	if get().logAttempts > DEFAULT_WARNING_LOG_ATTEMPTS && get().logAttempts < DEFAULT_MAX_LOG_ATTEMPTS {
-		if ENABLE_LOG_ATTEMPTS_MESSAGES {
-			logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
-		}
-		return false
+		} else if get().logAttempts >= DEFAULT_MAX_LOG_ATTEMPTS {
+			if ENABLE_LOG_ATTEMPTS_MESSAGES {
+				logError(forceNoFileWrite, "Too many log attempts, will panic now")
+				logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
+			}
 
-	} else if get().logAttempts >= DEFAULT_MAX_LOG_ATTEMPTS {
-		if ENABLE_LOG_ATTEMPTS_MESSAGES {
-			logError(forceNoFileWrite, "Too many log attempts, will panic now")
-			logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
-		}
-
-		return false
-	}
+			return false
+		}*/
 	return true
 }
 func resetLogAttempts(forceNoFileWrite bool) bool {
@@ -385,63 +392,43 @@ func AppVersion() string {
 }
 
 func currentLogLevels() string {
-	var msg string
-
-	if LogLevelsHas(LEVEL_DEBUG) {
-		msg += "| DEBUG |"
-	}
-	if LogLevelsHas(LEVEL_INFO) {
-		msg += "| INFO |"
-	}
-	if LogLevelsHas(LEVEL_WARNING) {
-		msg += "| WARNING |"
-	}
-	if LogLevelsHas(LEVEL_ERROR) {
-		msg += "| ERROR |"
-	}
-	if LogLevelsHas(LEVEL_FATAL) {
-		msg += "| FATAL |"
-	}
-
-	return msg
+	return "| " + LogLevels().Name() + " |"
 }
 
 // Returns the current logging levels loaded as bitmask
 func LogLevels() logLevel {
 	return get().LogLevels
 }
-func LogLevelsHas(option logLevel) bool {
-	return LogLevels()&option == option
-}
+
 func SetLogLevels(options logLevel) bool {
-	if options < LEVEL_NONE || options > LEVEL_ALL {
+	msg := "Logging options set to:"
+
+	if !options.IsValid() {
 		Warning("Invalid logging options")
 		return false
-	} else if options == LEVEL_ALL {
-		Debug("Logging options set to ALL")
-		get().LogLevels = LEVEL_ALL
+	} else if options.Is(Level.All()) {
+		Debug(msg, Level.All().Name())
+		get().LogLevels = Level.All()
 		return true
-	} else if options == LEVEL_NONE {
-		Debug("Logging options set to NONE")
-		get().LogLevels = LEVEL_NONE
+	} else if options.Is(Level.None()) {
+		Debug(msg, Level.None().Name())
+		get().LogLevels = Level.None()
 		return true
 	}
 
-	var msg string
-
-	if LogLevelsHas(LEVEL_DEBUG) {
+	if LogLevels().Has(Level.Debug()) {
 		msg += "| DEBUG |"
 	}
-	if LogLevelsHas(LEVEL_INFO) {
+	if LogLevels().Has(Level.Info()) {
 		msg += "| INFO |"
 	}
-	if LogLevelsHas(LEVEL_WARNING) {
+	if LogLevels().Has(Level.Warning()) {
 		msg += "| WARNING |"
 	}
-	if LogLevelsHas(LEVEL_ERROR) {
+	if LogLevels().Has(Level.Error()) {
 		msg += "| ERROR |"
 	}
-	if LogLevelsHas(LEVEL_FATAL) {
+	if LogLevels().Has(Level.Fatal()) {
 		msg += "| FATAL |"
 	}
 
@@ -450,147 +437,103 @@ func SetLogLevels(options logLevel) bool {
 	return true
 }
 func EnableLogOptions(options logLevel) bool {
-	if options < LEVEL_NONE || options > LEVEL_ALL {
+	if !options.IsValid() {
 		Warning("Invalid logging option")
 		return false
-	} else if options == LEVEL_ALL {
+	} else if options.Is(Level.All()) {
 		Debug("Enabled all logging options")
-		SetLogLevels(LEVEL_ALL)
+		SetLogLevels(Level.All())
 		return true
-	} else if options == LEVEL_NONE {
+	} else if options.Is(Level.None()) {
 		Debug("Disabled all logging options")
-		SetLogLevels(LEVEL_NONE)
+		SetLogLevels(Level.None())
 		return true
 	}
 
 	var msg string
 
-	if hasLogLevel(options, LEVEL_DEBUG) {
+	if options.Has(Level.Debug()) {
 		msg += "| DEBUG |"
 	}
-	if hasLogLevel(options, LEVEL_INFO) {
+	if options.Has(Level.Info()) {
 		msg += "| INFO |"
 	}
-	if hasLogLevel(options, LEVEL_WARNING) {
+	if options.Has(Level.Warning()) {
 		msg += "| WARNING |"
 	}
-	if hasLogLevel(options, LEVEL_ERROR) {
+	if options.Has(Level.Error()) {
 		msg += "| ERROR |"
 	}
-	if hasLogLevel(options, LEVEL_FATAL) {
+	if options.Has(Level.Fatal()) {
 		msg += "| FATAL |"
 	}
 
 	Debug("Enabled logging options: ", msg)
-	get().LogLevels |= options
+	get().LogLevels = LogLevels().And(options)
 	return true
 }
 func DisableLogOptions(options logLevel) bool {
-	if options < LEVEL_NONE || options > LEVEL_ALL {
+	if !options.IsValid() {
 		Warning("Invalid logging option")
 		return false
 	}
 
 	var msg string
 
-	if hasLogLevel(options, LEVEL_DEBUG) {
+	if options.Has(Level.Debug()) {
 		msg += "| DEBUG |"
 	}
-	if hasLogLevel(options, LEVEL_INFO) {
+	if options.Has(Level.Info()) {
 		msg += "| INFO |"
 	}
-	if hasLogLevel(options, LEVEL_WARNING) {
+	if options.Has(Level.Warning()) {
 		msg += "| WARNING |"
 	}
-	if hasLogLevel(options, LEVEL_ERROR) {
+	if options.Has(Level.Error()) {
 		msg += "| ERROR |"
 	}
-	if hasLogLevel(options, LEVEL_FATAL) {
+	if options.Has(Level.Fatal()) {
 		msg += "| FATAL |"
 	}
 
 	Debug("Disabled logging options: ", msg)
-	get().LogLevels &= ^options
+	get().LogLevels = LogLevels().Not(options)
 	return true
 }
 func SetMinLogLevel(level logLevel) bool {
-	if level < LEVEL_NONE || level > LEVEL_ALL {
+	if !level.IsValid() {
 		Warning("Invalid logging level")
 		return false
 	}
 
-	var msg string
-
-	switch level {
-	case LEVEL_ALL:
-		fallthrough
-	case LEVEL_DEBUG:
-		msg = "DEBUG"
-
-	case LEVEL_INFO:
-		msg = "INFO"
-	case LEVEL_WARNING:
-		msg = "WARNING"
-	case LEVEL_ERROR:
-		msg = "ERROR"
-	case LEVEL_FATAL:
-		msg = "FATAL"
-	case LEVEL_NONE:
-		msg = "NONE"
-	}
-
-	Debug("Minimum logging level set to: ", msg)
+	Debug("Minimum logging level set to: ", level.Name())
 	SetLogLevels(level)
 	return true
 }
-func LogLevelValue(levelName string) logLevel {
-	value := LogLevels()
-
-	switch levelName {
-	case "DEBUG":
-		value = LEVEL_DEBUG
-	case "INFO":
-		value = LEVEL_INFO
-	case "WARNING":
-		value = LEVEL_WARNING
-	case "ERROR":
-		value = LEVEL_ERROR
-	case "FATAL":
-		value = LEVEL_FATAL
-	case "ALL":
-		value = LEVEL_ALL
-	case "NONE":
-		value = LEVEL_NONE
-	default:
-		Warning("Invalid logging level")
-	}
-
-	return value
-}
 func canLogWith(logger *log.Logger) bool {
-	if LogLevelsHas(LEVEL_ALL) {
+	if LogLevels().Has(Level.All()) {
 		return true
-	} else if LogLevelsHas(LEVEL_NONE) {
+	} else if LogLevels().Has(Level.None()) {
 		return false
 	}
 
 	if logger == get().DebugLogger {
-		return LogLevelsHas(LEVEL_DEBUG)
+		return LogLevels().Has(Level.Debug())
 	} else if logger == get().InfoLogger {
-		return LogLevelsHas(LEVEL_INFO)
+		return LogLevels().Has(Level.Info())
 	} else if logger == get().WarningLogger {
-		return LogLevelsHas(LEVEL_WARNING)
+		return LogLevels().Has(Level.Warning())
 	} else if logger == get().ErrorLogger {
-		return LogLevelsHas(LEVEL_ERROR)
+		return LogLevels().Has(Level.Error())
 	} else if logger == get().FatalLogger {
-		return LogLevelsHas(LEVEL_FATAL)
+		return LogLevels().Has(Level.Fatal())
 	}
 
 	return false
 }
 
 func writeToFile(logger *log.Logger, prefix string, v ...any) bool {
-	file, err := os.OpenFile(LOG_FULL_PATH, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("get()", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	if err != nil {
 		logError(true, "Failed to open log file")

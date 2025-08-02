@@ -46,7 +46,7 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDBMongo] {
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
@@ -163,7 +163,7 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
@@ -216,7 +216,7 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
@@ -279,7 +279,7 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
@@ -336,7 +336,7 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,

@@ -64,7 +64,7 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDBMongo] {
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Session ID: "+id,
@@ -124,7 +124,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDBM
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,

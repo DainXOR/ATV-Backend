@@ -87,11 +87,12 @@ func DForEach[K comparable, V any](m map[K]V, action func(K, V)) {
 		action(k, v)
 	}
 }
-func DMap[K comparable, V, U any](m map[K]V, mapper func(K, V) U) map[K]U {
-	result := make(map[K]U, len(m))
+func DMap[K, NK comparable, V, NV any](m map[K]V, mapper func(K, V) (NK, NV)) map[NK]NV {
+	result := make(map[NK]NV, len(m))
 
 	for k, v := range m {
-		result[k] = mapper(k, v)
+		newKey, newVal := mapper(k, v)
+		result[newKey] = newVal
 	}
 	return result
 }

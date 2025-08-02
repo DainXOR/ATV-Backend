@@ -31,9 +31,11 @@ func address() string {
 func main() {
 	defer configs.DB.Close()
 
-	router := gin.Default()
-	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and logs a small trace
-	router.Use(middleware.CORSMiddleware())
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	router.Use(middleware.Recovery()) // Middleware to recover from panics and logs a small trace
+	router.Use(middleware.CORS())
 	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes

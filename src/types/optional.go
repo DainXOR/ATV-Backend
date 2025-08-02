@@ -6,16 +6,13 @@ type Optional[T any] struct {
 }
 
 func OptionalOf[T any](value T, condition ...bool) Optional[T] {
-	if len(condition) > 0 {
-		if condition[0] {
+	for _, c := range condition {
+		if c {
 			return Optional[T]{value: value, present: true}
 		}
-
-		return OptionalEmpty[T]()
-
-	} else {
-		return Optional[T]{value: value, present: true}
 	}
+
+	return OptionalEmpty[T]()
 }
 
 func OptionalEmpty[T any]() Optional[T] {
@@ -44,6 +41,16 @@ func (o Optional[T]) GetOr(defaultValue T) T {
 func (o Optional[T]) IfPresent(fn func(T) Optional[T]) Optional[T] {
 	if o.present {
 		if res := fn(o.value); res.IsPresent() {
+			return res
+		} else {
+			return OptionalEmpty[T]()
+		}
+	}
+	return o
+}
+func (o Optional[T]) IfEmpty(fn func() Optional[T]) Optional[T] {
+	if !o.present {
+		if res := fn(); res.IsPresent() {
 			return res
 		} else {
 			return OptionalEmpty[T]()

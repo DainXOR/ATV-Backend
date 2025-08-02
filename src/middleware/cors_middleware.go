@@ -9,7 +9,7 @@ import (
 	jcors "github.com/itsjamie/gin-cors"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
+func CORS() gin.HandlerFunc {
 	return corsLib()
 }
 
