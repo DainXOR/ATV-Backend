@@ -1,5 +1,7 @@
 package logger
 
+import "dainxor/atv/types"
+
 type wf struct {
 	writer    Writer
 	formatter *Formatter
@@ -12,7 +14,7 @@ type configs struct {
 	MaxLogAttempts     uint8
 	WarningLogAttempts uint8
 
-	AppVersion string
+	AppVersion types.Version
 
 	wf []wf
 }
@@ -29,7 +31,7 @@ func NewConfigs() configs {
 		WarningLogAttempts: 10,
 		MaxLogAttempts:     15,
 
-		AppVersion: "0.1.0",
+		AppVersion: types.V("0.1.0"),
 
 		wf: []wf{
 			{writer: ConsoleWriter.NewLine().New(), formatter: &cFormatter},
@@ -40,6 +42,13 @@ func NewConfigs() configs {
 
 func (c *configs) AddWriter(writer Writer, formatter *Formatter) *configs {
 	c.wf = append(c.wf, wf{writer: writer, formatter: formatter})
+	return c
+}
+func (c *configs) RemoveWriter(index int) *configs {
+	if index < 0 || index >= len(c.wf) {
+		return c
+	}
+	c.wf = append(c.wf[:index], c.wf[index+1:]...)
 	return c
 }
 func (c *configs) Writers() []wf {
