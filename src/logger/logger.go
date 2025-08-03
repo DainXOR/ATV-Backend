@@ -566,7 +566,7 @@ func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth 
 	registerLogAttempt(forceNoFileWrite)
 
 	orignalPrefix := logger.Prefix()
-	filePrefix := utils.CallOrigin(4 + extraTraceDepth)
+	filePrefix, _ := utils.CallOrigin(4 + extraTraceDepth)
 	filePrefix = CLR_FILE.Apply(filePrefix)
 	filePrefix += ":"
 

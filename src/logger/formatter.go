@@ -4,6 +4,7 @@ import (
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -13,6 +14,7 @@ Formatter interface defines the methods required for formatting log records.
 type Formatter interface {
 	Format(original *Record, current *formatRecord) (string, error)
 	Next() types.Optional[Formatter]
+	DateFormat() string
 }
 type FormatterBase struct {
 	next       *Formatter
@@ -26,28 +28,29 @@ func (f *FormatterBase) Next() types.Optional[Formatter] {
 	return types.OptionalOf(*f.next, f.next != nil)
 }
 func (f *FormatterBase) FinalString(original *Record, formatRecord *formatRecord) string {
-	formatString :=
-		formatRecord.LogLevel +
-			formatRecord.Time +
-			formatRecord.File +
-			formatRecord.Line +
-			formatRecord.Message +
-			formatRecord.AppVersion +
-			formatRecord.ContextBegin
+	formattedLevel := fmt.Sprintf(formatRecord.LogLevel, original.LogLevel.Name())
+	formattedTime := fmt.Sprintf(formatRecord.Time, original.Time.Format(f.DateFormat()))
+	formattedFile := fmt.Sprintf(formatRecord.File, original.File)
+	formattedLine := fmt.Sprintf(formatRecord.Line, original.Line)
+	formattedMessage := fmt.Sprintf(formatRecord.Message, original.Message)
+	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion)
 
-	for k, pair := range utils.DZip(original.Context, formatRecord.Context) {
+	formattedContext := formatRecord.ContextBegin
+	for k, pair := range utils.DZipWithDefault(original.Context, formatRecord.Context, "%s: %s, ") {
 		v, formatStr := pair.First, pair.Second
-		formatString += fmt.Sprintf(formatStr, k, v)
+		formattedContext += fmt.Sprintf(formatStr, k, v)
 	}
-	formatString += formatRecord.ContextEnd
+	formattedContext = strings.Trim(formattedContext, ", ")
+	formattedContext += formatRecord.ContextEnd
 
-	finalString := fmt.Sprintf(formatString,
-		original.LogLevel.Name(),
-		original.Time.Format(f.DateFormat()),
-		original.File,
-		original.Line,
-		original.Message,
-		original.AppVersion,
+	finalString := fmt.Sprint(
+		formattedLevel,
+		formattedTime,
+		formattedFile,
+		formattedLine,
+		formattedMessage,
+		formattedVersion,
+		formattedContext,
 	)
 
 	return finalString
@@ -57,7 +60,7 @@ func (f *FormatterBase) DefaultFormat() string {
 	return "%s"
 }
 func (f *FormatterBase) DefaultContextFormat() map[string]string {
-	return map[string]string{}
+	return nil
 }
 func (f *FormatterBase) DefaultContextPrefix() string {
 	return ""
@@ -76,7 +79,7 @@ func (f *FormatterBase) fileFormatString(_ string) string {
 	return f.DefaultFormat()
 }
 func (f *FormatterBase) lineFormatString(_ int) string {
-	return f.DefaultFormat()
+	return "%d"
 }
 func (f *FormatterBase) messageFormatString(_ string) string {
 	return f.DefaultFormat()
@@ -129,29 +132,25 @@ type FormatterBuilder interface {
  */
 type simpleFormatter struct {
 	FormatterBase
-	dateFormat string
 }
 
 func (f *simpleFormatter) levelFormatString(_ logLevel) string {
-	return "|%s|"
+	return "| %s | "
 }
 func (f *simpleFormatter) dateFormatString(_ time.Time) string {
-	return f.DefaultFormat()
+	return "%s "
 }
 func (f *simpleFormatter) fileFormatString(_ string) string {
 	return "%s:"
 }
 func (f *simpleFormatter) lineFormatString(_ int) string {
-	return "%d:"
+	return "%d: "
 }
 func (f *simpleFormatter) messageFormatString(_ string) string {
-	return f.DefaultFormat()
+	return "%s "
 }
 func (f *simpleFormatter) versionFormatString(_ string) string {
-	return f.DefaultFormat()
-}
-func (f *simpleFormatter) contextFormatString(_ map[string]string) map[string]string {
-	return f.DefaultContextFormat()
+	return "[%s] "
 }
 func (f *simpleFormatter) contextPrefixString(_ map[string]string) string {
 	return "{"
@@ -189,7 +188,10 @@ type simpleFormatterBuilder struct {
 
 var SimpleFormatter simpleFormatterBuilder = simpleFormatterBuilder{
 	formatter: simpleFormatter{
-		dateFormat: "",
+		FormatterBase: FormatterBase{
+			dateFormat: "",
+			next:       nil,
+		},
 	},
 }
 
@@ -198,7 +200,7 @@ func (b simpleFormatterBuilder) TimeFormat(format string) simpleFormatterBuilder
 	return b
 }
 func (b simpleFormatterBuilder) Next(formatter Formatter) FormatterBuilder {
-	b.formatter.FormatterBase.next = &formatter
+	b.formatter.next = &formatter
 	return b
 }
 func (b simpleFormatterBuilder) New() Formatter {
@@ -206,15 +208,17 @@ func (b simpleFormatterBuilder) New() Formatter {
 		b.formatter.dateFormat = "02/01/2006 15:04:05 -07:00"
 	}
 
-	return &simpleFormatter{
-		dateFormat: b.formatter.dateFormat,
+	t := &simpleFormatter{
+		FormatterBase: b.formatter.FormatterBase,
 	}
+
+	return t
 }
 
 type consoleColorFormatter struct {
 	FormatterBase
-	formatter   Formatter
-	colorScheme AnsiColorScheme
+	baseFormatter Formatter
+	colorScheme   AnsiColorScheme
 }
 
 func (f *consoleColorFormatter) Format(original *Record, record *formatRecord) (string, error) {
@@ -279,7 +283,7 @@ type consoleColorFormatterBuilder struct {
 
 var ConsoleColorFormatter consoleColorFormatterBuilder = consoleColorFormatterBuilder{
 	formatter: consoleColorFormatter{
-		formatter: SimpleFormatter.New(),
+		baseFormatter: SimpleFormatter.New(),
 		colorScheme: AnsiColorScheme{styles: map[string]AnsiStyle{
 			Level.Debug().CodeName():   CLR_DEBUG,
 			Level.Info().CodeName():    CLR_INFO,
@@ -305,7 +309,7 @@ var ConsoleColorFormatter consoleColorFormatterBuilder = consoleColorFormatterBu
 }
 
 func (b consoleColorFormatterBuilder) Formatter(formatter Formatter) consoleColorFormatterBuilder {
-	b.formatter.formatter = formatter
+	b.formatter.baseFormatter = formatter
 	return b
 }
 func (b consoleColorFormatterBuilder) AddColor(level logLevel, colorCode AnsiStyle) consoleColorFormatterBuilder {
@@ -343,8 +347,8 @@ func (b consoleColorFormatterBuilder) New() Formatter {
 	//}
 
 	return &consoleColorFormatter{
-		formatter:   b.formatter.formatter,
-		colorScheme: b.formatter.colorScheme,
+		baseFormatter: b.formatter.baseFormatter,
+		colorScheme:   b.formatter.colorScheme,
 	}
 }
 

@@ -2,15 +2,14 @@ package main
 
 import (
 	"cmp"
+	"fmt"
 	"os"
 
-	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
-	"dainxor/atv/middleware"
-	"dainxor/atv/routes"
+	"dainxor/atv/types"
 )
 
 //var envErr = godotenv.Load()
@@ -29,29 +28,41 @@ func address() string {
 }
 
 func main() {
-	defer configs.DB.Close()
+	formatter := logger.SimpleFormatter.New()
+	record := logger.NewRecord(
+		"Server is starting",
+		types.NewSPair("env", "development"),
+		types.NewSPair("second", "Just a test"),
+	)
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(middleware.Recovery()) // Middleware to recover from panics and logs a small trace
-	router.Use(middleware.CORS())
-	//router.Use(middleware.TokenMiddleware())
+	str, _ := formatter.Format(&record, nil)
+	fmt.Println(str)
 
-	// Root level routes
-	routes.MainRoutes(router)
+	/*
+		defer configs.DB.Close()
 
-	// Api routes
-	routes.InfoRoutes(router) // Routes for information about the API
-	routes.TestRoutes(router) // Routes for testing purposes
+		router := gin.New()
+		router.Use(gin.Logger())
+		router.Use(gin.Recovery())
+		router.Use(middleware.Recovery()) // Middleware to recover from panics and logs a small trace
+		router.Use(middleware.CORS())
+		//router.Use(middleware.TokenMiddleware())
 
-	// Versioned API routes
-	routes.StudentRoutes(router)
-	routes.UniversityRoutes(router)
-	routes.SpecialityRoutes(router)
-	routes.CompanionRoutes(router)
-	routes.SessionTypeRoutes(router)
-	routes.SessionRoutes(router)
+		// Root level routes
+		routes.MainRoutes(router)
 
-	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
+		// Api routes
+		routes.InfoRoutes(router) // Routes for information about the API
+		routes.TestRoutes(router) // Routes for testing purposes
+
+		// Versioned API routes
+		routes.StudentRoutes(router)
+		routes.UniversityRoutes(router)
+		routes.SpecialityRoutes(router)
+		routes.CompanionRoutes(router)
+		routes.SessionTypeRoutes(router)
+		routes.SessionRoutes(router)
+
+		router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
+	*/
 }

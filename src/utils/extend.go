@@ -116,6 +116,18 @@ func DZip[K comparable, V1, V2 any](m1 map[K]V1, m2 map[K]V2) map[K]types.Pair[V
 	}
 	return result
 }
+func DZipWithDefault[K comparable, V1, V2 any](m1 map[K]V1, m2 map[K]V2, defaultValue V2) map[K]types.Pair[V1, V2] {
+	result := make(map[K]types.Pair[V1, V2], len(m1))
+
+	for k, v1 := range m1 {
+		if v2, exists := m2[k]; exists {
+			result[k] = types.Pair[V1, V2]{First: v1, Second: v2}
+		} else {
+			result[k] = types.Pair[V1, V2]{First: v1, Second: defaultValue}
+		}
+	}
+	return result
+}
 
 func AsStrings(slice []any) []string {
 	return Map(slice, func(e any) string { return fmt.Sprint(e) })

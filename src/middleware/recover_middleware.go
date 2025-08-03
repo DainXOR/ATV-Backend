@@ -15,9 +15,9 @@ func Recovery() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				logger.Error("Recovered from panic:", err)
 
-				origin1 := utils.CallOrigin(5)
-				origin2 := utils.CallOrigin(6)
-				origin3 := utils.CallOrigin(7)
+				origin1, _ := utils.CallOrigin(5)
+				origin2, _ := utils.CallOrigin(6)
+				origin3, _ := utils.CallOrigin(7)
 
 				logger.Error(fmt.Sprintf("Error originated at: %s > %s > %s", origin3, origin2, origin1))
 
