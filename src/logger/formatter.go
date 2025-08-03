@@ -36,7 +36,7 @@ func (f *FormatterBase) FinalString(original *Record, formatRecord *formatRecord
 	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion)
 
 	formattedContext := formatRecord.ContextBegin
-	for k, pair := range utils.DZipWithDefault(original.Context, formatRecord.Context, "%s: %s, ") {
+	for k, pair := range utils.DZip(original.Context, formatRecord.Context, "%s: %s, ") {
 		v, formatStr := pair.First, pair.Second
 		formattedContext += fmt.Sprintf(formatStr, k, v)
 	}
