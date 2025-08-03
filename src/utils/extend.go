@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"dainxor/atv/types"
 	"fmt"
 	"strings"
 )
@@ -103,6 +104,16 @@ func DFlatten[K comparable, V, S any](m map[K]V, flattener func(K, V) S) []S {
 		result = append(result, flattener(k, v))
 	}
 
+	return result
+}
+func DZip[K comparable, V1, V2 any](m1 map[K]V1, m2 map[K]V2) map[K]types.Pair[V1, V2] {
+	result := make(map[K]types.Pair[V1, V2], len(m1))
+
+	for k, v1 := range m1 {
+		if v2, exists := m2[k]; exists {
+			result[k] = types.Pair[V1, V2]{First: v1, Second: v2}
+		}
+	}
 	return result
 }
 
