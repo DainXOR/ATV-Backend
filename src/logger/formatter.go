@@ -8,18 +8,29 @@ import (
 	"time"
 )
 
-/*
-Formatter interface defines the methods required for formatting log records.
-*/
+// Formatter interface defines the methods required for custom formatter implementations.
+// This interface also provides a guide on what chained formatters for a correct
+// interaction between them.
 type Formatter interface {
 	Format(original *Record, current *formatRecord) (string, error)
 	Next() types.Optional[Formatter]
 }
+
+// FormatterBase provides a base implementation for the Formatter interface.
+// It includes common formatting methods and a next formatter for chaining.
+// You can use this as a base for your custom formatters to ensure that they
+// implement the Formatter interface correctly.
+// It is not needed if you want to implement a custom formatter.
+//
+// > Keep in mind the golang method overriding behavior
 type FormatterBase struct {
 	next       *Formatter
 	dateFormat string
 }
 
+// Returns the date format used to represent the time in the log record.
+// Do not confuse with dateFormatString, which is used to "decorate" the time value
+// in the log record.
 func (f *FormatterBase) DateFormat() string {
 	return f.dateFormat
 }
@@ -58,15 +69,6 @@ func (f *FormatterBase) FinalString(original *Record, formatRecord *formatRecord
 func (f *FormatterBase) DefaultFormat() string {
 	return "%s"
 }
-func (f *FormatterBase) DefaultContextFormat() map[string]string {
-	return nil
-}
-func (f *FormatterBase) DefaultContextPrefix() string {
-	return ""
-}
-func (f *FormatterBase) DefaultContextPostfix() string {
-	return ""
-}
 
 func (f *FormatterBase) levelFormatString(_ logLevel) string {
 	return f.DefaultFormat()
@@ -87,13 +89,13 @@ func (f *FormatterBase) versionFormatString(_ string) string {
 	return f.DefaultFormat()
 }
 func (f *FormatterBase) contextFormatString(_ map[string]string) map[string]string {
-	return f.DefaultContextFormat()
+	return nil
 }
 func (f *FormatterBase) contextPrefixString(_ map[string]string) string {
-	return f.DefaultContextPrefix()
+	return ""
 }
 func (f *FormatterBase) contextPostfixString(_ map[string]string) string {
-	return f.DefaultContextPostfix()
+	return ""
 }
 
 // Since go does not support method overriding the same way as other languages,
