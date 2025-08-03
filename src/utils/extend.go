@@ -8,6 +8,8 @@ import (
 
 type Predicate[T any] func(T) bool
 
+/* Functional utilities for single values */
+
 func Curry[T, R any](value T, fn func(T) R) func() R {
 	return func() R {
 		return fn(value)
@@ -51,6 +53,8 @@ func Extract(prefix string, text string, suffix string) string {
 	return ""
 }
 
+/* Functional utilities for slices */
+
 func Filter[T any](slice []T, predicate Predicate[T]) []T {
 	result := make([]T, 0, len(slice))
 
@@ -83,10 +87,20 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	return result
 }
 
+/* Functional utilities for maps */
+
 func DForEach[K comparable, V any](m map[K]V, action func(K, V)) {
 	for k, v := range m {
 		action(k, v)
 	}
+}
+func DApply[K comparable, V any](m map[K]V, fn func(K, V) V) map[K]V {
+	result := make(map[K]V, len(m))
+
+	for k, v := range m {
+		result[k] = fn(k, v)
+	}
+	return result
 }
 func DMap[K, NK comparable, V, NV any](m map[K]V, mapper func(K, V) (NK, NV)) map[NK]NV {
 	result := make(map[NK]NV, len(m))
@@ -106,11 +120,11 @@ func DFlatten[K comparable, V, S any](m map[K]V, flattener func(K, V) S) []S {
 
 	return result
 }
-func DZip[K comparable, V1, V2 any](m1 map[K]V1, m2 map[K]V2, defaultValue ...V2) map[K]types.Pair[V1, V2] {
-	result := make(map[K]types.Pair[V1, V2], len(m1))
+func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaultValue ...V2) map[K]types.Pair[V1, V2] {
+	result := make(map[K]types.Pair[V1, V2], len(mainMap))
 
-	for k, v1 := range m1 {
-		if v2, exists := m2[k]; exists {
+	for k, v1 := range mainMap {
+		if v2, exists := zippedMap[k]; exists {
 			result[k] = types.Pair[V1, V2]{First: v1, Second: v2}
 		} else if len(defaultValue) > 0 {
 			result[k] = types.Pair[V1, V2]{First: v1, Second: defaultValue[0]}
@@ -118,6 +132,8 @@ func DZip[K comparable, V1, V2 any](m1 map[K]V1, m2 map[K]V2, defaultValue ...V2
 	}
 	return result
 }
+
+/* Functional utilities for strings */
 
 func AsStrings(slice []any) []string {
 	return Map(slice, func(e any) string { return fmt.Sprint(e) })

@@ -42,7 +42,7 @@ type formatRecord struct {
 	Line         string
 	Message      string
 	AppVersion   string
-	Context      map[string]string
+	Context      map[string](types.SPair[string])
 	ContextBegin string
 	ContextEnd   string
 }
