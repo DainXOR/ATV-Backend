@@ -14,7 +14,6 @@ Formatter interface defines the methods required for formatting log records.
 type Formatter interface {
 	Format(original *Record, current *formatRecord) (string, error)
 	Next() types.Optional[Formatter]
-	DateFormat() string
 }
 type FormatterBase struct {
 	next       *Formatter
@@ -97,6 +96,12 @@ func (f *FormatterBase) contextPostfixString(_ map[string]string) string {
 	return f.DefaultContextPostfix()
 }
 
+// Since go does not support method overriding the same way as other languages,
+// if you "override" any of the methods in FormatterBase, you must also
+// override the Format method to ensure that the correct methods are used.
+// If you want to keep this behavior, you can simply copy this method
+// and paste it in your custom formatter implementation, this will ensure that
+// the methods called are the ones you defined in your custom formatter.
 func (f *FormatterBase) Format(original *Record, currentFormat *formatRecord) (string, error) {
 	if currentFormat == nil {
 		currentFormat = &formatRecord{
@@ -135,7 +140,7 @@ type simpleFormatter struct {
 }
 
 func (f *simpleFormatter) levelFormatString(_ logLevel) string {
-	return "| %s | "
+	return "|%s| "
 }
 func (f *simpleFormatter) dateFormatString(_ time.Time) string {
 	return "%s "
