@@ -157,7 +157,6 @@ func (f *FormatterBase) Format(r *Record, formatRecord ...*FormatRecord) (string
 		}
 	}
 
-	fmt.Println(fr)
 	return f.FinalString(r, fr), nil
 }
 
@@ -249,7 +248,6 @@ func (f *simpleFormatter) Format(r *Record, formatRecord ...*FormatRecord) (stri
 		}
 	}
 
-	fmt.Println(fr)
 	return f.FinalString(r, fr), nil
 }
 
@@ -367,7 +365,6 @@ func (f *consoleColorFormatter) Format(r *Record, formatRecord ...*FormatRecord)
 		}
 	}
 
-	fmt.Println(fr)
 	return f.FinalString(r, fr), nil
 }
 
