@@ -26,9 +26,9 @@ func logLevels() map[string]logLevel {
 	LEVEL_FATAL := logLevel{code: 1 << 4, name: "FATAL", codeName: "fatal"}
 
 	LEVEL_DEPRECATE := logLevel{code: 1 << 8, name: "DEPRECATE", codeName: "deprecate"}
-	LEVEL_DEPRECATE_WARNING := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_WARNING.code, name: "DEPRECATE", codeName: "deprecate_warning"}
-	LEVEL_DEPRECATE_ERROR := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_ERROR.code, name: "DEPRECATE", codeName: "deprecate_error"}
-	LEVEL_DEPRECATE_FATAL := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_FATAL.code, name: "DEPRECATE", codeName: "deprecate_fatal"}
+	LEVEL_DEPRECATE_WARNING := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_WARNING.code, name: LEVEL_WARNING.Name() + ":DEPRECATE", codeName: "deprecate_warning"}
+	LEVEL_DEPRECATE_ERROR := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_ERROR.code, name: LEVEL_ERROR.Name() + ":DEPRECATE", codeName: "deprecate_error"}
+	LEVEL_DEPRECATE_FATAL := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_FATAL.code, name: LEVEL_FATAL.Name() + ":DEPRECATE", codeName: "deprecate_fatal"}
 
 	LEVEL_LAVA := logLevel{code: 1 << 9, name: "LAVA", codeName: "lava"}
 	LEVEL_LAVA_HOT := logLevel{code: LEVEL_LAVA.code | LEVEL_DEBUG.code, name: "LAVA HOT", codeName: "lava_hot"}
