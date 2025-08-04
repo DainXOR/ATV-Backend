@@ -77,6 +77,9 @@ func (ansiStyle) DriedLava() AnsiStyle {
 	return AnsiStyle{Background: BG_RED, Text: TXT_BLACK}
 }
 func (ansiStyle) File() AnsiStyle {
+	return AnsiStyle{Background: BG_BLUE, Text: TXT_WHITE, NoStop: true}
+}
+func (ansiStyle) Line() AnsiStyle {
 	return AnsiStyle{Background: BG_BLUE, Text: TXT_WHITE}
 }
 func (ansiStyle) Default() AnsiStyle {
@@ -134,9 +137,14 @@ func (cs AnsiColorScheme) GetStyle(name string) AnsiStyle {
 type AnsiStyle struct {
 	Background AnsiCode
 	Text       AnsiCode
+	NoStop     bool
 }
 
 func (s AnsiStyle) Apply(text string) string {
+	if s.NoStop {
+		return fmt.Sprintf("%s%s", CLR_START+s.Background+";"+s.Text, text)
+	}
+
 	return fmt.Sprintf("%s%s%s", CLR_START+s.Background+";"+s.Text, text, CLR_RESET)
 }
 
@@ -164,7 +172,7 @@ func (ansiStyle) DefaultColorScheme() AnsiColorScheme {
 			"lava_dry":  Ansi.DriedLava(),
 
 			"file":    Ansi.File(),
-			"line":    Ansi.File(),
+			"line":    Ansi.Line(),
 			"default": Ansi.Default(),
 		},
 	}
