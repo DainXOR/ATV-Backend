@@ -28,14 +28,17 @@ func address() string {
 }
 
 func main() {
-	formatter := logger.SimpleFormatter.New()
+	formatter := logger.ConsoleColorFormatter.New()
+
 	record := logger.NewRecord(
 		"Server is starting",
 		types.NewSPair("env", "development"),
 		types.NewSPair("second", "Just a test"),
 	)
 
-	str, _ := formatter.Format(&record, nil)
+	record.LogLevel = logger.Level.Error()
+
+	str, _ := formatter.Format(&record)
 	fmt.Println(str)
 
 	/*

@@ -170,11 +170,11 @@ func envInit() {
 		}
 	} else {
 		//Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
-		get().DebugLogger.SetPrefix("|" + CLR_DEBUG.Apply(" DEBUG ") + "| ")
-		get().InfoLogger.SetPrefix("|" + CLR_INFO.Apply(" INFO ") + "| ")
-		get().WarningLogger.SetPrefix("|" + CLR_WARN.Apply(" WARNING ") + "| ")
-		get().ErrorLogger.SetPrefix("|" + CLR_ERROR.Apply(" ERROR ") + "| ")
-		get().FatalLogger.SetPrefix("|" + CLR_FATAL.Apply(" FATAL ") + "| ")
+		get().DebugLogger.SetPrefix("|" + Ansi.Debug().Apply(" DEBUG ") + "| ")
+		get().InfoLogger.SetPrefix("|" + Ansi.Info().Apply(" INFO ") + "| ")
+		get().WarningLogger.SetPrefix("|" + Ansi.Warn().Apply(" WARNING ") + "| ")
+		get().ErrorLogger.SetPrefix("|" + Ansi.Error().Apply(" ERROR ") + "| ")
+		get().FatalLogger.SetPrefix("|" + Ansi.Fatal().Apply(" FATAL ") + "| ")
 	}
 
 	Debug("Logger environment variables loaded")
@@ -567,7 +567,7 @@ func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth 
 
 	orignalPrefix := logger.Prefix()
 	filePrefix, _ := utils.CallOrigin(4 + extraTraceDepth)
-	filePrefix = CLR_FILE.Apply(filePrefix)
+	filePrefix = Ansi.File().Apply(filePrefix)
 	filePrefix += ":"
 
 	stringValues := utils.AsStrings(v)
@@ -646,8 +646,8 @@ func Fatal(v ...any) {
 
 func Deprecate(deprecatedVersion string, removalVersion string, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
-	deprecateTxt := CLR_DEPRECATE.Apply(" DEPRECATED:")
-	reasonTxt := CLR_DEPR_REASON.Apply(" REASON:")
+	deprecateTxt := Ansi.Deprecate().Apply(" DEPRECATED:")
+	reasonTxt := Ansi.DeprecateReason().Apply(" REASON:")
 
 	if compareVersions(AppVersion(), addToVersion(removalVersion, 0, 1, 0)) >= 0 {
 		iLogFatal(false, 1, deprecateTxt, "This feature has been removed in version", removalVersion)
@@ -687,9 +687,9 @@ type volcano struct {
 
 func Lava(version string, v ...any) volcano {
 	args := utils.Join(v, " ")
-	lavaTxt := CLR_LAVA.Apply(" LAVA:")
-	coldLavaTxt := CLR_COLD_LAVA.Apply(" COLD LAVA:")
-	driedLavaTxt := CLR_DRIED_LAVA.Apply(" DRIED LAVA:")
+	lavaTxt := Ansi.Lava().Apply(" LAVA:")
+	coldLavaTxt := Ansi.ColdLava().Apply(" COLD LAVA:")
+	driedLavaTxt := Ansi.DriedLava().Apply(" DRIED LAVA:")
 
 	coldVersion := addToVersion(version, 0, 0, 2)
 	driedVersion := addToVersion(version, 0, 0, 4)

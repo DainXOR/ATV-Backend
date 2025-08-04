@@ -35,7 +35,7 @@ func NewRecord(msg string, extra ...types.SPair[string]) Record {
 	return rec
 }
 
-type formatRecord struct {
+type FormatRecord struct {
 	LogLevel     string
 	Time         string
 	File         string

@@ -32,14 +32,14 @@ func (o Optional[T]) Get() T {
 }
 
 func (o Optional[T]) GetOr(defaultValue T) T {
-	if o.present {
+	if o.IsPresent() {
 		return o.value
 	}
 	return defaultValue
 }
 
 func (o Optional[T]) IfPresent(fn func(T) Optional[T]) Optional[T] {
-	if o.present {
+	if o.IsPresent() {
 		if res := fn(o.value); res.IsPresent() {
 			return res
 		} else {
@@ -49,7 +49,7 @@ func (o Optional[T]) IfPresent(fn func(T) Optional[T]) Optional[T] {
 	return o
 }
 func (o Optional[T]) IfEmpty(fn func() Optional[T]) Optional[T] {
-	if !o.present {
+	if !o.IsPresent() {
 		if res := fn(); res.IsPresent() {
 			return res
 		} else {

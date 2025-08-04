@@ -12,8 +12,9 @@ import (
 // This interface also provides a guide on what chained formatters for a correct
 // interaction between them.
 type Formatter interface {
-	Format(original *Record, current *formatRecord) (string, error)
-	Next() types.Optional[Formatter]
+	Format(original *Record, formatRecord ...*FormatRecord) (string, error)
+	Next() Formatter
+	SetNext(next Formatter)
 }
 
 // FormatterBase provides a base implementation for the Formatter interface.
@@ -24,7 +25,7 @@ type Formatter interface {
 //
 // > Keep in mind the golang method overriding behavior
 type FormatterBase struct {
-	next       *Formatter
+	next       Formatter
 	dateFormat string
 }
 
@@ -34,18 +35,21 @@ type FormatterBase struct {
 func (f *FormatterBase) DateFormat() string {
 	return f.dateFormat
 }
-func (f *FormatterBase) Next() types.Optional[Formatter] {
-	return types.OptionalOf(*f.next, f.next != nil)
+func (f *FormatterBase) Next() Formatter {
+	return f.next
 }
-func (f *FormatterBase) FinalString(original *Record, formatRecord *formatRecord) string {
+func (f *FormatterBase) SetNext(next Formatter) {
+	f.next = next
+}
+func (f *FormatterBase) FinalString(original *Record, formatRecord *FormatRecord) string {
 	formattedLevel := fmt.Sprintf(formatRecord.LogLevel, original.LogLevel.Name())
 	formattedTime := fmt.Sprintf(formatRecord.Time, original.Time.Format(f.DateFormat()))
 	formattedFile := fmt.Sprintf(formatRecord.File, original.File)
-	formattedLine := fmt.Sprintf(formatRecord.Line, original.Line)
+	formattedLine := fmt.Sprintf(formatRecord.Line, fmt.Sprint(original.Line))
 	formattedMessage := fmt.Sprintf(formatRecord.Message, original.Message)
 	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion)
 
-	formattedContext := formatRecord.ContextBegin
+	formattedContext := fmt.Sprintf(formatRecord.ContextBegin, "")
 	for k, pair := range utils.DZip(original.Context, formatRecord.Context, types.NewSPair("%s:", " %s, ")) {
 		formatKey, formatValue := pair.Second.First, pair.Second.Second
 		formatStr := formatKey + formatValue
@@ -53,8 +57,8 @@ func (f *FormatterBase) FinalString(original *Record, formatRecord *formatRecord
 
 		formattedContext += fmt.Sprintf(formatStr, k, value)
 	}
-	formattedContext = strings.Trim(formattedContext, ", ")
-	formattedContext += formatRecord.ContextEnd
+	formattedContext = strings.TrimSuffix(formattedContext, ", ")
+	formattedContext += fmt.Sprintf(formatRecord.ContextEnd, "")
 
 	finalString := fmt.Sprint(
 		formattedLevel,
@@ -83,7 +87,7 @@ func (f *FormatterBase) fileFormatString(_ string) string {
 	return f.DefaultFormat()
 }
 func (f *FormatterBase) lineFormatString(_ int) string {
-	return "%d"
+	return "%s"
 }
 func (f *FormatterBase) messageFormatString(_ string) string {
 	return f.DefaultFormat()
@@ -91,14 +95,18 @@ func (f *FormatterBase) messageFormatString(_ string) string {
 func (f *FormatterBase) versionFormatString(_ string) string {
 	return f.DefaultFormat()
 }
-func (f *FormatterBase) contextFormatStrings(_ map[string]string) map[string]types.SPair[string] {
-	return nil
+func (f *FormatterBase) contextFormatStrings(m map[string]string) map[string]types.SPair[string] {
+	formatMap := make(map[string]types.SPair[string], len(m))
+	for k, _ := range m {
+		formatMap[k] = types.NewSPair(f.DefaultFormat(), f.DefaultFormat())
+	}
+	return formatMap
 }
 func (f *FormatterBase) contextPrefixString(_ map[string]string) string {
-	return ""
+	return "%s"
 }
-func (f *FormatterBase) contextPostfixString(_ map[string]string) string {
-	return ""
+func (f *FormatterBase) contextSuffixString(_ map[string]string) string {
+	return "%s"
 }
 
 // Since go does not support method overriding the same way as other languages,
@@ -107,28 +115,17 @@ func (f *FormatterBase) contextPostfixString(_ map[string]string) string {
 // If you want to keep this behavior, you can simply copy this method
 // and paste it in your custom formatter implementation, this will ensure that
 // the methods called are the ones you defined in your custom formatter.
-func (f *FormatterBase) Format(r *Record, fr *formatRecord) (string, error) {
-	err := error(nil)
-	if f.Next().IsPresent() {
-		_, err = f.Next().Get().Format(r, fr)
-	}
-	if err != nil {
-		return "", err
+func (f *FormatterBase) Format(r *Record, formatRecord ...*FormatRecord) (string, error) {
+	fr := &FormatRecord{}
+	if len(formatRecord) > 0 {
+		fr = formatRecord[0]
 	}
 
-	if fr == nil {
-		fr = &formatRecord{
-			LogLevel:     f.levelFormatString(r.LogLevel),
-			Time:         f.dateFormatString(r.Time),
-			File:         f.fileFormatString(r.File),
-			Line:         f.lineFormatString(r.Line),
-			Message:      f.messageFormatString(r.Message),
-			AppVersion:   f.versionFormatString(r.AppVersion),
-			Context:      f.contextFormatStrings(r.Context),
-			ContextBegin: f.contextPrefixString(r.Context),
-			ContextEnd:   f.contextPostfixString(r.Context),
+	if f.Next() != nil {
+		if _, err := f.Next().Format(r, fr); err != nil {
+			return "", err
 		}
-	} else {
+
 		fr.LogLevel = fmt.Sprintf(fr.LogLevel, f.levelFormatString(r.LogLevel))
 		fr.Time = fmt.Sprintf(fr.Time, f.dateFormatString(r.Time))
 		fr.File = fmt.Sprintf(fr.File, f.fileFormatString(r.File))
@@ -145,9 +142,22 @@ func (f *FormatterBase) Format(r *Record, fr *formatRecord) (string, error) {
 			return types.NewSPair(formatKey, formatValue)
 		})
 		fr.ContextBegin = fmt.Sprintf(fr.ContextBegin, f.contextPrefixString(r.Context))
-		fr.ContextEnd = fmt.Sprintf(fr.ContextEnd, f.contextPostfixString(r.Context))
+		fr.ContextEnd = fmt.Sprintf(fr.ContextEnd, f.contextSuffixString(r.Context))
+	} else {
+		*fr = FormatRecord{
+			LogLevel:     f.levelFormatString(r.LogLevel),
+			Time:         f.dateFormatString(r.Time),
+			File:         f.fileFormatString(r.File),
+			Line:         f.lineFormatString(r.Line),
+			Message:      f.messageFormatString(r.Message),
+			AppVersion:   f.versionFormatString(r.AppVersion),
+			Context:      f.contextFormatStrings(r.Context),
+			ContextBegin: f.contextPrefixString(r.Context),
+			ContextEnd:   f.contextSuffixString(r.Context),
+		}
 	}
 
+	fmt.Println(fr)
 	return f.FinalString(r, fr), nil
 }
 
@@ -175,43 +185,39 @@ func (f *simpleFormatter) fileFormatString(_ string) string {
 	return "%s:"
 }
 func (f *simpleFormatter) lineFormatString(_ int) string {
-	return "%d: "
+	return "%s:"
 }
 func (f *simpleFormatter) messageFormatString(_ string) string {
-	return "%s "
+	return " %s"
 }
 func (f *simpleFormatter) versionFormatString(_ string) string {
-	return "[%s] "
+	return " [%s]"
+}
+func (f *simpleFormatter) contextFormatStrings(m map[string]string) map[string]types.SPair[string] {
+	formatMap := make(map[string]types.SPair[string], len(m))
+	for k := range m {
+		formatMap[k] = types.NewSPair("%s:", " %s, ") // "%s: %s, "
+	}
+	return formatMap
 }
 func (f *simpleFormatter) contextPrefixString(_ map[string]string) string {
-	return "{"
+	return " {%s"
 }
-func (f *simpleFormatter) contextPostfixString(_ map[string]string) string {
-	return "}"
+func (f *simpleFormatter) contextSuffixString(_ map[string]string) string {
+	return "%s}"
 }
 
-func (f *simpleFormatter) Format(r *Record, fr *formatRecord) (string, error) {
-	err := error(nil)
-	if f.Next().IsPresent() {
-		_, err = f.Next().Get().Format(r, fr)
-	}
-	if err != nil {
-		return "", err
+func (f *simpleFormatter) Format(r *Record, formatRecord ...*FormatRecord) (string, error) {
+	fr := &FormatRecord{}
+	if len(formatRecord) > 0 {
+		fr = formatRecord[0]
 	}
 
-	if fr == nil {
-		fr = &formatRecord{
-			LogLevel:     f.levelFormatString(r.LogLevel),
-			Time:         f.dateFormatString(r.Time),
-			File:         f.fileFormatString(r.File),
-			Line:         f.lineFormatString(r.Line),
-			Message:      f.messageFormatString(r.Message),
-			AppVersion:   f.versionFormatString(r.AppVersion),
-			Context:      f.contextFormatStrings(r.Context),
-			ContextBegin: f.contextPrefixString(r.Context),
-			ContextEnd:   f.contextPostfixString(r.Context),
+	if f.Next() != nil {
+		if _, err := f.Next().Format(r, fr); err != nil {
+			return "", err
 		}
-	} else {
+
 		fr.LogLevel = fmt.Sprintf(fr.LogLevel, f.levelFormatString(r.LogLevel))
 		fr.Time = fmt.Sprintf(fr.Time, f.dateFormatString(r.Time))
 		fr.File = fmt.Sprintf(fr.File, f.fileFormatString(r.File))
@@ -228,9 +234,22 @@ func (f *simpleFormatter) Format(r *Record, fr *formatRecord) (string, error) {
 			return types.NewSPair(formatKey, formatValue)
 		})
 		fr.ContextBegin = fmt.Sprintf(fr.ContextBegin, f.contextPrefixString(r.Context))
-		fr.ContextEnd = fmt.Sprintf(fr.ContextEnd, f.contextPostfixString(r.Context))
+		fr.ContextEnd = fmt.Sprintf(fr.ContextEnd, f.contextSuffixString(r.Context))
+	} else {
+		*fr = FormatRecord{
+			LogLevel:     f.levelFormatString(r.LogLevel),
+			Time:         f.dateFormatString(r.Time),
+			File:         f.fileFormatString(r.File),
+			Line:         f.lineFormatString(r.Line),
+			Message:      f.messageFormatString(r.Message),
+			AppVersion:   f.versionFormatString(r.AppVersion),
+			Context:      f.contextFormatStrings(r.Context),
+			ContextBegin: f.contextPrefixString(r.Context),
+			ContextEnd:   f.contextSuffixString(r.Context),
+		}
 	}
 
+	fmt.Println(fr)
 	return f.FinalString(r, fr), nil
 }
 
@@ -252,7 +271,7 @@ func (b simpleFormatterBuilder) TimeFormat(format string) simpleFormatterBuilder
 	return b
 }
 func (b simpleFormatterBuilder) Next(formatter Formatter) FormatterBuilder {
-	b.formatter.next = &formatter
+	b.formatter.next = formatter
 	return b
 }
 func (b simpleFormatterBuilder) New() Formatter {
@@ -269,137 +288,144 @@ func (b simpleFormatterBuilder) New() Formatter {
 
 type consoleColorFormatter struct {
 	FormatterBase
-	baseFormatter Formatter
-	colorScheme   AnsiColorScheme
+	colorScheme AnsiColorScheme
 }
 
-func (f *consoleColorFormatter) Format(original *Record, record *formatRecord) (string, error) {
-	levelString := original.LogLevel.Name()
-	timeString := original.Time.Format(f.DateFormat())
-	lineString := fmt.Sprint(original.Line)
+func (f *consoleColorFormatter) styleFor(nameID string) AnsiStyle {
+	return f.colorScheme.GetStyle(nameID)
+}
 
-	styleLevel := f.colorScheme.GetStyle(original.LogLevel.CodeName())
-	styleTime := f.colorScheme.GetStyle("time")
-	styleMessage := f.colorScheme.GetStyle("message")
-	styleFile := f.colorScheme.GetStyle("file")
-	styleLine := f.colorScheme.GetStyle("line")
-	styleVersion := f.colorScheme.GetStyle("version")
-	StyleCtxKey := f.colorScheme.GetStyle("context-key")
-	StyleCtxValue := f.colorScheme.GetStyle("context-value")
+func (f *consoleColorFormatter) levelFormatString(l logLevel) string {
+	return f.styleFor(l.CodeName()).Apply(" %s ")
+}
+func (f *consoleColorFormatter) dateFormatString(_ time.Time) string {
+	return f.styleFor("time").Apply("%s")
+}
+func (f *consoleColorFormatter) fileFormatString(_ string) string {
+	return f.styleFor("file").Apply("%s")
+}
+func (f *consoleColorFormatter) lineFormatString(_ int) string {
+	return f.styleFor("line").Apply("%s")
+}
+func (f *consoleColorFormatter) messageFormatString(_ string) string {
+	return f.styleFor("message").Apply("%s")
+}
+func (f *consoleColorFormatter) versionFormatString(_ string) string {
+	return f.styleFor("version").Apply("%s")
+}
+func (f *consoleColorFormatter) contextFormatStrings(ctx map[string]string) map[string]types.SPair[string] {
+	formatMap := make(map[string]types.SPair[string], len(ctx))
 
-	StyledCtx := utils.DFlatten(original.Context, func(k, v string) string {
-		return fmt.Sprintf("%s: %s", StyleCtxKey.Apply(k), StyleCtxValue.Apply(v))
-	})
+	for k := range ctx {
+		formatMap[k] = types.NewSPair(
+			f.styleFor("context-key").Apply("%s"),
+			f.styleFor("context-value").Apply("%s"),
+		)
+	}
+	return formatMap
+}
 
-	utils.Reduce(StyledCtx, func(acc, ctx string) string { return acc + ", " + ctx }, "")
-
-	recordString := formatRecord{
-		LogLevel:   styleLevel.Apply(levelString),
-		Time:       styleTime.Apply(timeString),
-		Message:    styleMessage.Apply(original.Message),
-		File:       styleFile.Apply(original.File),
-		Line:       styleLine.Apply(lineString),
-		AppVersion: styleVersion.Apply(original.AppVersion),
-		Context:    nil, //original.Context,
+func (f *consoleColorFormatter) Format(r *Record, formatRecord ...*FormatRecord) (string, error) {
+	fr := &FormatRecord{}
+	if len(formatRecord) > 0 {
+		fr = formatRecord[0]
 	}
 
-	return recordString.Context["formatted"].First, nil
+	if f.Next() != nil {
+		if _, err := f.Next().Format(r, fr); err != nil {
+			return "", err
+		}
+
+		fr.LogLevel = fmt.Sprintf(fr.LogLevel, f.levelFormatString(r.LogLevel))
+		fr.Time = fmt.Sprintf(fr.Time, f.dateFormatString(r.Time))
+		fr.File = fmt.Sprintf(fr.File, f.fileFormatString(r.File))
+		fr.Line = fmt.Sprintf(fr.Line, f.lineFormatString(r.Line))
+		fr.Message = fmt.Sprintf(fr.Message, f.messageFormatString(r.Message))
+		fr.AppVersion = fmt.Sprintf(fr.AppVersion, f.versionFormatString(r.AppVersion))
+		fr.Context = utils.DApply(fr.Context, func(k string, v types.SPair[string]) types.SPair[string] {
+			last := f.contextFormatStrings(r.Context)[k]
+			current := fr.Context[k]
+
+			formatKey := fmt.Sprintf(current.First, last.First)
+			formatValue := fmt.Sprintf(current.Second, last.Second)
+
+			return types.NewSPair(formatKey, formatValue)
+		})
+		fr.ContextBegin = fmt.Sprintf(fr.ContextBegin, f.contextPrefixString(r.Context))
+		fr.ContextEnd = fmt.Sprintf(fr.ContextEnd, f.contextSuffixString(r.Context))
+	} else {
+		*fr = FormatRecord{
+			LogLevel:     f.levelFormatString(r.LogLevel),
+			Time:         f.dateFormatString(r.Time),
+			File:         f.fileFormatString(r.File),
+			Line:         f.lineFormatString(r.Line),
+			Message:      f.messageFormatString(r.Message),
+			AppVersion:   f.versionFormatString(r.AppVersion),
+			Context:      f.contextFormatStrings(r.Context),
+			ContextBegin: f.contextPrefixString(r.Context),
+			ContextEnd:   f.contextSuffixString(r.Context),
+		}
+	}
+
+	fmt.Println(fr)
+	return f.FinalString(r, fr), nil
 }
-func (f *consoleColorFormatter) FormatStrings(record *formatRecord) (string, error) {
-	styleLevel := f.colorScheme.GetStyle(record.LogLevel)
-	styleTime := f.colorScheme.GetStyle("time")
-	styleMessage := f.colorScheme.GetStyle("message")
-	styleFile := f.colorScheme.GetStyle("file")
-	styleLine := f.colorScheme.GetStyle("line")
-	styleVersion := f.colorScheme.GetStyle("version")
-	//StyleCtxKey := f.colorScheme.GetStyle("context-key")
-	//StyleCtxValue := f.colorScheme.GetStyle("context-value")
 
-	record.LogLevel = styleLevel.Apply(record.LogLevel)
-	record.Time = styleTime.Apply(record.Time)
-	record.Message = styleMessage.Apply(record.Message)
-	record.File = styleFile.Apply(record.File)
-	record.Line = styleLine.Apply(record.Line)
-	record.AppVersion = styleVersion.Apply(record.AppVersion)
-	//record.Context = utils.DMap(record.Context, func(k, v string) (string, string) {
-	//	return StyleCtxKey.Apply(k), StyleCtxValue.Apply(v)
-	//})
-	//
-	return "formatted", nil
-
+type ConsoleColorFormatterBuilder struct {
+	formatter     consoleColorFormatter
+	baseFormatter Formatter
 }
 
-type consoleColorFormatterBuilder struct {
-	formatter consoleColorFormatter
-}
-
-var ConsoleColorFormatter consoleColorFormatterBuilder = consoleColorFormatterBuilder{
+var ConsoleColorFormatter ConsoleColorFormatterBuilder = ConsoleColorFormatterBuilder{
 	formatter: consoleColorFormatter{
-		baseFormatter: SimpleFormatter.New(),
-		colorScheme: AnsiColorScheme{styles: map[string]AnsiStyle{
-			Level.Debug().CodeName():   CLR_DEBUG,
-			Level.Info().CodeName():    CLR_INFO,
-			Level.Warning().CodeName(): CLR_WARN,
-			Level.Error().CodeName():   CLR_ERROR,
-			Level.Fatal().CodeName():   CLR_FATAL,
-
-			Level.Deprecate().CodeName():             CLR_DEPRECATE,
-			Level.DeprecateWarning().CodeName():      CLR_DEPRECATE_WARNING,
-			Level.DeprecateError().CodeName():        CLR_DEPRECATE_ERROR,
-			Level.DeprecateFatal().CodeName():        CLR_DEPRECATE_FATAL,
-			Level.Deprecate().CodeName() + "_reason": CLR_DEPR_REASON,
-
-			Level.Lava().CodeName():     CLR_LAVA,
-			Level.LavaCold().CodeName(): CLR_COLD_LAVA,
-			Level.LavaDry().CodeName():  CLR_DRIED_LAVA,
-
-			"file": CLR_FILE,
-
-			"default": CLR_DEFAULT,
-		}},
+		colorScheme: Ansi.DefaultColorScheme(),
+		FormatterBase: FormatterBase{
+			dateFormat: "02/01/2006 15:04:05 -07:00",
+			next:       nil,
+		},
 	},
+	baseFormatter: SimpleFormatter.New(),
 }
 
-func (b consoleColorFormatterBuilder) Formatter(formatter Formatter) consoleColorFormatterBuilder {
-	b.formatter.baseFormatter = formatter
+func (b ConsoleColorFormatterBuilder) BaseFormatter(formatter Formatter) ConsoleColorFormatterBuilder {
+	b.baseFormatter = formatter
 	return b
 }
-func (b consoleColorFormatterBuilder) AddColor(level logLevel, colorCode AnsiStyle) consoleColorFormatterBuilder {
-	//if b.formatter.colors == nil {
-	//	b.formatter.colors = make(map[logLevel]string)
-	//}
-	//b.formatter.colors[level] = colorCode
+func (b ConsoleColorFormatterBuilder) AddColor(nameID string, colorCode AnsiStyle) ConsoleColorFormatterBuilder {
+	if b.formatter.colorScheme.styles == nil {
+		b.formatter.colorScheme.styles = make(map[string]AnsiStyle)
+	}
+	if _, exists := b.formatter.colorScheme.styles[nameID]; exists {
+		// DEBUG
+		fmt.Printf("Color with name '%s' is being overwritten\n", nameID)
+	}
+
+	b.formatter.colorScheme.styles[nameID] = colorCode
 	return b
 }
-func (b consoleColorFormatterBuilder) DefaultColor(colorCode string) consoleColorFormatterBuilder {
-	//if b.formatter.colors == nil {
-	//	b.formatter.colors = make(map[logLevel]string)
-	//}
-	//
-	//b.formatter.colors[LEVEL_NONE] = colorCode
+func (b ConsoleColorFormatterBuilder) DefaultColor(colorCode AnsiStyle) ConsoleColorFormatterBuilder {
+	if b.formatter.colorScheme.styles == nil {
+		b.formatter.colorScheme.styles = make(map[string]AnsiStyle)
+	}
+
+	b.formatter.colorScheme.styles["default"] = colorCode
 	return b
 }
-func (b consoleColorFormatterBuilder) Next(formatter Formatter) FormatterBuilder {
-	b.formatter.FormatterBase.next = &formatter
+func (b ConsoleColorFormatterBuilder) Next(formatter Formatter) FormatterBuilder {
+	b.formatter.next = formatter
 	return b
 }
-func (b consoleColorFormatterBuilder) New() Formatter {
-	//if b.formatter.formatter == nil {
-	//	b.formatter.formatter = SimpleFormatter.New()
-	//}
-	//
-	//if len(b.formatter.colors) == 0 {
-	//	b.formatter.colors = map[logLevel]string{
-	//		LEVEL_DEBUG:   "\033[34m", // Blue
-	//		LEVEL_INFO:    "\033[32m", // Green
-	//		LEVEL_WARNING: "\033[33m", // Yellow
-	//		LEVEL_ERROR:   "\033[31m", // Red
-	//		LEVEL_FATAL:   "\033[35m", // Magenta
-	//	}
-	//}
+func (b ConsoleColorFormatterBuilder) New() Formatter {
+	next := (Formatter)(nil)
+	if b.formatter.next != nil {
+		next = b.formatter.next
+	}
+
+	b.baseFormatter.SetNext(next)
+	b.formatter.SetNext(b.baseFormatter)
 
 	return &consoleColorFormatter{
-		baseFormatter: b.formatter.baseFormatter,
+		FormatterBase: b.formatter.FormatterBase,
 		colorScheme:   b.formatter.colorScheme,
 	}
 }
@@ -407,4 +433,4 @@ func (b consoleColorFormatterBuilder) New() Formatter {
 var _ Formatter = (*simpleFormatter)(nil)
 var _ Formatter = (*consoleColorFormatter)(nil)
 var _ FormatterBuilder = (*simpleFormatterBuilder)(nil)
-var _ FormatterBuilder = (*consoleColorFormatterBuilder)(nil)
+var _ FormatterBuilder = (*ConsoleColorFormatterBuilder)(nil)
