@@ -2,14 +2,12 @@ package main
 
 import (
 	"cmp"
-	"fmt"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
 
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
-	"dainxor/atv/types"
 )
 
 //var envErr = godotenv.Load()
@@ -28,18 +26,9 @@ func address() string {
 }
 
 func main() {
-	formatter := logger.ConsoleColorFormatter.New()
 
-	record := logger.NewRecord(
-		"Server is starting",
-		types.NewSPair("env", "development"),
-		types.NewSPair("second", "Just a test"),
-	)
-
-	record.LogLevel = logger.Level.Error()
-
-	str, _ := formatter.Format(&record)
-	fmt.Println(str)
+	record := logger.NewRecord("Server is starting")
+	record.LogLevel = logger.Level.Info()
 
 	/*
 		defer configs.DB.Close()

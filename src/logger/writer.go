@@ -5,23 +5,32 @@ import (
 	"os"
 )
 
+type CloseFunc func() error
+
 type Writer interface {
+	CreationError() error
 	Write(text string) error
+	Close() error
 }
 type WriterBuilder interface {
 	New() Writer
 }
 
 type consoleWriter struct {
-	NewLineTerminated bool
+	formatString string
+	err          error
 }
 
+func (w *consoleWriter) CreationError() error {
+	return w.err
+}
 func (w *consoleWriter) Write(text string) error {
-	if w.NewLineTerminated {
-		text += "\n"
-	}
-	_, err := fmt.Print(text)
+	_, err := fmt.Printf(w.formatString, text)
 	return err
+}
+func (w *consoleWriter) Close() error {
+	// No resources to close for console writer
+	return nil
 }
 
 type ConsoleWriterBuilder struct {
@@ -29,33 +38,43 @@ type ConsoleWriterBuilder struct {
 }
 
 func (b ConsoleWriterBuilder) NewLine() ConsoleWriterBuilder {
-	b.writer.NewLineTerminated = true
+	if b.writer.formatString == "" {
+		b.writer.formatString = "%s\n"
+	} else {
+		b.writer.formatString += "\n"
+	}
+	return b
+}
+func (b ConsoleWriterBuilder) FormatString(format string) ConsoleWriterBuilder {
+	b.writer.formatString = format
 	return b
 }
 func (b ConsoleWriterBuilder) New() Writer {
 	return &consoleWriter{
-		NewLineTerminated: b.writer.NewLineTerminated,
+		formatString: b.writer.formatString,
+		err:          nil,
 	}
 }
 
 type fileWriter struct {
-	NewLineTerminated bool
-	FilePath          string
+	formatString string
+	FilePath     string
+	file         *os.File
+	err          error
 }
 
+func (w *fileWriter) CreationError() error {
+	return w.err
+}
 func (w *fileWriter) Write(text string) error {
-	if w.NewLineTerminated {
-		text += "\n"
-	}
-
-	file, err := os.OpenFile(w.FilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(text)
+	_, err := w.file.WriteString(fmt.Sprintf(w.formatString, text))
 	return err
+}
+func (w *fileWriter) Close() error {
+	if w.file != nil {
+		return w.file.Close()
+	}
+	return nil
 }
 
 type FileWriterBuilder struct {
@@ -67,7 +86,16 @@ func (b FileWriterBuilder) FilePath(path string) FileWriterBuilder {
 	return b
 }
 func (b FileWriterBuilder) NewLine() FileWriterBuilder {
-	b.writer.NewLineTerminated = true
+	if b.writer.formatString == "" {
+		b.writer.formatString = "%s\n"
+	} else {
+		b.writer.formatString += "\n"
+	}
+
+	return b
+}
+func (b FileWriterBuilder) FormatString(format string) FileWriterBuilder {
+	b.writer.formatString = format
 	return b
 }
 func (b FileWriterBuilder) New() Writer {
@@ -75,14 +103,29 @@ func (b FileWriterBuilder) New() Writer {
 		b.writer.FilePath = "logs.log"
 	}
 
+	file, err := os.OpenFile(b.writer.FilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return &fileWriter{
+			formatString: b.writer.formatString,
+			FilePath:     b.writer.FilePath,
+			file:         nil,
+			err:          fmt.Errorf("failed to open log file: %w", err),
+		}
+	}
+
 	return &fileWriter{
-		NewLineTerminated: b.writer.NewLineTerminated,
-		FilePath:          b.writer.FilePath,
+		formatString: b.writer.formatString,
+		FilePath:     b.writer.FilePath,
+		file:         file,
+		err:          nil,
 	}
 }
 
 var _ Writer = (*consoleWriter)(nil)
 var _ Writer = (*fileWriter)(nil)
+
+var _ WriterBuilder = (*ConsoleWriterBuilder)(nil)
+var _ WriterBuilder = (*FileWriterBuilder)(nil)
 
 var ConsoleWriter ConsoleWriterBuilder
 var FileWriter FileWriterBuilder

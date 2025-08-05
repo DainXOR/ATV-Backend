@@ -49,16 +49,19 @@ func (f *FormatterBase) FinalString(original *Record, formatRecord *FormatRecord
 	formattedMessage := fmt.Sprintf(formatRecord.Message, original.Message)
 	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion)
 
-	formattedContext := fmt.Sprintf(formatRecord.ContextBegin, "")
-	for k, pair := range utils.DZip(original.Context, formatRecord.Context, types.NewSPair("%s:", " %s, ")) {
-		formatKey, formatValue := pair.Second.First, pair.Second.Second
-		formatStr := formatKey + formatValue
-		value := pair.First
+	formattedContext := ""
+	if len(original.Context) != 0 {
+		formattedContext = fmt.Sprintf(formatRecord.ContextBegin, "")
+		for k, pair := range utils.DZip(original.Context, formatRecord.Context, types.NewSPair("%s:", " %s, ")) {
+			formatKey, formatValue := pair.Second.First, pair.Second.Second
+			formatStr := formatKey + formatValue
+			value := pair.First
 
-		formattedContext += fmt.Sprintf(formatStr, k, value)
+			formattedContext += fmt.Sprintf(formatStr, k, value)
+		}
+		formattedContext = strings.TrimSuffix(formattedContext, ", ")
+		formattedContext += fmt.Sprintf(formatRecord.ContextEnd, "")
 	}
-	formattedContext = strings.TrimSuffix(formattedContext, ", ")
-	formattedContext += fmt.Sprintf(formatRecord.ContextEnd, "")
 
 	finalString := fmt.Sprint(
 		formattedLevel,
