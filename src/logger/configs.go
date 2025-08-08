@@ -2,61 +2,66 @@ package logger
 
 import "dainxor/atv/types"
 
-type wf struct {
+type writerAndFormatter struct {
 	writer    Writer
 	formatter *Formatter
 }
 
-type configs struct {
-	LogLevel logLevel
-	LogFlags logFlag
+type configurations struct {
+	logLevels logLevel
+	logFlags  logFlag
 
-	MaxLogAttempts     uint8
-	WarningLogAttempts uint8
+	maxLogAttempts     uint8
+	warningLogAttempts uint8
 
-	AppVersion types.Version
+	panicOnMaxAttempts      bool
+	canPanicOnAbnormalWrite bool
 
-	wf []wf
+	appVersion types.Version
+
+	writers []writerAndFormatter
 }
 
 // NewConfigs initializes a new configs instance with default values
-func NewConfigs() configs {
+func NewConfigs() configurations {
 	fFormatter := SimpleFormatter.New()
-	cFormatter := ConsoleColorFormatter.New()
 
-	return configs{
-		LogLevel: Level.All(),
-		LogFlags: Flag.DateTime() | Flag.File() | Flag.Line() | Flag.AppVersion(),
+	return configurations{
+		logLevels: Level.All(),
+		logFlags:  Flag.DateTime() | Flag.File() | Flag.Line() | Flag.AppVersion(),
 
-		WarningLogAttempts: 10,
-		MaxLogAttempts:     15,
+		warningLogAttempts: 10,
+		maxLogAttempts:     15,
 
-		AppVersion: types.V("0.1.0"),
+		panicOnMaxAttempts:      true,
+		canPanicOnAbnormalWrite: true,
 
-		wf: []wf{
-			{writer: ConsoleWriter.NewLine().New(), formatter: &cFormatter},
+		appVersion: types.V("0.1.0"),
+
+		writers: []writerAndFormatter{
+			{writer: ConsoleWriter.NewLine().New(), formatter: &fFormatter},
 			{writer: FileWriter.NewLine().New(), formatter: &fFormatter},
 		},
 	}
 }
 
-func (c *configs) AddWriter(writer Writer, formatter *Formatter) *configs {
-	c.wf = append(c.wf, wf{writer: writer, formatter: formatter})
+func (c *configurations) AddWriter(writer Writer, formatter *Formatter) *configurations {
+	c.writers = append(c.writers, writerAndFormatter{writer: writer, formatter: formatter})
 	return c
 }
-func (c *configs) RemoveWriter(index int) *configs {
-	if index < 0 || index >= len(c.wf) {
+func (c *configurations) RemoveWriter(index int) *configurations {
+	if index < 0 || index >= len(c.writers) {
 		return c
 	}
-	c.wf = append(c.wf[:index], c.wf[index+1:]...)
+	c.writers = append(c.writers[:index], c.writers[index+1:]...)
 	return c
 }
-func (c *configs) Writers() []wf {
-	return c.wf
+func (c *configurations) Writers() []writerAndFormatter {
+	return c.writers
 }
-func (c *configs) Writer(index int) (*Writer, *Formatter) {
-	if index < 0 || index >= len(c.wf) {
+func (c *configurations) Writer(index int) (*Writer, *Formatter) {
+	if index < 0 || index >= len(c.writers) {
 		return nil, nil
 	}
-	return &c.wf[index].writer, c.wf[index].formatter
+	return &c.writers[index].writer, c.writers[index].formatter
 }

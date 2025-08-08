@@ -205,7 +205,7 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to session with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
+		logger.Lava(types.V("0.1.2"), "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C300().NotModified(),
 			"No changes made",

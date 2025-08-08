@@ -97,7 +97,7 @@ func (l *logLevel) Unset(level logLevel) *logLevel {
 
 // Checks if the log level is in a valid range.
 func (l logLevel) IsValid() bool {
-	return !l.Is(Level.None()) && !Level.All().Has(l)
+	return l.Is(Level.None()) || Level.All().Has(l)
 }
 
 type iLevel struct{}
@@ -110,6 +110,15 @@ func (iLevel) Get(nameID string) (logLevel, error) {
 	}
 
 	return Level.None(), fmt.Errorf("Invalid log level: %s", nameID)
+}
+func (iLevel) ContainedIn(l logLevel) []logLevel {
+	var contained []logLevel
+	for _, level := range logLevels() {
+		if l.Has(level) {
+			contained = append(contained, level)
+		}
+	}
+	return contained
 }
 
 func (iLevel) Debug() logLevel {
@@ -270,4 +279,49 @@ func (f logFlag) Set(flag logFlag) logFlag {
 }
 func (f logFlag) Unset(flag logFlag) logFlag {
 	return f &^ flag
+}
+
+type logInternalVal string
+type iInternal struct{}
+
+var internal iInternal
+
+func (iInternal) prefix(txt string) string {
+	return "_internal_" + txt
+}
+func (iInternal) CallOriginOffset() logInternalVal {
+	return logInternalVal(internal.prefix("call_origin_offset"))
+}
+func (iInternal) FormatString() logInternalVal {
+	return logInternalVal(internal.prefix("format_string"))
+}
+func (iInternal) AppVersion() logInternalVal {
+	return logInternalVal(internal.prefix("app_version"))
+}
+
+func (l logInternalVal) String() string {
+	return string(l)
+}
+func (l logInternalVal) Check(val string) bool {
+	return (len(val) > 10) && (val[:10] == "_internal_") && (logInternalVal(val) == l)
+}
+
+type iTerminationCode struct{}
+
+var TerminationCode iTerminationCode
+
+func (iTerminationCode) Normal() int {
+	return 0
+}
+func (iTerminationCode) WriteError() int {
+	return 0x0106_FA11
+}
+func (iTerminationCode) FormatError() int {
+	return 0x0FA7_FA11
+}
+func (iTerminationCode) MaxAttemptsExceeded() int {
+	return 0xECCD_A775
+}
+func (iTerminationCode) Deprecated() int {
+	return 0xDEAD_C0DE
 }

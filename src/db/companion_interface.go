@@ -199,7 +199,7 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
+		logger.Lava(types.V("0.1.2"), "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -262,7 +262,7 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
+		logger.Lava(types.V("0.1.2"), "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",
@@ -294,7 +294,7 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 
 	var companion models.CompanionDBMongo
 	//result, err := configs.DB.UpdateOne(filter, update, deletedCompanion)
-	v := logger.Lava("0.1.1", "Use the code above to update the companion with deleted_at field")
+	v := logger.Lava(types.V("0.1.1"), "Use the code above to update the companion with deleted_at field")
 	v.LavaStart()
 	result, err := configs.DB.From(models.CompanionDBMongo{}).UpdateOne(ctx, filter, update)
 	if err != nil {

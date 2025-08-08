@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func CallOrigin(depth int) (string, int) {
+func CallOrigin(depth int) (string, uint64) {
 	_, file, line, ok := runtime.Caller(depth)
 
 	if ok {
@@ -16,5 +16,5 @@ func CallOrigin(depth int) (string, int) {
 		line = 0
 	}
 
-	return file, line
+	return file, uint64(line)
 }

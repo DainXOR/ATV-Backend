@@ -1,191 +1,76 @@
 package logger
 
 import (
+	"dainxor/atv/types"
 	"dainxor/atv/utils"
-	"regexp"
-
-	"fmt"
-	"log"
-	"os"
+	"errors"
 	"strconv"
 	"strings"
+
+	"fmt"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var ( // Default color functions for logging
-	colorAsDebug   = colorApplier(TXT_BLACK, BG_GREEN)
-	colorAsInfo    = colorApplier(TXT_BLACK, BG_CYAN)
-	colorAsWarning = colorApplier(TXT_BLACK, BG_YELLOW)
-	colorAsError   = colorApplier(TXT_BLACK, BG_RED)
-	colorAsFatal   = colorApplier(TXT_WHITE, BG_RED)
-
-	colorAsDeprecate  = colorApplier(TXT_WHITE, BG_MAGENTA)
-	colorAsDeprReason = colorApplier(TXT_WHITE, BG_YELLOW)
-
-	colorAsLava      = colorApplier(TXT_BLACK, BG_WHITE)
-	colorAsColdLava  = colorApplier(TXT_BLACK, BG_YELLOW)
-	colorAsDriedLava = colorApplier(TXT_BLACK, BG_RED)
-
-	colorAsFile = colorApplier(TXT_WHITE, BG_BLUE)
-)
-
-func colorApplier(textColor, bgColor AnsiCode) func(txt string) string {
-	if !LogsWithColor() {
-		return func(txt string) string {
-			return txt // If color logging is disabled, return the text as is
-		}
-	}
-
-	return func(txt string) string {
-		return txt //CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
-	}
-}
-
 type dnxLogger struct {
-	DebugLogger   *log.Logger
-	InfoLogger    *log.Logger
-	WarningLogger *log.Logger
-	ErrorLogger   *log.Logger
-	FatalLogger   *log.Logger
+	configurations
 
-	LogToFile    bool
-	LogToConsole bool
-	ColorLogs    bool
-	LogLevels    logLevel
-	logAttempts  int
+	logAttempts   uint8 // Number of log attempts, used to prevent infinite loops in logging
+	usingDefaults bool  // Indicates if the logger is using default settings
 
-	appVersion      string
-	appVersionMajor uint64
-	appVersionMinor uint64
-	appVersionPatch uint64
-
-	usingDefaults bool // Indicates if the logger is using default settings
+	abnormalWriters []writerAndFormatter // Special writers used when normal logging is failing
 }
 
-var dnxLoggerInstance *dnxLogger
+var dnxGlobalLogger *dnxLogger
 
 func init() {
-	defaultInit()
-}
-func defaultInit() {
-	dnxLoggerInstance = &dnxLogger{
-		//		LogToFile:       DEFAULT_LOGS_TO_FILE,
-		//		LogToConsole:    DEFAULT_LOGS_TO_CONSOLE,
-		//		ColorLogs:       DEFAULT_COLOR_LOGGING,
-		//		LogLevels:       DEFAULT_LOG_LEVEL,
-		//		logAttempts:     0,
-		//		appVersion:      DEFAULT_APP_VERSION,
-		//		appVersionMajor: majorVersionOf(DEFAULT_APP_VERSION),
-		//		appVersionMinor: minorVersionOf(DEFAULT_APP_VERSION),
-		//		appVersionPatch: patchVersionOf(DEFAULT_APP_VERSION),
-		usingDefaults: true,
-
-		DebugLogger:   log.New(os.Stdout, "| DEBUG | ", log.LstdFlags),
-		InfoLogger:    log.New(os.Stdout, "| INFO | ", log.LstdFlags),
-		WarningLogger: log.New(os.Stdout, "| WARNING | ", log.LstdFlags),
-		ErrorLogger:   log.New(os.Stderr, "| ERROR | ", log.LstdFlags),
-		FatalLogger:   log.New(os.Stderr, "| FATAL | ", log.LstdFlags),
-	}
-
-	envInit() // Initialize environment variables for logger
-
-	if LogsToFile() {
-		tryCreateLogFile() // Create the path if it doesn't exist, else it will set log to console only
-	}
-
-	Debug("Logger initialized")
-}
-func envInit() {
-	Debug("Loading environment variables for logger")
-
-	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
-	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
-	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
-	logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
-	logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
-
-	if existMinLevel {
-		level, err := Level.Get(minLogLevel)
-		if err != nil {
-			Warning("Failed to parse DNX_LOG_MIN_LEVEL value, using default level: ", currentLogLevels())
-			level = Level.All()
-		}
-
-		Debug("Setting minimum log level to ", minLogLevel)
-		get().usingDefaults = !SetMinLogLevel(level) // If any environment variable is set, we are not using defaults
-	} else {
-		Debug("DNX_LOG_MIN_LEVEL not set, using default level: ", currentLogLevels())
-	}
-	if existDisableLevels {
-		levels := strings.Split(disableLevels, "|")
-		//options := LEVEL_NONE
-		Debug("Disabling log levels:")
-
-		for _, level := range levels {
-			level = strings.TrimSpace(level)
-			//options |= LogLevelValue(level)
-			Debug(" - ", level)
-		}
-
-		//get().usingDefaults = !DisableLogOptions(options) && get().usingDefaults // If any environment variable is set, we are not using defaults
-	} else {
-		Debug("DNX_LOG_DISABLE_LEVELS not set, keeping current log levels: ", currentLogLevels())
-	}
-	if existLogConsole {
-		b, err := strconv.ParseBool(logConsole)
-		if err != nil {
-			Warning("Failed to parse DNX_LOG_CONSOLE value")
-			//Warning("Defaulting to console logging: ", DEFAULT_LOGS_TO_CONSOLE)
-			//SetLogToConsole(DEFAULT_LOGS_TO_CONSOLE)
-		} else {
-			SetLogToConsole(b)
-			get().usingDefaults = false // If any environment variable is set, we are not using defaults
-		}
-	} else {
-		//Debug("DNX_LOG_CONSOLE not set, using default value: ", DEFAULT_LOGS_TO_CONSOLE)
-	}
-	if existLogFile {
-		b, err := strconv.ParseBool(logFile)
-		if err != nil {
-			Warning("Failed to parse DNX_LOG_FILE value")
-			//Warning("Defaulting to file logging: ", DEFAULT_LOGS_TO_FILE)
-			//SetLogToFile(DEFAULT_LOGS_TO_FILE)
-		} else {
-			SetLogToFile(b)
-			get().usingDefaults = false // If any environment variable is set, we are not using defaults
-		}
-	} else {
-		//Debug("DNX_LOG_FILE not set, using default value: ", DEFAULT_LOGS_TO_FILE)
-	}
-	if existLogWithColor {
-		b, err := strconv.ParseBool(logWithColor)
-		if err != nil {
-			Warning("Failed to parse DNX_LOG_WITH_COLOR value")
-			//Warning("Defaulting to color logging: ", DEFAULT_COLOR_LOGGING)
-			//SetLogWithColor(DEFAULT_COLOR_LOGGING)
-		} else {
-			SetLogWithColor(b)
-			get().usingDefaults = false // If any environment variable is set, we are not using defaults
-		}
-	} else {
-		//Debug("DNX_LOG_WITH_COLOR not set, using default value: ", DEFAULT_COLOR_LOGGING)
-		get().DebugLogger.SetPrefix("|" + Ansi.Debug().Apply(" DEBUG ") + "| ")
-		get().InfoLogger.SetPrefix("|" + Ansi.Info().Apply(" INFO ") + "| ")
-		get().WarningLogger.SetPrefix("|" + Ansi.Warn().Apply(" WARNING ") + "| ")
-		get().ErrorLogger.SetPrefix("|" + Ansi.Error().Apply(" ERROR ") + "| ")
-		get().FatalLogger.SetPrefix("|" + Ansi.Fatal().Apply(" FATAL ") + "| ")
-	}
-
-	Debug("Logger environment variables loaded")
+	dnxGlobalLogger = newDefaultLogger()
 }
 
-func ReloadEnv() {
-	envInit()
-}
+func newDefaultLogger() *dnxLogger {
+	logger := &dnxLogger{}
+	fm := SimpleFormatter.New()
 
-func hasLogLevel(options logLevel, level logLevel) bool {
-	return options.Has(level)
+	logger = &dnxLogger{
+		configurations: NewConfigs(),
+		logAttempts:    0,
+		usingDefaults:  true,
+
+		abnormalWriters: []writerAndFormatter{
+			{writer: ConsoleWriter.NewLine().New(), formatter: &fm},
+		},
+	}
+
+	envLoad(logger) // Initialize environment variables for logger
+
+	tryCreateLogFile() // Create the path if it doesn't exist, else it will set log to console only
+
+	logger.Debug("Logger initialized")
+
+	return logger
+}
+func cloneLogger(original *dnxLogger) *dnxLogger {
+	logger := &dnxLogger{
+		configurations:  original.configurations,
+		logAttempts:     0,
+		usingDefaults:   false,
+		abnormalWriters: make([]writerAndFormatter, len(original.abnormalWriters)),
+	}
+
+	copy(logger.abnormalWriters, original.abnormalWriters)
+	logger.Debug("Logger cloned")
+	return logger
+}
+func envLoad(logger *dnxLogger) {
+	logger.Debug("Loading environment variables for logger")
+
+	//minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
+	//disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
+	//logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
+	//logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
+	//logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
+
+	logger.Debug("Logger environment variables loaded")
 }
 
 // Returns the singleton instance of dnxLogger, initializing it if necessary.
@@ -193,82 +78,22 @@ func hasLogLevel(options logLevel, level logLevel) bool {
 // It abstracts the initialization logic and provides a single point of access to the logger instance.
 // It ensures that the logger is initialized only once, and provides a consistent interface for logging.
 func get() *dnxLogger {
-	if dnxLoggerInstance == nil {
-		defaultInit()
+	if dnxGlobalLogger == nil {
+		dnxGlobalLogger = newDefaultLogger()
 	}
-	return dnxLoggerInstance
-}
-func UsingDefaults() bool {
-	return get().usingDefaults
-}
-func colorTxt(txt string, textColor string, bgColor string) string {
-	if !LogsWithColor() {
-		return txt // If color logging is disabled, return the text as is
-	}
-
-	return txt //CLR_START + bgColor + ";" + textColor + txt + CLR_RESET
-}
-func colorWith(txt string, colorString string) string {
-	if !LogsWithColor() {
-		return txt // If color logging is disabled, return the text as is
-	}
-
-	return txt //colorString + txt + CLR_RESET
+	return dnxGlobalLogger
 }
 
-func majorVersionOf(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[0]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
+func GetNew() *dnxLogger {
+	return cloneLogger(get())
 }
-func minorVersionOf(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[1]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
+func GetNewDefault() *dnxLogger {
+	return newDefaultLogger()
 }
-func patchVersionOf(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[2]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
-}
-func compareVersions(ver1, ver2 string) int8 {
-	major1 := majorVersionOf(ver1)
-	minor1 := minorVersionOf(ver1)
-	patch1 := patchVersionOf(ver1)
-
-	major2 := majorVersionOf(ver2)
-	minor2 := minorVersionOf(ver2)
-	patch2 := patchVersionOf(ver2)
-
-	return compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2)
-}
-func compareVersionsNum(major1, minor1, patch1, major2, minor2, patch2 uint64) int8 {
-	if major1 > major2 {
-		return 1
-	} else if major1 < major2 {
-		return -1
-	}
-
-	if minor1 > minor2 {
-		return 1
-	} else if minor1 < minor2 {
-		return -1
-	}
-
-	if patch1 > patch2 {
-		return 1
-	} else if patch1 < patch2 {
-		return -1
-	}
-
-	return 0
-}
-func addToVersion(version string, major, minor, patch uint64) string {
-	majorVersion := majorVersionOf(version) + major
-	minorVersion := minorVersionOf(version) + minor
-	patchVersion := patchVersionOf(version) + patch
-
-	return fmt.Sprintf("%d.%d.%d", majorVersion, minorVersion, patchVersion)
+func GetNewWithEnv() *dnxLogger {
+	logger := GetNewDefault()
+	envLoad(logger)
+	return logger
 }
 
 func tryCreateLogFile() bool {
@@ -308,145 +133,116 @@ func tryCreateLogFile() bool {
 	*/
 	return true
 }
+func panicOrError(msg string, condition bool) error {
+	if condition {
+		panic(msg)
+	} else {
+		return errors.New(msg)
+	}
+}
+func (i *dnxLogger) logLevelsNames() string {
+	contained := Level.ContainedIn(i.LogLevels())
+	names := utils.Map(contained, logLevel.Name)
+	return "| " + strings.Join(names, " | ") + " |"
+}
 
-func registerLogAttempt(forceNoFileWrite bool) bool {
-	get().logAttempts++
-	/*
-		if get().logAttempts > DEFAULT_WARNING_LOG_ATTEMPTS && get().logAttempts < DEFAULT_MAX_LOG_ATTEMPTS {
-			if ENABLE_LOG_ATTEMPTS_MESSAGES {
-				logWarning(forceNoFileWrite, "Too many log attempts, will panic if this continues")
-			}
-			return false
+func (i *dnxLogger) registerLogAttempt() bool {
+	i.logAttempts++
 
-		} else if get().logAttempts >= DEFAULT_MAX_LOG_ATTEMPTS {
-			if ENABLE_LOG_ATTEMPTS_MESSAGES {
-				logError(forceNoFileWrite, "Too many log attempts, will panic now")
-				logFatal(forceNoFileWrite, "Too many log attempts, this is likely a bug in the logger, please report it")
-			}
+	if i.logAttempts > i.warningLogAttempts && i.logAttempts < i.maxLogAttempts {
+		i.internalAbnormalWrite(NewRecord("Too many log attempts, will panic if this continues"))
+		return false
 
-			return false
-		}*/
+	} else if i.logAttempts >= i.maxLogAttempts {
+		i.internalAbnormalWrite(NewRecord("Too many log attempts, will panic now"))
+		i.internalAbnormalWrite(NewRecord("Too many log attempts, this is likely a bug in the logger, please report it"))
+
+		return false
+	}
 	return true
 }
-func resetLogAttempts(forceNoFileWrite bool) bool {
-	if get().logAttempts == 1 {
-		get().logAttempts = 0
+func (i *dnxLogger) resetLogAttempts() bool {
+	if i.logAttempts == 1 {
+		i.logAttempts = 0
 		return true
 
-	} else if get().logAttempts > 1 {
-		get().logAttempts = 0
-		logDebug(forceNoFileWrite, "Log attempts reset (", get().logAttempts, ")")
+	} else if i.logAttempts > 1 {
+		i.logAttempts = 0
+		i.internalAbnormalWrite(NewRecord("Resetting log attempts after too many attempts"))
 		return true
 	}
 
 	return false
 }
 
-func LogsToFile() bool {
-	return get().LogToFile
+func (i *dnxLogger) SetVersion(version types.Version) {
+	i.appVersion = version
+	i.Debug("App version changed to: ", version.String())
 }
-func SetLogToFile(value bool) {
-	logDebug(!value, "File logging set to ", value)
-	get().LogToFile = value
-}
-
-func LogsToConsole() bool {
-	return get().LogToConsole
-}
-func SetLogToConsole(value bool) {
-	Debug("Console logging set to ", value)
-	get().LogToConsole = value
+func SetVersion(version types.Version) {
+	get().SetVersion(version)
 }
 
-func LogsWithColor() bool {
-	return get().ColorLogs
+// Returns the application version used as reference for deprecation warnings.
+func (i *dnxLogger) AppVersion() types.Version {
+	return i.appVersion
 }
-func SetLogWithColor(value bool) {
-	if value {
-		Debug("Color logging enabled")
-	} else {
-		Debug("Color logging disabled")
-	}
-
-	get().ColorLogs = value
-}
-
-func SetAppVersion(version string) {
-	regex := regexp.MustCompile(`^\d+\.\d+\.\d+$`)
-
-	if !regex.MatchString(version) {
-		Warning("Invalid app version format")
-		return
-	}
-
-	get().appVersion = version
-	get().appVersionMajor = majorVersionOf(version)
-	get().appVersionMinor = minorVersionOf(version)
-	get().appVersionPatch = patchVersionOf(version)
-	Debug("App version set to: ", version)
-}
-
-// Returns the application version is supposed to be the current
-func AppVersion() string {
-	return get().appVersion
-}
-
-func currentLogLevels() string {
-	return "| " + LogLevels().Name() + " |"
+func AppVersion() types.Version {
+	return get().AppVersion()
 }
 
 // Returns the current logging levels loaded as bitmask
-func LogLevels() logLevel {
-	return get().LogLevels
+func (i *dnxLogger) LogLevels() logLevel {
+	return i.logLevels
 }
 
-func SetLogLevels(options logLevel) bool {
+func (i *dnxLogger) SetLogLevels(options logLevel) bool {
 	msg := "Logging options set to:"
 
 	if !options.IsValid() {
-		Warning("Invalid logging options")
+		i.Warning("Invalid logging options")
 		return false
 	} else if options.Is(Level.All()) {
-		Debug(msg, Level.All().Name())
-		get().LogLevels = Level.All()
+		i.Debug(msg, Level.All().Name())
+		i.logLevels = Level.All()
 		return true
 	} else if options.Is(Level.None()) {
-		Debug(msg, Level.None().Name())
-		get().LogLevels = Level.None()
+		i.Debug(msg, Level.None().Name())
+		i.logLevels = Level.None()
 		return true
 	}
 
-	if LogLevels().Has(Level.Debug()) {
+	if i.LogLevels().Has(Level.Debug()) {
 		msg += "| DEBUG |"
 	}
-	if LogLevels().Has(Level.Info()) {
+	if i.LogLevels().Has(Level.Info()) {
 		msg += "| INFO |"
 	}
-	if LogLevels().Has(Level.Warning()) {
+	if i.LogLevels().Has(Level.Warning()) {
 		msg += "| WARNING |"
 	}
-	if LogLevels().Has(Level.Error()) {
+	if i.LogLevels().Has(Level.Error()) {
 		msg += "| ERROR |"
 	}
-	if LogLevels().Has(Level.Fatal()) {
+	if i.LogLevels().Has(Level.Fatal()) {
 		msg += "| FATAL |"
 	}
 
-	Debug("Logging options set to: ", msg)
-	get().LogLevels = options
+	i.Debug("Logging options set to: ", msg)
+	i.logLevels = options
 	return true
 }
-func EnableLogOptions(options logLevel) bool {
+func (i *dnxLogger) EnableLogOptions(options logLevel) bool {
 	if !options.IsValid() {
-		Warning("Invalid logging option")
+		i.Warning("Invalid logging option")
 		return false
 	} else if options.Is(Level.All()) {
-		Debug("Enabled all logging options")
-		SetLogLevels(Level.All())
+		i.Debug("Enabled all logging options")
+		i.SetLogLevels(Level.All())
 		return true
 	} else if options.Is(Level.None()) {
-		Debug("Disabled all logging options")
-		SetLogLevels(Level.None())
+		i.Debug("Disabled all logging options")
+		i.SetLogLevels(Level.None())
 		return true
 	}
 
@@ -468,13 +264,13 @@ func EnableLogOptions(options logLevel) bool {
 		msg += "| FATAL |"
 	}
 
-	Debug("Enabled logging options: ", msg)
-	get().LogLevels = LogLevels().And(options)
+	i.Debug("Enabled logging options: ", msg)
+	i.logLevels.Set(i.LogLevels().And(options))
 	return true
 }
-func DisableLogOptions(options logLevel) bool {
+func (i *dnxLogger) DisableLogOptions(options logLevel) bool {
 	if !options.IsValid() {
-		Warning("Invalid logging option")
+		i.Warning("Invalid logging option")
 		return false
 	}
 
@@ -496,237 +292,318 @@ func DisableLogOptions(options logLevel) bool {
 		msg += "| FATAL |"
 	}
 
-	Debug("Disabled logging options: ", msg)
-	get().LogLevels = LogLevels().Not(options)
+	i.Debug("Disabled logging options: ", msg)
+	i.logLevels.Set(i.LogLevels().Not(options))
 	return true
 }
-func SetMinLogLevel(level logLevel) bool {
+func (i *dnxLogger) SetMinLogLevel(level logLevel) bool {
 	if !level.IsValid() {
-		Warning("Invalid logging level")
+		i.Warning("Invalid logging level")
 		return false
 	}
 
-	Debug("Minimum logging level set to: ", level.Name())
-	SetLogLevels(level)
+	i.Debug("Minimum logging level set to: ", level.Name())
+	i.SetLogLevels(level)
 	return true
 }
-func canLogWith(logger *log.Logger) bool {
-	if LogLevels().Has(Level.All()) {
-		return true
-	} else if LogLevels().Has(Level.None()) {
-		return false
-	}
-
-	if logger == get().DebugLogger {
-		return LogLevels().Has(Level.Debug())
-	} else if logger == get().InfoLogger {
-		return LogLevels().Has(Level.Info())
-	} else if logger == get().WarningLogger {
-		return LogLevels().Has(Level.Warning())
-	} else if logger == get().ErrorLogger {
-		return LogLevels().Has(Level.Error())
-	} else if logger == get().FatalLogger {
-		return LogLevels().Has(Level.Fatal())
-	}
-
-	return false
+func (i *dnxLogger) canLog(level logLevel) bool {
+	return i.LogLevels().Has(level)
 }
 
-func writeToFile(logger *log.Logger, prefix string, v ...any) bool {
-	file, err := os.OpenFile("get()", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-
-	if err != nil {
-		logError(true, "Failed to open log file")
-		return false
-	}
-	defer file.Close()
-
-	stringValues := utils.AsStrings(v)
-	stringValues = utils.Podate(stringValues, "[ ]")
-	trimmedArgs := strings.Join(stringValues, " ")
-	trimmedArgs = strings.Trim(trimmedArgs, "[]")
-
-	originalOutput := logger.Writer()
-	logger.SetOutput(file)
-	logger.Println(prefix, trimmedArgs)
-	logger.SetOutput(originalOutput)
-	return true
-}
-
-// Private function that handles the actual logging.
-// TO DO: Add option to modify depth of the call stack to log origin
-func logWith(logger *log.Logger, forceNoFileWrite bool, v ...any) {
-	internalLogWith(logger, forceNoFileWrite, 1, v...)
-}
-func internalLogWith(logger *log.Logger, forceNoFileWrite bool, extraTraceDepth int, v ...any) {
-	if !canLogWith(logger) {
+func (i *dnxLogger) internalWrite(record Record) {
+	if !i.canLog(record.LogLevel) {
 		return
 	}
 
-	registerLogAttempt(forceNoFileWrite)
+	i.registerLogAttempt()
+	removeList := make([]int, 0, len(i.writers))
 
-	orignalPrefix := logger.Prefix()
-	filePrefix, _ := utils.CallOrigin(4 + extraTraceDepth)
-	filePrefix = Ansi.File().Apply(filePrefix)
-	filePrefix += ":"
+	for p, pair := range i.writers {
+		w := pair.writer
+		f := *pair.formatter
 
-	stringValues := utils.AsStrings(v)
-	stringValues = utils.Podate(stringValues, "[ ]")
-	trimmedArgs := strings.Join(stringValues, " ")
-	trimmedArgs = strings.Trim(trimmedArgs, "[]")
+		if w == nil || f == nil {
+			record := NewRecord("Invalid writer or formatter in writer list, marking for removal")
+			record.LogLevel = Level.Error()
+			i.internalAbnormalWrite(record)
+			removeList = append(removeList, p)
+			continue
+		}
 
-	if LogsToConsole() {
-		logger.Println(filePrefix, trimmedArgs)
-	}
+		if str, err := f.Format(&record); err == nil {
+			if err = w.Write(str); err != nil {
+				record := NewRecord("Error during write: " + err.Error() + ", marking writer for removal")
+				record.LogLevel = Level.Error()
+				i.internalAbnormalWrite(record)
+				removeList = append(removeList, p)
+			}
 
-	// This might be short-circuited, but idk if it is, so I will leave it like this
-	if !forceNoFileWrite && LogsToFile() {
-		if !writeToFile(logger, filePrefix, trimmedArgs) {
-			SetLogToFile(false)
+		} else {
+			panic("Error formatting record for abnormal write: " + err.Error())
 		}
 	}
 
-	logger.SetPrefix(orignalPrefix) // Reset the prefix to the original one
-	resetLogAttempts(forceNoFileWrite)
-}
+	for _, index := range removeList {
+		i.RemoveWriter(index)
+	}
 
-// Private functions for logging at different levels
-// These functions are used internally and should not be called directly by users.
-// Use forceNoFileWrite to prevent writing to the log file, useful for testing or when file logging is disabled or not possible.
-func logDebug(forceNoFileWrite bool, v ...any) {
-	logWith(get().DebugLogger, forceNoFileWrite, v...)
+	i.resetLogAttempts()
 }
-func logInfo(forceNoFileWrite bool, v ...any) {
-	logWith(get().InfoLogger, forceNoFileWrite, v...)
-}
-func logWarning(forceNoFileWrite bool, v ...any) {
-	logWith(get().WarningLogger, forceNoFileWrite, v...)
-}
-func logError(forceNoFileWrite bool, v ...any) {
-	logWith(get().ErrorLogger, forceNoFileWrite, v...)
-}
-func logFatal(forceNoFileWrite bool, v ...any) {
-	logWith(get().FatalLogger, forceNoFileWrite, v...)
-	panic(fmt.Sprint(v...))
-}
+func (i *dnxLogger) internalAbnormalWrite(record Record) error {
+	if !i.canLog(record.LogLevel) {
+		return nil
+	}
 
-func iLogDebug(forceNoFileWrite bool, extraFileDepth int, v ...any) {
-	internalLogWith(get().DebugLogger, forceNoFileWrite, extraFileDepth, v...)
-}
-func iLogInfo(forceNoFileWrite bool, extraFileDepth int, v ...any) {
-	internalLogWith(get().InfoLogger, forceNoFileWrite, extraFileDepth, v...)
-}
-func iLogWarning(forceNoFileWrite bool, extraFileDepth int, v ...any) {
-	internalLogWith(get().WarningLogger, forceNoFileWrite, extraFileDepth, v...)
-}
-func iLogError(forceNoFileWrite bool, extraFileDepth int, v ...any) {
-	internalLogWith(get().ErrorLogger, forceNoFileWrite, extraFileDepth, v...)
-}
-func iLogFatal(forceNoFileWrite bool, extraFileDepth int, v ...any) {
-	internalLogWith(get().FatalLogger, forceNoFileWrite, extraFileDepth, v...)
-	panic(fmt.Sprint(v...))
+	for _, wf := range get().abnormalWriters {
+		if wf.writer == nil || wf.formatter == nil {
+			return panicOrError("Invalid writer or formatter in abnormal write", i.canPanicOnAbnormalWrite)
+		}
+
+		w, f := wf.writer, (*wf.formatter)
+		if str, err := f.Format(&record); err == nil {
+			if err = w.Write(str); err != nil {
+				return panicOrError("Error during abnormal write: "+err.Error(), i.canPanicOnAbnormalWrite)
+			}
+
+		} else {
+			return panicOrError("Error formatting record for abnormal write: "+err.Error(), i.canPanicOnAbnormalWrite)
+		}
+	}
+
+	return nil
 }
 
 // Public functions for logging at different levels
+func generateRecord(level logLevel, v ...any) Record {
+	msg := ""
+	extraParts := []types.SPair[string]{types.NewSPair("_internal_call_origin_offset", "2")}
+
+	for _, pair := range utils.ValuesOfType[types.SPair[string]](v) {
+		if internal.CallOriginOffset().Check(pair.First) {
+			offset, _ := strconv.Atoi(pair.Second)
+			extraParts[0].Second = fmt.Sprint(offset + 2)
+			continue
+		} else if internal.FormatString().Check(pair.First) {
+			msg = fmt.Sprintf(pair.Second, utils.ExcludeOfType[types.SPair[string]](v)...)
+			continue
+		}
+
+		extraParts = append(extraParts, pair)
+	}
+
+	if msg == "" {
+		msg = fmt.Sprint(utils.ExcludeOfType[types.SPair[string]](v)...)
+	}
+
+	record := NewRecord(msg, extraParts...)
+	record.LogLevel = level
+	return record
+}
+
+func (i *dnxLogger) iWrite(l logLevel, v ...any) {
+	record := generateRecord(l, v...)
+	i.internalWrite(record)
+}
+func (i *dnxLogger) iWritef(l logLevel, format string, v ...any) {
+	extraParts := []any{types.NewSPair(internal.FormatString().String(), format)}
+	extraParts = append(extraParts, v...)
+
+	record := generateRecord(l, extraParts...)
+	i.internalWrite(record)
+}
+func (i *dnxLogger) iWriter(r Record) {
+	i.internalWrite(r)
+}
+
+func (i *dnxLogger) Debug(v ...any) {
+	i.iWrite(Level.Debug(), v...)
+}
+func (i *dnxLogger) Debugf(format string, v ...any) {
+	i.iWritef(Level.Debug(), format, v...)
+}
+func (i *dnxLogger) Debugr(r Record) {
+	r.LogLevel = Level.Debug()
+	i.iWriter(r)
+}
 func Debug(v ...any) {
-	logDebug(false, v...)
+	get().Debug(v...)
+}
+func Debugf(format string, v ...any) {
+	get().Debugf(format, v...)
+}
+func Debugr(r Record) {
+	get().Debugr(r)
+}
+
+func (i *dnxLogger) Info(v ...any) {
+	i.iWrite(Level.Info(), v...)
+}
+func (i *dnxLogger) Infof(format string, v ...any) {
+	i.iWritef(Level.Info(), format, v...)
+}
+func (i *dnxLogger) Infor(r Record) {
+	r.LogLevel = Level.Info()
+	i.iWriter(r)
 }
 func Info(v ...any) {
-	logInfo(false, v...)
+	get().Info(v...)
+}
+func Infof(format string, v ...any) {
+	get().Infof(format, v...)
+}
+func Infor(r Record) {
+	get().Infor(r)
+}
+
+func (i *dnxLogger) Warning(v ...any) {
+	i.iWrite(Level.Warning(), v...)
+}
+func (i *dnxLogger) Warningf(format string, v ...any) {
+	i.iWritef(Level.Warning(), format, v...)
+}
+func (i *dnxLogger) Warningr(r Record) {
+	r.LogLevel = Level.Warning()
+	i.iWriter(r)
 }
 func Warning(v ...any) {
-	logWarning(false, v...)
+	get().Warning(v...)
+}
+func Warningf(format string, v ...any) {
+	get().Warningf(format, v...)
+}
+func Warningr(r Record) {
+	get().Warningr(r)
+}
+
+func (i *dnxLogger) Error(v ...any) {
+	i.iWrite(Level.Error(), v...)
+}
+func (i *dnxLogger) Errorf(format string, v ...any) {
+	i.iWritef(Level.Error(), format, v...)
+}
+func (i *dnxLogger) Errorr(r Record) {
+	r.LogLevel = Level.Error()
+	i.iWriter(r)
 }
 func Error(v ...any) {
-	logError(false, v...)
+	get().Error(v...)
+}
+func Errorf(format string, v ...any) {
+	get().Errorf(format, v...)
+}
+func Errorr(r Record) {
+	get().Errorr(r)
+}
+
+func (i *dnxLogger) Fatal(v ...any) {
+	i.iWrite(Level.Fatal(), v...)
+}
+func (i *dnxLogger) Fatalf(format string, v ...any) {
+	i.iWritef(Level.Fatal(), format, v...)
+}
+func (i *dnxLogger) Fatalr(r Record) {
+	r.LogLevel = Level.Fatal()
+	i.iWriter(r)
 }
 func Fatal(v ...any) {
-	logFatal(false, v...)
+	get().Fatal(v...)
+}
+func Fatalf(format string, v ...any) {
+	get().Fatalf(format, v...)
+}
+func Fatalr(r Record) {
+	get().Fatalr(r)
 }
 
-func Deprecate(deprecatedVersion string, removalVersion string, v ...any) (bool, error) {
+func (i *dnxLogger) Deprecate(deprecatedVersion types.Version, removalVersion types.Version, v ...any) (bool, error) {
 	args := utils.Join(v, " ")
-	deprecateTxt := Ansi.Deprecate().Apply(" DEPRECATED:")
-	reasonTxt := Ansi.DeprecateReason().Apply(" REASON:")
 
-	if compareVersions(AppVersion(), addToVersion(removalVersion, 0, 1, 0)) >= 0 {
-		iLogFatal(false, 1, deprecateTxt, "This feature has been removed in version", removalVersion)
-		iLogFatal(false, 1, reasonTxt, args)
+	if i.AppVersion().GreaterEq(removalVersion.Plus(types.V("0.1.0"))) {
+		i.iWrite(Level.DeprecateFatal(), "This feature has been removed in version:", removalVersion)
+		i.iWrite(Level.DeprecateFatal(), "Reason:", args)
+		i.iWrite(Level.DeprecateFatal(), "Unrecoverable deprecation error, application will terminate")
+		panic(TerminationCode.Deprecated())
 
-	} else if compareVersions(AppVersion(), removalVersion) >= 0 {
-		iLogError(false, 1, deprecateTxt+" This feature has been removed in version ", removalVersion)
-		iLogError(false, 1, reasonTxt, args)
+	} else if i.AppVersion().GreaterEq(removalVersion) {
+		i.iWrite(Level.DeprecateError(), "This feature has been removed in version:", removalVersion)
+		i.iWrite(Level.DeprecateError(), "Reason:", args)
 		return false, fmt.Errorf("feature removed in version %s. %s", removalVersion, args)
 
-	} else if compareVersions(AppVersion(), deprecatedVersion) >= 0 && compareVersions(AppVersion(), removalVersion) < 0 {
-		iLogWarning(false, 1, deprecateTxt, "This feature marked for removal in version", removalVersion)
-		iLogWarning(false, 1, reasonTxt, args)
+	} else if i.AppVersion().GreaterEq(deprecatedVersion) && i.AppVersion().LessThan(removalVersion) {
+		i.iWrite(Level.DeprecateWarning(), "This feature is marked for removal in version:", removalVersion)
+		i.iWrite(Level.DeprecateWarning(), "Reason:", args)
 		return false, fmt.Errorf("feature deprecated in version %s, will be removed in version %s. %s", deprecatedVersion, removalVersion, args)
 
-	} else if compareVersions(AppVersion(), deprecatedVersion) == 0 {
-		iLogWarning(false, 1, deprecateTxt, "This feature will be removed in future versions")
-		iLogWarning(false, 1, reasonTxt, args)
+	} else if i.AppVersion().GreaterEq(deprecatedVersion) {
+		i.iWrite(Level.Deprecate(), "This feature will be removed in future versions")
+		i.iWrite(Level.Deprecate(), "Reason:", args)
 		return true, fmt.Errorf("feature deprecated in version %s. %s", deprecatedVersion, args)
 	}
 	return true, nil
 }
-func DeprecateMsg(deprecatedVersion string, removalVersion string, v ...any) string {
-	_, err := Deprecate(deprecatedVersion, removalVersion, v...)
+func (i *dnxLogger) DeprecateMsg(deprecatedVersion types.Version, removalVersion types.Version, v ...any) string {
+	_, err := i.Deprecate(deprecatedVersion, removalVersion, v...)
 	return err.Error()
+}
+func Deprecate(deprecatedVersion types.Version, removalVersion types.Version, v ...any) (bool, error) {
+	return get().Deprecate(deprecatedVersion, removalVersion, v...)
+}
+func DeprecateMsg(deprecatedVersion types.Version, removalVersion types.Version, v ...any) string {
+	return get().DeprecateMsg(deprecatedVersion, removalVersion, v...)
 }
 
 type volcano struct {
-	currentVersion string
-	coldVersion    string
-	driedVersion   string
-
-	lavaTxt      string
-	coldLavaTxt  string
-	driedLavaTxt string
+	logger         *dnxLogger
+	initialVersion types.Version
+	coldVersion    types.Version
+	driedVersion   types.Version
 }
 
-func Lava(version string, v ...any) volcano {
+func (i *dnxLogger) Lava(version types.Version, v ...any) volcano {
 	args := utils.Join(v, " ")
-	lavaTxt := Ansi.Lava().Apply(" LAVA:")
-	coldLavaTxt := Ansi.ColdLava().Apply(" COLD LAVA:")
-	driedLavaTxt := Ansi.DriedLava().Apply(" DRIED LAVA:")
 
-	coldVersion := addToVersion(version, 0, 0, 2)
-	driedVersion := addToVersion(version, 0, 0, 4)
+	coldVersion := version.Plus(types.V("0.1.0"))
+	driedVersion := version.Plus(types.V("0.2.0"))
 
-	if compareVersions(AppVersion(), version) == 0 {
-		iLogWarning(false, 1, lavaTxt, "Running code that should be removed, cleaned up or refactored.", args)
-	} else if compareVersions(AppVersion(), coldVersion) >= 0 {
-		iLogWarning(false, 1, coldLavaTxt, "This code must be refactored.", args)
-	} else if compareVersions(AppVersion(), driedVersion) > 0 {
-		iLogError(false, 1, driedLavaTxt, "This code should not be running as is, it is likely a bug.", args)
+	if i.AppVersion().GreaterEq(driedVersion) {
+		i.iWrite(Level.LavaDry(), "Running code that should be removed, cleaned up or refactored.")
+		i.iWrite(Level.LavaDry(), "Reason:", args)
+		//iLogWarning(false, 1, lavaTxt, "Running code that should be removed, cleaned up or refactored.", args)
+	} else if i.AppVersion().GreaterEq(coldVersion) {
+		i.iWrite(Level.LavaCold(), "This code must be refactored.")
+		i.iWrite(Level.LavaCold(), "Reason:", args)
+		//iLogWarning(false, 1, coldLavaTxt, "This code must be refactored.", args)
+	} else if i.AppVersion().GreaterEq(version) {
+		i.iWrite(Level.LavaHot(), "This code should not be running as is, it is likely a bug.")
+		i.iWrite(Level.LavaHot(), "Reason:", args)
+		//iLogError(false, 1, driedLavaTxt, "This code should not be running as is, it is likely a bug.", args)
 	}
 
 	return volcano{
-		currentVersion: version,
+		logger:         i,
+		initialVersion: version,
 		coldVersion:    coldVersion,
 		driedVersion:   driedVersion,
-
-		lavaTxt:      lavaTxt,
-		coldLavaTxt:  coldLavaTxt,
-		driedLavaTxt: driedLavaTxt,
 	}
 }
+func Lava(version types.Version, v ...any) volcano {
+	return get().Lava(version, v...)
+}
 func (v *volcano) LavaStart() {
-	if AppVersion() == v.currentVersion {
-		iLogWarning(false, 1, v.lavaTxt, "Start of flow")
-	} else if compareVersions(AppVersion(), v.coldVersion) >= 0 {
-		iLogWarning(false, 1, v.coldLavaTxt, "Start of flow")
-	} else if compareVersions(AppVersion(), v.driedVersion) > 0 {
-		iLogError(false, 1, v.driedLavaTxt, "Start of lava cast")
+	if v.logger.AppVersion().GreaterEq(v.driedVersion) {
+		v.logger.iWrite(Level.LavaDry(), "Start of lava cast")
+	} else if v.logger.AppVersion().GreaterEq(v.coldVersion) {
+		v.logger.iWrite(Level.LavaCold(), "Start of flow")
+	} else if v.logger.AppVersion().GreaterEq(v.initialVersion) {
+		v.logger.iWrite(Level.LavaHot(), "Start of flow")
 	}
 }
 func (v *volcano) LavaEnd() {
-	if AppVersion() == v.currentVersion {
-		iLogWarning(false, 1, v.lavaTxt, "End of flow")
-	} else if compareVersions(AppVersion(), v.coldVersion) >= 0 {
-		iLogWarning(false, 1, v.coldLavaTxt, "End of flow")
-	} else if compareVersions(AppVersion(), v.driedVersion) > 0 {
-		iLogError(false, 1, v.driedLavaTxt, "End of lava cast")
+	if v.logger.AppVersion().GreaterEq(v.driedVersion) {
+		v.logger.iWrite(Level.LavaDry(), "End of lava cast")
+	} else if v.logger.AppVersion().GreaterEq(v.coldVersion) {
+		v.logger.iWrite(Level.LavaCold(), "End of flow")
+	} else if v.logger.AppVersion().GreaterEq(v.initialVersion) {
+		v.logger.iWrite(Level.LavaHot(), "End of flow")
 	}
 }

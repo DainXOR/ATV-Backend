@@ -271,7 +271,7 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to student with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
+		logger.Lava(types.V("0.1.2"), "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C200().Accepted(),
 			"No changes made",

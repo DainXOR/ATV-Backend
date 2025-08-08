@@ -8,12 +8,10 @@ type Version struct {
 	Patch uint8
 }
 
-var (
-	VersionZero = Version{Major: 0, Minor: 0, Patch: 0}
-	Version100  = Version{Major: 1, Minor: 0, Patch: 0}
-	Version010  = Version{Major: 0, Minor: 1, Patch: 0}
-	Version001  = Version{Major: 0, Minor: 0, Patch: 1}
-)
+// Shorthand for version V("0.1.0")
+func V0() Version {
+	return Version{Major: 0, Minor: 0, Patch: 0}
+}
 
 func VersionFrom(version string) (Version, error) {
 	var major, minor, patch uint8
@@ -57,17 +55,23 @@ func (v Version) Compare(other Version) int8 {
 	}
 	return 0
 }
-func (v Version) Greater(other Version) bool {
+func (v Version) GreaterThan(other Version) bool {
 	return v.Compare(other) > 0
 }
-func (v Version) Less(other Version) bool {
+func (v Version) GreaterEq(other Version) bool {
+	return v.Compare(other) >= 0
+}
+func (v Version) LessThan(other Version) bool {
 	return v.Compare(other) < 0
+}
+func (v Version) LessEq(other Version) bool {
+	return v.Compare(other) <= 0
 }
 func (v Version) Equal(other Version) bool {
 	return v.Major == other.Major && v.Minor == other.Minor && v.Patch == other.Patch
 }
 
-func (v Version) Add(other Version, others ...Version) Version {
+func (v Version) Plus(other Version, others ...Version) Version {
 	result := Version{
 		Major: v.Major + other.Major,
 		Minor: v.Minor + other.Minor,
@@ -80,7 +84,7 @@ func (v Version) Add(other Version, others ...Version) Version {
 	}
 	return result
 }
-func (v Version) Subtract(other Version, others ...Version) Version {
+func (v Version) Minus(other Version, others ...Version) Version {
 	result := Version{
 		Major: v.Major - other.Major,
 		Minor: v.Minor - other.Minor,

@@ -2,6 +2,7 @@ package models
 
 import (
 	"dainxor/atv/logger"
+	"dainxor/atv/types"
 
 	"fmt"
 	"time"
@@ -25,7 +26,7 @@ type DBID = bson.ObjectID
 type DBDateTime = time.Time
 
 func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.ToPrimitive() instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToPrimitive() instead")
 	switch v := id.(type) {
 	case string:
 		return primitive.ObjectIDFromHex(v)
@@ -38,7 +39,7 @@ func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
 	}
 }
 func BsonIDFrom(id any) (bson.ObjectID, error) {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.ToBson() instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToBson() instead")
 	switch v := id.(type) {
 	case string:
 		return bson.ObjectIDFromHex(v)
@@ -53,19 +54,19 @@ func BsonIDFrom(id any) (bson.ObjectID, error) {
 
 // Change this if you decide to change the ID type in the database
 func DBIDFrom(id any) (DBID, error) {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.ToDBID() instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToDBID() instead")
 	return ID.ToBson(id)
 }
 
 func OmitEmptyID(id string, result *DBID, idName string) bool {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.OmitEmpty() instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.OmitEmpty() instead")
 	if id != "" {
 		return ID.Ensure(id, result, idName)
 	}
 	return true
 }
 func EnsureID(id string, result *DBID, idName string) bool {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.ID.Ensure() instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.Ensure() instead")
 	if id == "" {
 		logger.Warning("Missing required field:", idName)
 		return false
@@ -147,13 +148,13 @@ func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
 
 // If decide to change the time type, you can only change it here
 func TimeNow() DBDateTime {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.Time.Now() directly instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Now() directly instead")
 	return time.Now()
 }
 
 // If decide to change the time type, you can only change it here
 func TimeZero() DBDateTime {
-	logger.Deprecate("0.1.0", "0.1.3", "Use models.Time.Zero() directly instead")
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Zero() directly instead")
 	return time.Time{}
 }
 

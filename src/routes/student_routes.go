@@ -15,7 +15,7 @@ func StudentRoutes(router *gin.Engine) {
 	router.Group("api/v0/user").Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().MovedPermanently(),
 			types.EmptyResponse(
-				logger.DeprecateMsg("0.0.3", "0.1.0", "Use /api/v1/student/ instead"),
+				logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.0"), "Use /api/v1/student/ instead"),
 			),
 		)
 	})

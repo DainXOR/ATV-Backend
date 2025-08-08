@@ -13,7 +13,7 @@ import (
 //var envErr = godotenv.Load()
 
 func init() {
-	logger.SetAppVersion(configs.App.ApiVersion())
+	logger.SetVersion(configs.App.ApiVersion())
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")

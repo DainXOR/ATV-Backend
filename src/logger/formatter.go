@@ -47,7 +47,7 @@ func (f *FormatterBase) FinalString(original *Record, formatRecord *FormatRecord
 	formattedFile := fmt.Sprintf(formatRecord.File, original.File)
 	formattedLine := fmt.Sprintf(formatRecord.Line, fmt.Sprint(original.Line))
 	formattedMessage := fmt.Sprintf(formatRecord.Message, original.Message)
-	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion)
+	formattedVersion := fmt.Sprintf(formatRecord.AppVersion, original.AppVersion.String())
 
 	formattedContext := ""
 	if len(original.Context) != 0 {
@@ -89,18 +89,18 @@ func (f *FormatterBase) dateFormatString(_ time.Time) string {
 func (f *FormatterBase) fileFormatString(_ string) string {
 	return f.DefaultFormat()
 }
-func (f *FormatterBase) lineFormatString(_ int) string {
+func (f *FormatterBase) lineFormatString(_ uint64) string {
 	return "%s"
 }
 func (f *FormatterBase) messageFormatString(_ string) string {
 	return f.DefaultFormat()
 }
-func (f *FormatterBase) versionFormatString(_ string) string {
+func (f *FormatterBase) versionFormatString(_ types.Version) string {
 	return f.DefaultFormat()
 }
 func (f *FormatterBase) contextFormatStrings(m map[string]string) map[string]types.SPair[string] {
 	formatMap := make(map[string]types.SPair[string], len(m))
-	for k, _ := range m {
+	for k := range m {
 		formatMap[k] = types.NewSPair(f.DefaultFormat(), f.DefaultFormat())
 	}
 	return formatMap
@@ -186,13 +186,13 @@ func (f *simpleFormatter) dateFormatString(_ time.Time) string {
 func (f *simpleFormatter) fileFormatString(_ string) string {
 	return "%s:"
 }
-func (f *simpleFormatter) lineFormatString(_ int) string {
+func (f *simpleFormatter) lineFormatString(_ uint64) string {
 	return "%s:"
 }
 func (f *simpleFormatter) messageFormatString(_ string) string {
 	return " %s"
 }
-func (f *simpleFormatter) versionFormatString(_ string) string {
+func (f *simpleFormatter) versionFormatString(_ types.Version) string {
 	return " [%s]"
 }
 func (f *simpleFormatter) contextFormatStrings(m map[string]string) map[string]types.SPair[string] {
@@ -305,13 +305,13 @@ func (f *consoleColorFormatter) dateFormatString(_ time.Time) string {
 func (f *consoleColorFormatter) fileFormatString(_ string) string {
 	return f.styleFor("file").Apply("%s")
 }
-func (f *consoleColorFormatter) lineFormatString(_ int) string {
+func (f *consoleColorFormatter) lineFormatString(_ uint64) string {
 	return f.styleFor("line").Apply("%s")
 }
 func (f *consoleColorFormatter) messageFormatString(_ string) string {
 	return f.styleFor("message").Apply("%s")
 }
-func (f *consoleColorFormatter) versionFormatString(_ string) string {
+func (f *consoleColorFormatter) versionFormatString(_ types.Version) string {
 	return f.styleFor("version").Apply("%s")
 }
 func (f *consoleColorFormatter) contextFormatStrings(ctx map[string]string) map[string]types.SPair[string] {
