@@ -1,6 +1,9 @@
 package logger
 
-import "fmt"
+import (
+	"dainxor/atv/types"
+	"fmt"
+)
 
 type logLevel struct {
 	code     uint16
@@ -11,6 +14,7 @@ type logLevel struct {
 func (l logLevel) Code() uint16 {
 	return l.code
 }
+
 func (l logLevel) Name() string {
 	return l.name
 }
@@ -18,7 +22,7 @@ func (l logLevel) CodeName() string {
 	return l.codeName
 }
 
-func logLevels() map[string]logLevel {
+func createLogLevels() map[string]logLevel {
 	LEVEL_DEBUG := logLevel{code: 1 << 0, name: "DEBUG", codeName: "debug"}
 	LEVEL_INFO := logLevel{code: 1 << 1, name: "INFO", codeName: "info"}
 	LEVEL_WARNING := logLevel{code: 1 << 2, name: "WARNING", codeName: "warning"}
@@ -31,12 +35,13 @@ func logLevels() map[string]logLevel {
 	LEVEL_DEPRECATE_FATAL := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_FATAL.code, name: LEVEL_FATAL.Name() + ":DEPRECATE", codeName: "deprecate_fatal"}
 
 	LEVEL_LAVA := logLevel{code: 1 << 9, name: "LAVA", codeName: "lava"}
-	LEVEL_LAVA_HOT := logLevel{code: LEVEL_LAVA.code | LEVEL_DEBUG.code, name: "LAVA HOT", codeName: "lava_hot"}
-	LEVEL_LAVA_COLD := logLevel{code: LEVEL_LAVA.code | LEVEL_WARNING.code, name: "LAVA COLD", codeName: "lava_cold"}
-	LEVEL_LAVA_DRY := logLevel{code: LEVEL_LAVA.code | LEVEL_ERROR.code, name: "LAVA DRY", codeName: "lava_dry"}
+	LEVEL_LAVA_HOT := logLevel{code: LEVEL_LAVA.code | LEVEL_DEBUG.code, name: LEVEL_LAVA.Name() + ":HOT", codeName: "lava_hot"}
+	LEVEL_LAVA_COLD := logLevel{code: LEVEL_LAVA.code | LEVEL_WARNING.code, name: LEVEL_LAVA.Name() + ":COLD", codeName: "lava_cold"}
+	LEVEL_LAVA_DRY := logLevel{code: LEVEL_LAVA.code | LEVEL_ERROR.code, name: LEVEL_LAVA.Name() + ":DRY", codeName: "lava_dry"}
 
 	LEVEL_ALL := logLevel{code: ^uint16(0), name: "ALL", codeName: "all"}
 	LEVEL_NONE := logLevel{code: 0, name: "NONE", codeName: "none"}
+	LEVEL_URGENCY := logLevel{code: LEVEL_DEBUG.code | LEVEL_INFO.code | LEVEL_WARNING.code | LEVEL_ERROR.code | LEVEL_FATAL.code, name: "URGENCY", codeName: "urgency"}
 
 	return map[string]logLevel{
 		LEVEL_DEBUG.codeName:   LEVEL_DEBUG,
@@ -55,10 +60,13 @@ func logLevels() map[string]logLevel {
 		LEVEL_LAVA_COLD.codeName: LEVEL_LAVA_COLD,
 		LEVEL_LAVA_DRY.codeName:  LEVEL_LAVA_DRY,
 
-		LEVEL_ALL.codeName:  LEVEL_ALL,
-		LEVEL_NONE.codeName: LEVEL_NONE,
+		LEVEL_ALL.codeName:     LEVEL_ALL,
+		LEVEL_NONE.codeName:    LEVEL_NONE,
+		LEVEL_URGENCY.codeName: LEVEL_URGENCY,
 	}
 }
+
+var logLevels = createLogLevels()
 
 func (l logLevel) Has(level logLevel) bool {
 	return l.code&level.code == level.code
@@ -81,21 +89,48 @@ func (l logLevel) Not(level logLevel) logLevel {
 	return newlevel
 }
 
-// Adds the specified log level to the current log level in place.
 func (l *logLevel) Set(level logLevel) *logLevel {
 	*l = l.And(level)
 
 	return l
 }
-
-// Removes the specified log level from the current log level in place.
 func (l *logLevel) Unset(level logLevel) *logLevel {
 	*l = l.Not(level)
 
 	return l
 }
 
-// Checks if the log level is in a valid range.
+func (l *logLevel) AsMax() logLevel {
+	dom := Level.Dominant(*l)
+	mask := dom.code
+
+	for i := l.code; i > 0; i <<= 1 {
+		mask |= i
+	}
+
+	return logLevel{code: mask, name: dom.name, codeName: dom.codeName}
+}
+func (l *logLevel) AsMin() logLevel {
+	dom := Level.Dominant(*l)
+	mask := dom.code
+
+	for i := l.code; i > 0; i >>= 1 {
+		mask |= i
+	}
+
+	return logLevel{code: mask, name: dom.name, codeName: dom.codeName}
+}
+
+func (l *logLevel) Select(level logLevel) logLevel {
+	if l.Has(level) {
+		return level
+	}
+	return Level.None()
+}
+
+func (l logLevel) UrgencyLevels() uint16 {
+	return logLevels["urgency"].code & l.code
+}
 func (l logLevel) IsValid() bool {
 	return l.Is(Level.None()) || Level.All().Has(l)
 }
@@ -105,7 +140,7 @@ type iLevel struct{}
 var Level iLevel
 
 func (iLevel) Get(nameID string) (logLevel, error) {
-	if level, ok := logLevels()[nameID]; ok {
+	if level, ok := logLevels[nameID]; ok {
 		return level, nil
 	}
 
@@ -113,7 +148,7 @@ func (iLevel) Get(nameID string) (logLevel, error) {
 }
 func (iLevel) ContainedIn(l logLevel) []logLevel {
 	var contained []logLevel
-	for _, level := range logLevels() {
+	for _, level := range logLevels {
 		if l.Has(level) {
 			contained = append(contained, level)
 		}
@@ -122,67 +157,81 @@ func (iLevel) ContainedIn(l logLevel) []logLevel {
 }
 
 func (iLevel) Debug() logLevel {
-	return logLevels()["debug"]
+	return logLevels["debug"]
 }
 func (iLevel) Info() logLevel {
-	return logLevels()["info"]
+	return logLevels["info"]
 }
 func (iLevel) Warning() logLevel {
-	return logLevels()["warning"]
+	return logLevels["warning"]
 }
 func (iLevel) Error() logLevel {
-	return logLevels()["error"]
+	return logLevels["error"]
 }
 func (iLevel) Fatal() logLevel {
-	return logLevels()["fatal"]
+	return logLevels["fatal"]
 }
 
 func (iLevel) Deprecate() logLevel {
-	return logLevels()["deprecate"]
+	return logLevels["deprecate"]
 }
 func (iLevel) DeprecateWarning() logLevel {
-	return logLevels()["deprecate_warning"]
+	return logLevels["deprecate_warning"]
 }
 func (iLevel) DeprecateError() logLevel {
-	return logLevels()["deprecate_error"]
+	return logLevels["deprecate_error"]
 }
 func (iLevel) DeprecateFatal() logLevel {
-	return logLevels()["deprecate_fatal"]
+	return logLevels["deprecate_fatal"]
 }
 
 func (iLevel) Lava() logLevel {
-	return logLevels()["lava"]
+	return logLevels["lava"]
 }
 func (iLevel) LavaHot() logLevel {
-	return logLevels()["lava_hot"]
+	return logLevels["lava_hot"]
 }
 func (iLevel) LavaCold() logLevel {
-	return logLevels()["lava_cold"]
+	return logLevels["lava_cold"]
 }
 func (iLevel) LavaDry() logLevel {
-	return logLevels()["lava_dry"]
+	return logLevels["lava_dry"]
 }
 
 func (iLevel) All() logLevel {
-	return logLevels()["all"]
+	return logLevels["all"]
 }
 func (iLevel) None() logLevel {
-	return logLevels()["none"]
+	return logLevels["none"]
 }
 
 // Returns the higher of two log levels based on their code values.
 // If both levels are equal, it returns the first one.
-func (iLevel) Highest(l1, l2 logLevel) logLevel {
-	if l1.code >= l2.code {
-		return l1
+func (iLevel) Highest(levels ...logLevel) logLevel {
+	if len(levels) == 0 {
+		return Level.None()
 	}
-	return l2
+
+	highest := Level.None()
+	for _, level := range levels {
+		if level.code > highest.code {
+			highest = level
+		}
+	}
+	return highest
 }
-func (iLevel) Lowest(l1, l2 logLevel) logLevel {
-	if l1.code <= l2.code {
-		return l1
+func (iLevel) Lowest(levels ...logLevel) logLevel {
+	if len(levels) == 0 {
+		return Level.None()
 	}
-	return l2
+
+	lowest := Level.All()
+	for _, level := range levels {
+		if level.code < lowest.code {
+			lowest = level
+		}
+	}
+	return lowest
 }
 func (iLevel) InOrder(l1, l2 logLevel) (logLevel, logLevel) {
 	if l1.code < l2.code {
@@ -301,6 +350,9 @@ func (iInternal) AppVersion() logInternalVal {
 
 func (l logInternalVal) String() string {
 	return string(l)
+}
+func (l logInternalVal) Value(val string) types.SPair[string] {
+	return types.NewSPair(l.String(), val)
 }
 func (l logInternalVal) Check(val string) bool {
 	return (len(val) > 10) && (val[:10] == "_internal_") && (logInternalVal(val) == l)

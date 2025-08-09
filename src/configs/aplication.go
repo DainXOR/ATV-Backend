@@ -2,6 +2,7 @@ package configs
 
 import (
 	"cmp"
+	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"os"
 	"strconv"
@@ -9,7 +10,7 @@ import (
 
 const (
 	DEFAULT_ROUTE_VERSION = "1"     // Default version for the API routes
-	DEFAULT_API_VERSION   = "0.1.4" // Default version for the API
+	DEFAULT_API_VERSION   = "0.1.0" // Default version for the API
 )
 
 type appType struct {
@@ -29,12 +30,14 @@ func envInit() {
 	stringRoutesVersion := cmp.Or(os.Getenv("ATV_ROUTE_VERSION"), DEFAULT_ROUTE_VERSION)
 	routeVersion, err := strconv.ParseUint(stringRoutesVersion, 10, 32)
 	if err != nil {
+		logger.Warning("Invalid route version, falling back to default")
 		routeVersion, _ = strconv.ParseUint(DEFAULT_ROUTE_VERSION, 10, 32)
 	}
 	App.routesVersion = uint32(routeVersion)
 
 	appVersion, err := types.VersionFrom(cmp.Or(os.Getenv("ATV_API_VERSION"), DEFAULT_API_VERSION))
 	if err != nil {
+		logger.Warning("Invalid API version, falling back to default")
 		appVersion = types.V(DEFAULT_API_VERSION)
 	}
 	App.apiVersion = appVersion

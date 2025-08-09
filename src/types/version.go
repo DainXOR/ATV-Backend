@@ -8,7 +8,7 @@ type Version struct {
 	Patch uint8
 }
 
-// Shorthand for version V("0.1.0")
+// Shorthand for version V("0.0.0")
 func V0() Version {
 	return Version{Major: 0, Minor: 0, Patch: 0}
 }
@@ -21,6 +21,10 @@ func VersionFrom(version string) (Version, error) {
 	}
 	return Version{Major: major, Minor: minor, Patch: patch}, nil
 }
+
+// Shorthand for creating a version from a string.
+// Only use when you are sure of the input.
+// If you are not sure, use VersionFrom instead.
 func V(version string) Version {
 	var major, minor, patch uint8
 	fmt.Sscanf(version, "%d.%d.%d", &major, &minor, &patch)

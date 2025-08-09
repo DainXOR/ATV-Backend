@@ -30,6 +30,8 @@ func NewRecord(msg string, extra ...types.SPair[string]) Record {
 
 			if err == nil {
 				rec.File, rec.Line = utils.CallOrigin(int(i) + 2)
+			} else {
+				rec.File, rec.Line = "UnknownFile", 0
 			}
 
 			extra = extra[1:] // Remove the first element

@@ -94,6 +94,9 @@ func ValuesOfType[T any](slice []any) []T {
 	result := make([]T, 0)
 
 	for _, v := range slice {
+		if v == nil {
+			continue
+		}
 		if reflect.TypeOf(v).AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
 			result = append(result, v.(T))
 		}
@@ -108,6 +111,9 @@ func ExcludeOfType[T any](slice []any) []any {
 	result := make([]any, 0)
 
 	for _, v := range slice {
+		if v == nil {
+			continue
+		}
 		if !reflect.TypeOf(v).AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
 			result = append(result, v)
 		}

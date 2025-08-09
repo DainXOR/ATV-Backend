@@ -4,7 +4,7 @@ import "dainxor/atv/types"
 
 type writerAndFormatter struct {
 	writer    Writer
-	formatter *Formatter
+	formatter Formatter
 }
 
 type configurations struct {
@@ -24,8 +24,6 @@ type configurations struct {
 
 // NewConfigs initializes a new configs instance with default values
 func NewConfigs() configurations {
-	fFormatter := SimpleFormatter.New()
-
 	return configurations{
 		logLevels: Level.All(),
 		logFlags:  Flag.DateTime() | Flag.File() | Flag.Line() | Flag.AppVersion(),
@@ -39,13 +37,13 @@ func NewConfigs() configurations {
 		appVersion: types.V("0.1.0"),
 
 		writers: []writerAndFormatter{
-			{writer: ConsoleWriter.NewLine().New(), formatter: &fFormatter},
-			{writer: FileWriter.NewLine().New(), formatter: &fFormatter},
+			{writer: ConsoleWriter.NewLine().New(), formatter: SimpleFormatter.New()},
+			{writer: FileWriter.NewLine().New(), formatter: SimpleFormatter.New()},
 		},
 	}
 }
 
-func (c *configurations) AddWriter(writer Writer, formatter *Formatter) *configurations {
+func (c *configurations) AddWriter(writer Writer, formatter Formatter) *configurations {
 	c.writers = append(c.writers, writerAndFormatter{writer: writer, formatter: formatter})
 	return c
 }
@@ -56,6 +54,26 @@ func (c *configurations) RemoveWriter(index int) *configurations {
 	c.writers = append(c.writers[:index], c.writers[index+1:]...)
 	return c
 }
+func (c *configurations) RemoveWriters(index ...int) *configurations {
+	indexes := len(index)
+	if indexes == 0 {
+		return c
+	}
+
+	last := len(c.writers) - 1
+
+	for _, idx := range index {
+		c.writers[idx].writer.Close()
+
+		swap := c.writers[last]
+		c.writers[last] = c.writers[idx]
+		c.writers[idx] = swap
+		last--
+	}
+
+	c.writers = c.writers[:last]
+	return c
+}
 func (c *configurations) Writers() []writerAndFormatter {
 	return c.writers
 }
@@ -63,5 +81,5 @@ func (c *configurations) Writer(index int) (*Writer, *Formatter) {
 	if index < 0 || index >= len(c.writers) {
 		return nil, nil
 	}
-	return &c.writers[index].writer, c.writers[index].formatter
+	return &c.writers[index].writer, &c.writers[index].formatter
 }

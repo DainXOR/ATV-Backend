@@ -128,6 +128,9 @@ func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaul
 			result[k] = types.Pair[V1, V2]{First: v1, Second: v2}
 		} else if len(defaultValue) > 0 {
 			result[k] = types.Pair[V1, V2]{First: v1, Second: defaultValue[0]}
+		} else {
+			var zeroValue V2
+			result[k] = types.Pair[V1, V2]{First: v1, Second: zeroValue}
 		}
 	}
 	return result

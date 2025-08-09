@@ -28,7 +28,7 @@ func address() string {
 func main() {
 
 	record := logger.NewRecord("Server is starting")
-	record.LogLevel = logger.Level.Info()
+	logger.Info(record)
 
 	/*
 		defer configs.DB.Close()

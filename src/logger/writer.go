@@ -25,6 +25,10 @@ func (w *consoleWriter) CreationError() error {
 	return w.err
 }
 func (w *consoleWriter) Write(text string) error {
+	if w.formatString == "" {
+		return fmt.Errorf("format string is empty")
+	}
+
 	_, err := fmt.Printf(w.formatString, text)
 	return err
 }
@@ -50,6 +54,10 @@ func (b ConsoleWriterBuilder) FormatString(format string) ConsoleWriterBuilder {
 	return b
 }
 func (b ConsoleWriterBuilder) New() Writer {
+	if b.writer.formatString == "" {
+		b.writer.formatString = "%s"
+	}
+
 	return &consoleWriter{
 		formatString: b.writer.formatString,
 		err:          nil,
@@ -67,7 +75,7 @@ func (w *fileWriter) CreationError() error {
 	return w.err
 }
 func (w *fileWriter) Write(text string) error {
-	_, err := w.file.WriteString(fmt.Sprintf(w.formatString, text))
+	_, err := fmt.Fprintf(w.file, w.formatString, text)
 	return err
 }
 func (w *fileWriter) Close() error {
@@ -101,6 +109,9 @@ func (b FileWriterBuilder) FormatString(format string) FileWriterBuilder {
 func (b FileWriterBuilder) New() Writer {
 	if b.writer.FilePath == "" {
 		b.writer.FilePath = "logs.log"
+	}
+	if b.writer.formatString == "" {
+		b.writer.formatString = "%s"
 	}
 
 	file, err := os.OpenFile(b.writer.FilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

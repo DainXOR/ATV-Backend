@@ -142,10 +142,10 @@ type AnsiStyle struct {
 
 func (s AnsiStyle) Apply(text string) string {
 	if s.NoStop {
-		return fmt.Sprintf("%s%s", CLR_START+s.Background+";"+s.Text, text)
+		return fmt.Sprintf("%s%s;%s%s", CLR_START, s.Background, s.Text, text)
 	}
 
-	return fmt.Sprintf("%s%s%s", CLR_START+s.Background+";"+s.Text, text, CLR_RESET)
+	return fmt.Sprintf("%s%s;%s%s%s", CLR_START, s.Background, s.Text, text, CLR_RESET)
 }
 
 var _ Style = (*AnsiStyle)(nil)
