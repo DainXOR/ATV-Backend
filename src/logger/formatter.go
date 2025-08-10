@@ -420,6 +420,9 @@ func (b ConsoleColorFormatterBuilder) New() Formatter {
 	if b.formatter.next != nil {
 		next = b.formatter.next
 	}
+	if b.baseFormatter == nil {
+		b.baseFormatter = SimpleFormatter.New()
+	}
 
 	b.baseFormatter.SetNext(next)
 	b.formatter.SetNext(b.baseFormatter)

@@ -27,7 +27,16 @@ func init() {
 	dnxGlobalLogger = NewWithEnv()
 }
 
-func cloneLogger(original *dnxLogger) *dnxLogger {
+// Returns the singleton instance of dnxLogger, initializing it if necessary.
+// This function should be used to access the global logger throughout the instanceless methods.
+// It ensures that the logger is initialized before use.
+func get() *dnxLogger {
+	if dnxGlobalLogger == nil {
+		dnxGlobalLogger = NewDefault()
+	}
+	return dnxGlobalLogger
+}
+func clone(original *dnxLogger) *dnxLogger {
 	logger := &dnxLogger{
 		configurations:  original.configurations,
 		logAttempts:     0,
@@ -39,34 +48,10 @@ func cloneLogger(original *dnxLogger) *dnxLogger {
 	logger.Debug("Logger cloned")
 	return logger
 }
-func LoadEnv(logger *dnxLogger) {
-	logger.Debug("Loading environment variables for logger")
 
-	//minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
-	//disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
-	//logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
-	//logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
-	//logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
-
-	logger.Debug("Logger environment variables loaded")
-}
-
-// Returns the singleton instance of dnxLogger, initializing it if necessary.
-// This function should be used to access the global logger throughout the instanceless methods.
-// It ensures that the logger is initialized before use.
-func get() *dnxLogger {
-	if dnxGlobalLogger == nil {
-		dnxGlobalLogger = NewDefault()
-	}
-	return dnxGlobalLogger
-}
-
-// Creates a new clone of the global logger instance.
 func NewClone() *dnxLogger {
-	return cloneLogger(get())
+	return clone(get())
 }
-
-// Creates a new default logger instance.
 func NewDefault() *dnxLogger {
 	logger := &dnxLogger{
 		configurations: NewConfigs(),
@@ -82,12 +67,31 @@ func NewDefault() *dnxLogger {
 
 	return logger
 }
-
-// Creates a new logger instance with environment variables loaded.
 func NewWithEnv() *dnxLogger {
 	logger := NewDefault()
 	LoadEnv(logger)
 	return logger
+}
+func LoadEnv(logger *dnxLogger) {
+	logger.Debug("Loading environment variables for logger")
+
+	logger.writers[0].formatter = ConsoleColorFormatter.New()
+
+	//minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
+	//disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
+	//logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
+	//logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
+	//logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
+
+	logger.Debug("Logger environment variables loaded")
+}
+
+func (i *dnxLogger) Close() {
+	i.Debug("Closing logger")
+	// Close any open resources here
+}
+func Close() {
+	get().Close()
 }
 
 func panicOrError(msg string, condition bool) error {
@@ -136,7 +140,9 @@ func (i *dnxLogger) resetLogAttempts() bool {
 
 func (i *dnxLogger) SetVersion(version types.Version) {
 	i.appVersion = version
-	i.Debug("App version changed to: ", version.String())
+	i.Debug("App version changed to: ", version.String(),
+		internal.CallOriginOffset().Value("1"),
+	)
 }
 func SetVersion(version types.Version) {
 	get().SetVersion(version)
@@ -317,17 +323,27 @@ func (i *dnxLogger) internalAbnormalWrite(record Record) error {
 	return nil
 }
 
-func generateRecord(level logLevel, v ...any) Record {
+func (i *dnxLogger) generateRecord(level logLevel, v ...any) Record {
 	msg := ""
-	extraParts := []types.SPair[string]{internal.CallOriginOffset().Value("3")}
+	extraParts := []types.SPair[string]{
+		internal.CallOriginOffset().Value("4"),
+		internal.AppVersion().Value(i.AppVersion().String()),
+	}
 
 	for _, pair := range utils.ValuesOfType[types.SPair[string]](v) {
 		if internal.CallOriginOffset().Check(pair.First) {
 			offset, _ := strconv.Atoi(pair.Second)
-			extraParts[0].Second = fmt.Sprint(offset + 2)
+			originalOffset, _ := strconv.Atoi(extraParts[0].Second)
+			extraParts[0].Second = fmt.Sprint(originalOffset + offset)
 			continue
 		} else if internal.FormatString().Check(pair.First) {
 			msg = fmt.Sprintf(pair.Second, utils.ExcludeOfType[types.SPair[string]](v)...)
+			continue
+		} else if internal.AppVersion().Check(pair.First) {
+			version, err := types.VersionFrom(pair.Second)
+			if err == nil {
+				extraParts[1].Second = version.String()
+			}
 			continue
 		}
 
@@ -344,17 +360,20 @@ func generateRecord(level logLevel, v ...any) Record {
 }
 
 func (i *dnxLogger) iWrite(l logLevel, v ...any) {
-	record := generateRecord(l, v...)
+	record := i.generateRecord(l, v...)
 	i.internalWrite(record)
 }
 func (i *dnxLogger) iWritef(l logLevel, format string, v ...any) {
 	extraParts := []any{types.NewSPair(internal.FormatString().String(), format)}
 	extraParts = append(extraParts, v...)
 
-	record := generateRecord(l, extraParts...)
+	record := i.generateRecord(l, extraParts...)
 	i.internalWrite(record)
 }
 func (i *dnxLogger) iWriter(r Record) {
+	if r.AppVersion == types.V0() {
+		r.AppVersion = i.AppVersion()
+	}
 	i.internalWrite(r)
 }
 
