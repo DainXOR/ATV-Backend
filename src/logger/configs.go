@@ -2,7 +2,7 @@ package logger
 
 import "dainxor/atv/types"
 
-type writerAndFormatter struct {
+type outputBinding struct {
 	writer    Writer
 	formatter Formatter
 }
@@ -19,12 +19,12 @@ type configurations struct {
 
 	appVersion types.Version
 
-	writers []writerAndFormatter
+	writers map[string]outputBinding
 }
 
 // NewConfigs initializes a new configs instance with default values
-func NewConfigs() configurations {
-	return configurations{
+func NewConfigs() *configurations {
+	return &configurations{
 		logLevels: Level.All(),
 		logFlags:  Flag.DateTime() | Flag.File() | Flag.Line() | Flag.AppVersion(),
 
@@ -36,50 +36,62 @@ func NewConfigs() configurations {
 
 		appVersion: types.V("0.1.0"),
 
-		writers: []writerAndFormatter{
-			{writer: ConsoleWriter.NewLine().New(), formatter: SimpleFormatter.New()},
-			{writer: FileWriter.NewLine().New(), formatter: SimpleFormatter.New()},
+		writers: map[string]outputBinding{
+			"console": {writer: ConsoleWriter.NewLine().New(), formatter: SimpleFormatter.New()},
 		},
 	}
 }
 
-func (c *configurations) AddWriter(writer Writer, formatter Formatter) *configurations {
-	c.writers = append(c.writers, writerAndFormatter{writer: writer, formatter: formatter})
+func (c *configurations) NoWriters() *configurations {
+	c.writers = make(map[string]outputBinding)
 	return c
 }
-func (c *configurations) RemoveWriter(index int) *configurations {
-	if index < 0 || index >= len(c.writers) {
-		return c
-	}
-	c.writers = append(c.writers[:index], c.writers[index+1:]...)
+func (c *configurations) AddWriter(nameID string, writer Writer, formatter Formatter) *configurations {
+	c.writers[nameID] = outputBinding{writer: writer, formatter: formatter}
 	return c
 }
-func (c *configurations) RemoveWriters(index ...int) *configurations {
-	indexes := len(index)
-	if indexes == 0 {
+func (c *configurations) RemoveWriter(nameID string) *configurations {
+	if _, exists := c.writers[nameID]; !exists {
 		return c
 	}
 
-	last := len(c.writers) - 1
-
-	for _, idx := range index {
-		c.writers[idx].writer.Close()
-
-		swap := c.writers[last]
-		c.writers[last] = c.writers[idx]
-		c.writers[idx] = swap
-		last--
-	}
-
-	c.writers = c.writers[:last]
+	c.writers[nameID].writer.Close()
+	delete(c.writers, nameID)
 	return c
 }
-func (c *configurations) Writers() []writerAndFormatter {
+func (c *configurations) RemoveWriters(nameIDs ...string) *configurations {
+	if len(nameIDs) == 0 {
+		return c
+	}
+
+	for _, nameID := range nameIDs {
+		if binding, exists := c.writers[nameID]; exists {
+			binding.writer.Close()
+			delete(c.writers, nameID)
+		}
+	}
+	return c
+}
+
+func (c *configurations) ChangeWriter(nameID string, writer Writer) *configurations {
+	if binding, exists := c.writers[nameID]; exists {
+		c.writers[nameID] = outputBinding{writer: writer, formatter: binding.formatter}
+	}
+	return c
+}
+func (c *configurations) ChangeFormatter(nameID string, formatter Formatter) *configurations {
+	if binding, exists := c.writers[nameID]; exists {
+		c.writers[nameID] = outputBinding{writer: binding.writer, formatter: formatter}
+	}
+	return c
+}
+
+func (c *configurations) Writer(nameID string) (*Writer, *Formatter) {
+	if binding, exists := c.writers[nameID]; exists {
+		return &binding.writer, &binding.formatter
+	}
+	return nil, nil
+}
+func (c *configurations) Writers() map[string]outputBinding {
 	return c.writers
-}
-func (c *configurations) Writer(index int) (*Writer, *Formatter) {
-	if index < 0 || index >= len(c.writers) {
-		return nil, nil
-	}
-	return &c.writers[index].writer, &c.writers[index].formatter
 }

@@ -4,6 +4,8 @@ import (
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"errors"
+	"maps"
+	"os"
 	"strconv"
 	"strings"
 
@@ -18,7 +20,7 @@ type dnxLogger struct {
 	logAttempts   uint8 // Number of log attempts, used to prevent infinite loops in logging
 	usingDefaults bool  // Indicates if the logger is using default settings
 
-	abnormalWriters []writerAndFormatter // Special writers used when normal logging is failing
+	abnormalWriters map[string]outputBinding // Special writers used when normal logging is failing
 }
 
 var dnxGlobalLogger *dnxLogger
@@ -41,10 +43,10 @@ func clone(original *dnxLogger) *dnxLogger {
 		configurations:  original.configurations,
 		logAttempts:     0,
 		usingDefaults:   false,
-		abnormalWriters: make([]writerAndFormatter, len(original.abnormalWriters)),
+		abnormalWriters: make(map[string]outputBinding, len(original.abnormalWriters)),
 	}
 
-	copy(logger.abnormalWriters, original.abnormalWriters)
+	maps.Copy(logger.abnormalWriters, original.abnormalWriters)
 	logger.Debug("Logger cloned")
 	return logger
 }
@@ -54,12 +56,12 @@ func NewClone() *dnxLogger {
 }
 func NewDefault() *dnxLogger {
 	logger := &dnxLogger{
-		configurations: NewConfigs(),
+		configurations: *NewConfigs(),
 		logAttempts:    0,
 		usingDefaults:  true,
 
-		abnormalWriters: []writerAndFormatter{
-			{writer: ConsoleWriter.NewLine().New(), formatter: SimpleFormatter.New()},
+		abnormalWriters: map[string]outputBinding{
+			"console": {writer: ConsoleWriter.NewLine().New(), formatter: SimpleFormatter.New()},
 		},
 	}
 
@@ -75,20 +77,50 @@ func NewWithEnv() *dnxLogger {
 func LoadEnv(logger *dnxLogger) {
 	logger.Debug("Loading environment variables for logger")
 
-	logger.writers[0].formatter = ConsoleColorFormatter.New()
+	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
+	disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
+	logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
+	logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
+	logFilePath, existLogFilePath := os.LookupEnv("DNX_LOG_FILE_PATH")
+	logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
 
-	//minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
-	//disableLevels, existDisableLevels := os.LookupEnv("DNX_LOG_DISABLE_LEVELS")
-	//logConsole, existLogConsole := os.LookupEnv("DNX_LOG_CONSOLE")
-	//logFile, existLogFile := os.LookupEnv("DNX_LOG_FILE")
-	//logWithColor, existLogWithColor := os.LookupEnv("DNX_LOG_WITH_COLOR")
+	if existMinLevel {
+		l, err := Level.Get(strings.ToLower(minLogLevel))
+		if err == nil {
+			logger.SetMinLogLevel(l)
+		}
+	}
+	if existDisableLevels {
+		levelsIDs := strings.Split(strings.ToLower(disableLevels), "|")
+		lvls := utils.MapE(levelsIDs, Level.Get)
+
+		logger.DisableLogLevels(Level.Combine(lvls...))
+	}
+	if existLogConsole && logConsole == "FALSE" {
+		logger.RemoveWriter("console")
+	}
+	if existLogFile && logFile == "TRUE" {
+		if !existLogFilePath {
+			logFilePath = ""
+		}
+		logger.AddWriter("file", FileWriter.FilePath(logFilePath).NewLine().New(), SimpleFormatter.New())
+	}
+	if existLogWithColor && logWithColor == "TRUE" {
+		logger.ChangeFormatter("console", ConsoleColorFormatter.New())
+	}
 
 	logger.Debug("Logger environment variables loaded")
 }
 
 func (i *dnxLogger) Close() {
-	i.Debug("Closing logger")
-	// Close any open resources here
+	i.Debug("Closing writers")
+	i.Lava(types.V("0.1.5"), "writer.Close() error return is not handled")
+	for _, writer := range i.writers {
+		writer.writer.Close()
+	}
+	for _, writer := range i.abnormalWriters {
+		writer.writer.Close()
+	}
 }
 func Close() {
 	get().Close()
@@ -259,14 +291,13 @@ func (i *dnxLogger) internalWrite(record Record) {
 	}
 
 	i.registerLogAttempt()
-	removeList := make([]int, 0, len(i.writers))
+	removeList := make([]string, 0, len(i.writers))
 
 	for p, pair := range i.writers {
 		w, f := pair.writer, pair.formatter
 
 		if w == nil || f == nil {
-			record := NewRecord("Invalid writer or formatter in writer list, marking for removal")
-			record.LogLevel = Level.Error()
+			record := i.generateRecord(Level.Error(), "Invalid writer or formatter in writer list, marking for removal")
 			i.internalAbnormalWrite(record)
 			removeList = append(removeList, p)
 			continue
@@ -274,29 +305,17 @@ func (i *dnxLogger) internalWrite(record Record) {
 
 		if str, err := f.Format(&record); err == nil {
 			if err = w.Write(str); err != nil {
-				record := NewRecord("Error during write: " + err.Error() + ", marking writer for removal")
-				record.LogLevel = Level.Error()
+				record := i.generateRecord(Level.Error(), "Error during write:", err.Error())
 				i.internalAbnormalWrite(record)
-				removeList = append(removeList, p)
 			}
 
 		} else {
-			panic("Error formatting record for abnormal write: " + err.Error())
+			record := i.generateRecord(Level.Error(), "Error formatting record:", err.Error())
+			i.internalAbnormalWrite(record)
 		}
 	}
 
-	if len(removeList) > 0 {
-		i.Lava(types.V("0.1.5"), "Debug removing writers")
-		beforeLen := len(i.writers)
-		i.RemoveWriters(removeList...)
-		dif := len(i.writers) - len(removeList)
-
-		if beforeLen != dif {
-			i.Fatal("Mismatch in writer count after removal",
-				types.NewSPair("Count", fmt.Sprint(dif-beforeLen)))
-		}
-	}
-
+	i.RemoveWriters(removeList...)
 	i.resetLogAttempts()
 }
 func (i *dnxLogger) internalAbnormalWrite(record Record) error {
@@ -351,7 +370,8 @@ func (i *dnxLogger) generateRecord(level logLevel, v ...any) Record {
 	}
 
 	if msg == "" {
-		msg = fmt.Sprint(utils.ExcludeOfType[types.SPair[string]](v)...)
+		msg = fmt.Sprintln(utils.ExcludeOfType[types.SPair[string]](v)...)
+		msg = strings.TrimSuffix(msg, "\n")
 	}
 
 	record := NewRecord(msg, extraParts...)

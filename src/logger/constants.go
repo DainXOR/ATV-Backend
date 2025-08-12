@@ -155,6 +155,17 @@ func (iLevel) ContainedIn(l logLevel) []logLevel {
 	}
 	return contained
 }
+func (iLevel) Combine(levels ...logLevel) logLevel {
+	if len(levels) == 0 {
+		return Level.None()
+	}
+
+	combined := Level.None()
+	for _, level := range levels {
+		combined = combined.And(level)
+	}
+	return combined
+}
 
 func (iLevel) Debug() logLevel {
 	return logLevels["debug"]

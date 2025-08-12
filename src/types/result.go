@@ -20,11 +20,11 @@ func ResultOf[T any](value T, err error, isError bool) Result[T] {
 }
 
 func (r Result[T]) IsOk() bool {
-	return r.err == nil
+	return r.err == nil && r.value.IsPresent()
 }
 
 func (r Result[T]) IsErr() bool {
-	return r.err != nil
+	return r.err != nil && !r.value.IsPresent()
 }
 
 func (r Result[T]) Value() T {

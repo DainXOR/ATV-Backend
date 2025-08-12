@@ -6,6 +6,10 @@ type Optional[T any] struct {
 }
 
 func OptionalOf[T any](value T, condition ...bool) Optional[T] {
+	if len(condition) == 0 {
+		return Optional[T]{value: value, present: true}
+	}
+
 	for _, c := range condition {
 		if c {
 			return Optional[T]{value: value, present: true}

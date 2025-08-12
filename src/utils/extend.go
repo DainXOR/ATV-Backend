@@ -73,6 +73,16 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 	}
 	return result
 }
+func MapE[T, U any](slice []T, mapper func(T) (U, error)) []U {
+	result := make([]U, 0, len(slice))
+
+	for _, value := range slice {
+		if mappedValue, err := mapper(value); err == nil {
+			result = append(result, mappedValue)
+		}
+	}
+	return result
+}
 func ForEach[T any](slice []T, action func(int, T)) {
 	for i, value := range slice {
 		action(i, value)
