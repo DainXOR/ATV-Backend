@@ -16,6 +16,7 @@ import (
 //
 // To implement this interface, a model must
 // define a method TableName that returns the name of the database table
+// and a method IsEmpty that checks if the object is empty.
 // Yes, that's it, nothing else is required.
 type DBModelInterface interface {
 	TableName() string
@@ -28,66 +29,31 @@ type DBDateTime = time.Time
 // Deprecated: Use models.ID.ToPrimitive() instead.
 func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToPrimitive() instead")
-	switch v := id.(type) {
-	case string:
-		return primitive.ObjectIDFromHex(v)
-	case primitive.ObjectID:
-		return v, nil
-	case bson.ObjectID:
-		return primitive.ObjectIDFromHex(v.Hex())
-	default:
-		return primitive.NilObjectID, fmt.Errorf("unsupported type for PrimitiveIDFrom: %T", id)
-	}
+	return ID.ToPrimitive(id)
 }
 
 // Deprecated: Use models.ID.ToBson() instead.
 func BsonIDFrom(id any) (bson.ObjectID, error) {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToBson() instead")
-	switch v := id.(type) {
-	case string:
-		return bson.ObjectIDFromHex(v)
-	case primitive.ObjectID:
-		return bson.ObjectIDFromHex(v.Hex())
-	case bson.ObjectID:
-		return v, nil
-	default:
-		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
-	}
+	return ID.ToBson(id)
 }
 
-// Change this if you decide to change the ID type in the database.
-//
-// Deprecated: Use models.ID.ToDBID() instead.
+// Deprecated: Use models.ID.ToDB() instead.
 func DBIDFrom(id any) (DBID, error) {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToDBID() instead")
-	return ID.ToBson(id)
+	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToDB() instead")
+	return ID.ToDB(id)
 }
 
 // Deprecated: Use models.ID.OmitEmpty() instead.
 func OmitEmptyID(id string, result *DBID, idName string) bool {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.OmitEmpty() instead")
-	if id != "" {
-		return ID.Ensure(id, result, idName)
-	}
-	return true
+	return ID.OmitEmpty(id, result, idName)
 }
 
 // Deprecated: Use models.ID.Ensure() instead.
 func EnsureID(id string, result *DBID, idName string) bool {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.Ensure() instead")
-	if id == "" {
-		logger.Warning("Missing required field:", idName)
-		return false
-	}
-
-	idObj, err := DBIDFrom(id)
-	if err != nil {
-		logger.Warning("Failed to convert", idName, "to ObjectID:", err)
-		return false
-	}
-
-	*result = idObj
-	return true
+	return ID.Ensure(id, result, idName)
 }
 
 type iID struct{}
@@ -103,7 +69,7 @@ func (iID) ToPrimitive(id any) (primitive.ObjectID, error) {
 	case bson.ObjectID:
 		return primitive.ObjectIDFromHex(v.Hex())
 	default:
-		return primitive.NilObjectID, fmt.Errorf("unsupported type for PrimitiveIDFrom: %T", id)
+		return primitive.NilObjectID, fmt.Errorf("unsupported type for ToPrimitive: %T", id)
 	}
 }
 func (iID) ToBson(id any) (bson.ObjectID, error) {
@@ -115,7 +81,7 @@ func (iID) ToBson(id any) (bson.ObjectID, error) {
 	case bson.ObjectID:
 		return v, nil
 	default:
-		return bson.NilObjectID, fmt.Errorf("unsupported type for BSONIDFrom: %T", id)
+		return bson.NilObjectID, fmt.Errorf("unsupported type for ToBson: %T", id)
 	}
 }
 
@@ -154,20 +120,16 @@ func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
 	return true
 }
 
-// If decide to change the time type, you can only change it here.
-//
 // Deprecated: Use models.Time.Now() instead.
 func TimeNow() DBDateTime {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Now() instead")
 	return time.Now()
 }
 
-// If decide to change the time type, you can only change it here.
-//
 // Deprecated: Use models.Time.Zero() instead.
 func TimeZero() DBDateTime {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Zero() instead")
-	return time.Time{}
+	return Time.Zero()
 }
 
 type iTime struct{}

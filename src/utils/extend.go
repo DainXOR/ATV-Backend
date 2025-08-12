@@ -73,6 +73,8 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 	}
 	return result
 }
+
+// MapE is a variant of Map that drops the elements for which the mapper returns an error.
 func MapE[T, U any](slice []T, mapper func(T) (U, error)) []U {
 	result := make([]U, 0, len(slice))
 
@@ -139,8 +141,7 @@ func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaul
 		} else if len(defaultValue) > 0 {
 			result[k] = types.Pair[V1, V2]{First: v1, Second: defaultValue[0]}
 		} else {
-			var zeroValue V2
-			result[k] = types.Pair[V1, V2]{First: v1, Second: zeroValue}
+			result[k] = types.Pair[V1, V2]{First: v1}
 		}
 	}
 	return result
@@ -151,7 +152,7 @@ func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaul
 func AsStrings(slice []any) []string {
 	return Map(slice, func(e any) string { return fmt.Sprint(e) })
 }
-func Podate(slice []string, cutset string) []string {
+func TrimAll(slice []string, cutset string) []string {
 	return Map(slice, func(e string) string {
 		return strings.Trim(e, cutset)
 	})

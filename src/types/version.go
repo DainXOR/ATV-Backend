@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Version struct {
 	Major uint8
@@ -14,6 +17,12 @@ func V0() Version {
 }
 
 func VersionFrom(version string) (Version, error) {
+	if len(version) == 1 {
+		// If the version string is just a single digit, assume it's the major version
+		major, err := strconv.ParseUint(version, 10, 8)
+		return Version{Major: uint8(major)}, err
+	}
+
 	var major, minor, patch uint8
 	_, err := fmt.Sscanf(version, "%d.%d.%d", &major, &minor, &patch)
 	if err != nil {
@@ -26,6 +35,12 @@ func VersionFrom(version string) (Version, error) {
 // Only use when you are sure of the input.
 // If you are not sure, use VersionFrom instead.
 func V(version string) Version {
+	if len(version) == 1 {
+		// If the version string is just a single digit, assume it's the major version
+		major, _ := strconv.ParseUint(version, 10, 8)
+		return Version{Major: uint8(major)}
+	}
+
 	var major, minor, patch uint8
 	fmt.Sscanf(version, "%d.%d.%d", &major, &minor, &patch)
 	return Version{Major: major, Minor: minor, Patch: patch}
