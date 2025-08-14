@@ -47,7 +47,7 @@ func (r Result[T]) Error() error {
 
 func (r Result[T]) GetRaw() (T, error) {
 	if r.IsOk() {
-		return r.Value(), r.Error()
+		return r.Value(), nil
 	}
 
 	var zero T

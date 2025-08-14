@@ -11,12 +11,11 @@ func OptionalOf[T any](value T, condition ...bool) Optional[T] {
 	}
 
 	for _, c := range condition {
-		if c {
-			return Optional[T]{value: value, present: true}
+		if !c {
+			return OptionalEmpty[T]()
 		}
 	}
-
-	return OptionalEmpty[T]()
+	return Optional[T]{value: value, present: true}
 }
 
 func OptionalEmpty[T any]() Optional[T] {
