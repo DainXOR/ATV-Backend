@@ -11,11 +11,13 @@ import (
 const (
 	DEFAULT_ROUTE_VERSION = "1"     // Default version for the API routes
 	DEFAULT_API_VERSION   = "0.1.0" // Default version for the API
+	DEFAULT_ADDRESS       = ":8080" // Default server address
 )
 
 type appType struct {
 	apiVersion    types.Version
 	routesVersion uint32
+	address       string
 }
 
 var App appType
@@ -44,6 +46,8 @@ func envInit() {
 		appVersion = types.V(DEFAULT_API_VERSION)
 	}
 	App.apiVersion = appVersion
+
+	App.address = cmp.Or(os.Getenv("SERVER_ADDRESS"), DEFAULT_ADDRESS)
 }
 
 func (appType) RoutesVersion() uint32 {
@@ -52,4 +56,8 @@ func (appType) RoutesVersion() uint32 {
 
 func (appType) ApiVersion() types.Version {
 	return App.apiVersion
+}
+
+func (appType) Address() string {
+	return App.address
 }
