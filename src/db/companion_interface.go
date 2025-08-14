@@ -24,7 +24,7 @@ func (companionType) Create(companion models.CompanionCreate) types.Result[model
 		return types.ResultErr[models.CompanionDBMongo](err)
 	}
 
-	companionDB.ID, err = models.DBIDFrom(result.InsertedID)
+	companionDB.ID, err = models.ID.ToDB(result.InsertedID)
 
 	if err != nil {
 		logger.Error("Failed to convert inserted ID to ObjectID: ", err)

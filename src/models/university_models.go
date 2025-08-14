@@ -54,6 +54,12 @@ func (u UniversityDBMongo) IsEmpty() bool {
 	return u == (UniversityDBMongo{})
 }
 
+func (c *UniversityDBMongo) SetID(id any) error {
+	var err error
+	c.ID, err = ID.ToDB(id)
+	return err
+}
+
 func (UniversityDBMongo) TableName() string {
 	return "universities"
 }

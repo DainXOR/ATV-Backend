@@ -47,6 +47,12 @@ func (u SessionTypeDBMongo) IsEmpty() bool {
 	return u == (SessionTypeDBMongo{})
 }
 
+func (c *SessionTypeDBMongo) SetID(id any) error {
+	var err error
+	c.ID, err = ID.ToDB(id)
+	return err
+}
+
 func (SessionTypeDBMongo) TableName() string {
 	return "session_types"
 }

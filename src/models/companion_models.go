@@ -88,6 +88,11 @@ func (c CompanionDBMongo) ToResponse() CompanionResponse {
 func (c CompanionDBMongo) IsEmpty() bool {
 	return c == (CompanionDBMongo{})
 }
+func (c *CompanionDBMongo) SetID(id any) error {
+	var err error
+	c.ID, err = ID.ToDB(id)
+	return err
+}
 
 func (CompanionDBMongo) TableName() string {
 	return "companions"

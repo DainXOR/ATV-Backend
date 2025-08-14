@@ -149,6 +149,12 @@ func (u SessionDBMongo) IsEmpty() bool {
 	return u == (SessionDBMongo{})
 }
 
+func (c *SessionDBMongo) SetID(id any) error {
+	var err error
+	c.ID, err = ID.ToDB(id)
+	return err
+}
+
 func (SessionDBMongo) TableName() string {
 	return "sessions"
 }

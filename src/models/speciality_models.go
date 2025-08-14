@@ -47,6 +47,12 @@ func (u SpecialityDBMongo) IsEmpty() bool {
 	return u == (SpecialityDBMongo{})
 }
 
+func (c *SpecialityDBMongo) SetID(id any) error {
+	var err error
+	c.ID, err = ID.ToDB(id)
+	return err
+}
+
 func (SpecialityDBMongo) TableName() string {
 	return "specialities"
 }

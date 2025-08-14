@@ -21,6 +21,7 @@ import (
 type DBModelInterface interface {
 	TableName() string
 	IsEmpty() bool
+	SetID(id any) error
 }
 
 type DBID = bson.ObjectID
