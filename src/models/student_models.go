@@ -123,7 +123,7 @@ func (user StudentDBMongo) ToResponse() StudentResponse {
 func (user StudentDBMongo) IsEmpty() bool {
 	return user == (StudentDBMongo{})
 }
-func (user StudentDBMongo) SetID(id any) error {
+func (user *StudentDBMongo) SetID(id any) error {
 	var err error
 	user.ID, err = ID.ToDB(id)
 	return err
