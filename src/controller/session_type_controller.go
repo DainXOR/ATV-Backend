@@ -35,7 +35,7 @@ func (sessionTypeType) Create(c *gin.Context) {
 	logger.Debug("Creating session type in MongoDB: ", body)
 	existent := db.SessionType.GetAll()
 	if existent.IsOk() && len(existent.Value()) > 0 {
-		match := utils.Filter(existent.Value(), func(st models.SessionTypeDBMongo) bool {
+		match := utils.Filter(existent.Value(), func(st models.SessionTypeDB) bool {
 			return st.Name == body.Name
 		})
 
@@ -115,7 +115,7 @@ func (sessionTypeType) GetAll(c *gin.Context) {
 		return
 	}
 
-	sessionTypes := utils.Map(result.Value(), models.SessionTypeDBMongo.ToResponse)
+	sessionTypes := utils.Map(result.Value(), models.SessionTypeDB.ToResponse)
 	if len(sessionTypes) == 0 {
 		logger.Warning("No session types found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

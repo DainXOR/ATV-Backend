@@ -14,13 +14,13 @@ type universityType struct{}
 
 var University universityType
 
-func (universityType) Create(u models.UniversityCreate) types.Result[models.UniversityDBMongo] {
+func (universityType) Create(u models.UniversityCreate) types.Result[models.UniversityDB] {
 	universityDB := u.ToInsert()
-	result, err := configs.DB.InsertOne(universityDB)
+	result, err := configs.DB.InsertOne(&universityDB)
 
 	if err != nil {
 		logger.Error("Error inserting university: ", err)
-		return types.ResultErr[models.UniversityDBMongo](err)
+		return types.ResultErr[models.UniversityDB](err)
 	}
 
 	universityDB.ID, err = models.ID.ToDB(result.InsertedID)
@@ -32,13 +32,13 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 			"Failed to convert inserted ID to PrimitiveID",
 			"Error: "+err.Error(),
 		)
-		return types.ResultErr[models.UniversityDBMongo](&httpErr)
+		return types.ResultErr[models.UniversityDB](&httpErr)
 	}
 
 	return types.ResultOk(universityDB)
 }
 
-func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] {
+func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -49,11 +49,11 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 			"Invalid ID format: "+err.Error(),
 			"University ID: "+id,
 		)
-		return types.ResultErr[models.UniversityDBMongo](&httpErr)
+		return types.ResultErr[models.UniversityDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var university models.UniversityDBMongo
+	var university models.UniversityDB
 
 	err = configs.DB.FindOne(filter, &university)
 	if err != nil {
@@ -75,14 +75,14 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDBMongo] 
 			)
 		}
 
-		return types.ResultErr[models.UniversityDBMongo](&httpErr)
+		return types.ResultErr[models.UniversityDB](&httpErr)
 	}
 
 	return types.ResultOk(university)
 }
-func (universityType) GetAll() types.Result[[]models.UniversityDBMongo] {
+func (universityType) GetAll() types.Result[[]models.UniversityDB] {
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted universities
-	universities := []models.UniversityDBMongo{}
+	universities := []models.UniversityDB{}
 
 	err := configs.DB.FindAll(filter, &universities)
 	if err != nil {
@@ -92,7 +92,7 @@ func (universityType) GetAll() types.Result[[]models.UniversityDBMongo] {
 			err.Error(),
 		)
 
-		return types.ResultErr[[]models.UniversityDBMongo](&httpErr)
+		return types.ResultErr[[]models.UniversityDB](&httpErr)
 	}
 
 	logger.Debug("Retrieved", len(universities), "universities from MongoDB database")

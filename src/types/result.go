@@ -20,15 +20,17 @@ func ResultOf[T any](value T, err error, isError bool) Result[T] {
 	if !isError {
 		return ResultOk(value)
 	}
-	return ResultErr[T](err)
+	return Result[T]{value: OptionalOf(value), err: err}
 }
 
 func (r Result[T]) IsOk() bool {
 	return r.err == nil && r.value.IsPresent()
 }
-
 func (r Result[T]) IsErr() bool {
 	return r.err != nil || r.value.IsEmpty()
+}
+func (r Result[T]) HasErrorValue() bool {
+	return r.err != nil && r.value.IsPresent()
 }
 
 func (r Result[T]) Value() T {
@@ -45,13 +47,10 @@ func (r Result[T]) Error() error {
 	return r.err
 }
 
+// Returns the raw value and error
+// Be careful, this is an unchecked operation
 func (r Result[T]) GetRaw() (T, error) {
-	if r.IsOk() {
-		return r.Value(), nil
-	}
-
-	var zero T
-	return zero, r.Error()
+	return r.Value(), r.Error()
 }
 func (r Result[T]) Get() (Optional[T], error) {
 	return r.value, r.err

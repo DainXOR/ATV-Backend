@@ -102,7 +102,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 		return
 	}
 
-	sessions := utils.Map(result.Value(), models.SessionDBMongo.ToResponse)
+	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
 
 	if len(sessions) == 0 {
 		logger.Warning("No sessions found for student ID in MongoDB database")
@@ -133,7 +133,7 @@ func (sessionType) GetAll(c *gin.Context) {
 		return
 	}
 
-	sessions := utils.Map(result.Value(), models.SessionDBMongo.ToResponse)
+	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
 	if len(sessions) == 0 {
 		logger.Warning("No sessions found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

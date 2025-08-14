@@ -22,6 +22,19 @@ type DBModelInterface interface {
 	TableName() string
 	IsEmpty() bool
 	SetID(id any) error
+	GetID() DBID
+}
+type DBModelBase struct {
+	ID DBID `json:"_id,omitempty" bson:"_id,omitempty"`
+}
+
+func (m *DBModelBase) SetID(id any) error {
+	var err error
+	m.ID, err = ID.ToDB(id)
+	return err
+}
+func (m *DBModelBase) GetID() string {
+	return m.ID.Hex()
 }
 
 type DBID = bson.ObjectID
@@ -149,15 +162,17 @@ type iFilters struct{}
 
 var Filter iFilters
 
-func (iFilters) ID(id bson.ObjectID) bson.E {
-	return bson.E{Key: "_id", Value: id} // Filter by ID
+type FilterType = bson.E
+
+func (iFilters) ID(id bson.ObjectID) FilterType {
+	return FilterType{Key: "_id", Value: id} // Filter by ID
 }
-func (iFilters) IDOf(idName string, id bson.ObjectID) bson.E {
-	return bson.E{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
+func (iFilters) IDOf(idName string, id bson.ObjectID) FilterType {
+	return FilterType{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
 }
-func (iFilters) NotDeleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
+func (iFilters) NotDeleted() FilterType {
+	return FilterType{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
 }
-func (iFilters) Deleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
+func (iFilters) Deleted() FilterType {
+	return FilterType{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
 }

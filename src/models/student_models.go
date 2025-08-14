@@ -7,8 +7,8 @@ import (
 
 // UserDBGorm represents the database model for a user
 
-type StudentDBMongo struct {
-	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+type StudentDB struct {
+	DBModelBase
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -57,15 +57,15 @@ type StudentResponse struct {
 
 // ToInsert and ToUpdate converts a UserCreate struct to a UserDBMongo struct
 // This is used to prepare the data for insertion into the MongoDB database
-func (user StudentCreate) ToInsert() StudentDBMongo {
+func (user StudentCreate) ToInsert() StudentDB {
 	idu, err := ID.ToDB(user.IDUniversity)
 
 	if err != nil {
 		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
-		return StudentDBMongo{} // Return an empty struct if conversion fails
+		return StudentDB{} // Return an empty struct if conversion fails
 	}
 
-	return StudentDBMongo{
+	return StudentDB{
 		NumberID:         user.NumberID,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -82,8 +82,8 @@ func (user StudentCreate) ToInsert() StudentDBMongo {
 }
 
 // This is used to prepare the data for patch into the MongoDB database
-func (user StudentCreate) ToUpdate() StudentDBMongo {
-	obj := StudentDBMongo{
+func (user StudentCreate) ToUpdate() StudentDB {
+	obj := StudentDB{
 		NumberID:         user.NumberID,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
@@ -96,7 +96,7 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 	}
 
 	if !ID.OmitEmpty(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
-		return StudentDBMongo{}
+		return StudentDB{}
 	}
 
 	return obj
@@ -104,7 +104,7 @@ func (user StudentCreate) ToUpdate() StudentDBMongo {
 
 // ToDB converts a UserDB struct to a UserResponse struct
 // This is used to prepare the data for returning to the client
-func (user StudentDBMongo) ToResponse() StudentResponse {
+func (user StudentDB) ToResponse() StudentResponse {
 	return StudentResponse{
 		ID:               user.ID.Hex(),
 		NumberID:         user.NumberID,
@@ -120,21 +120,16 @@ func (user StudentDBMongo) ToResponse() StudentResponse {
 		UpdatedAt:        user.UpdatedAt,
 	}
 }
-func (user StudentDBMongo) IsEmpty() bool {
-	return user == (StudentDBMongo{})
-}
-func (user *StudentDBMongo) SetID(id any) error {
-	var err error
-	user.ID, err = ID.ToDB(id)
-	return err
+func (user StudentDB) IsEmpty() bool {
+	return user == (StudentDB{})
 }
 
 // TableName returns the name of the table in the database for the UserDB struct
 // This is used by GORM to determine the table name for the model
-func (StudentDBMongo) TableName() string {
+func (StudentDB) TableName() string {
 	return "students"
 }
 
 // Explicitly checking if the structs implement the DBModelInterface
 // This will error in compile time if the structs do not implement the interface
-var _ DBModelInterface = (*StudentDBMongo)(nil)
+var _ DBModelInterface = (*StudentDB)(nil)

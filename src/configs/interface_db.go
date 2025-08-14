@@ -1,0 +1,57 @@
+package configs
+
+import (
+	"dainxor/atv/models"
+	"dainxor/atv/types"
+	"errors"
+)
+
+type dbError struct{}
+
+var dbErr dbError
+
+func (dbError) NotFound() error {
+	return errors.New("document not found")
+}
+func (dbError) NotModified() error {
+	return errors.New("document not modified")
+}
+func (dbError) NotDeleted() error {
+	return errors.New("document not deleted")
+}
+func (dbError) AlreadyExists() error {
+	return errors.New("document already exists")
+}
+func (dbError) InvalidInput() error {
+	return errors.New("invalid input")
+}
+func (dbError) Internal() error {
+	return errors.New("internal server error")
+}
+func (dbError) NotImplemented() error {
+	return errors.New("not implemented")
+}
+
+type InterfaceDB interface {
+	Connect(dbName, conectionString string) error
+	Disconnect() error
+	Migrate(models ...models.DBModelInterface) error
+
+	CreateFilter(filter ...types.SPair[string]) any
+	// CreateUpdator(update models.DBModelInterface) any
+
+	CreateOne(element models.DBModelInterface) types.Result[models.DBID]
+	CreateMany(elements ...models.DBModelInterface) types.Result[[]models.DBID]
+
+	GetOne(filter any, model models.DBModelInterface) types.Result[models.DBModelInterface]
+	GetMany(filter any, model ...models.DBModelInterface) types.Result[[]models.DBModelInterface]
+
+	UpdateOne(filter any, update models.DBModelInterface) error
+	UpdateMany(filter any, update models.DBModelInterface) error
+
+	PatchOne(filter any, update models.DBModelInterface) error
+	PatchMany(filter any, update models.DBModelInterface) error
+
+	DeleteOne(filter any, model models.DBModelInterface) error
+	DeleteMany(filter any, model models.DBModelInterface) error
+}

@@ -5,8 +5,8 @@ import (
 	"errors"
 )
 
-type SessionDBMongo struct {
-	ID                  DBID          `json:"_id,omitempty" bson:"_id,omitempty"`
+type SessionDB struct {
+	DBModelBase
 	IDStudent           DBID          `json:"id_student,omitempty" bson:"id_student,omitempty"`
 	StudentName         string        `json:"first_name_student,omitempty" bson:"first_name_student,omitempty"`
 	StudentSurname      string        `json:"last_name_student,omitempty" bson:"last_name_student,omitempty"`
@@ -83,8 +83,8 @@ func statusCode(name string) sessionStatus {
 	return STATUS_UNKNOWN
 }
 
-func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionDBMongo] {
-	obj := SessionDBMongo{
+func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionDB] {
+	obj := SessionDB{
 		StudentName:         extra["StudentName"],
 		StudentSurname:      extra["StudentSurname"],
 		CompanionName:       extra["CompanionName"],
@@ -101,13 +101,13 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.Ensure(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
-		return types.OptionalEmpty[SessionDBMongo]()
+		return types.OptionalEmpty[SessionDB]()
 	}
 
 	return types.OptionalOf(obj)
 }
-func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDBMongo] {
-	obj := SessionDBMongo{
+func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB] {
+	obj := SessionDB{
 		StudentName:         extra["StudentName"],
 		StudentSurname:      extra["StudentSurname"],
 		CompanionName:       extra["CompanionName"],
@@ -122,12 +122,12 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDBM
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.OmitEmpty(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
-		return types.ResultErr[SessionDBMongo](errors.New("Invalid session data"))
+		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
 
 	return types.ResultOk(obj)
 }
-func (u SessionDBMongo) ToResponse() SessionResponse {
+func (u SessionDB) ToResponse() SessionResponse {
 	return SessionResponse{
 		ID:                  u.ID.Hex(),
 		IDStudent:           u.IDStudent.Hex(),
@@ -145,18 +145,12 @@ func (u SessionDBMongo) ToResponse() SessionResponse {
 		UpdatedAt:           u.UpdatedAt,
 	}
 }
-func (u SessionDBMongo) IsEmpty() bool {
-	return u == (SessionDBMongo{})
+func (u SessionDB) IsEmpty() bool {
+	return u == (SessionDB{})
 }
 
-func (c *SessionDBMongo) SetID(id any) error {
-	var err error
-	c.ID, err = ID.ToDB(id)
-	return err
-}
-
-func (SessionDBMongo) TableName() string {
+func (SessionDB) TableName() string {
 	return "sessions"
 }
 
-var _ DBModelInterface = (*SessionDBMongo)(nil)
+var _ DBModelInterface = (*SessionDB)(nil)

@@ -1,7 +1,7 @@
 package models
 
-type SessionTypeDBMongo struct {
-	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+type SessionTypeDB struct {
+	DBModelBase
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
@@ -21,21 +21,21 @@ type SessionTypeResponse struct {
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (u SessionTypeCreate) ToInsert() SessionTypeDBMongo {
-	return SessionTypeDBMongo{
+func (u SessionTypeCreate) ToInsert() SessionTypeDB {
+	return SessionTypeDB{
 		Name:      u.Name,
 		CreatedAt: TimeNow(),
 		UpdatedAt: TimeNow(),
 		DeletedAt: TimeZero(),
 	}
 }
-func (u SessionTypeCreate) ToUpdate() SessionTypeDBMongo {
-	return SessionTypeDBMongo{
+func (u SessionTypeCreate) ToUpdate() SessionTypeDB {
+	return SessionTypeDB{
 		Name:      u.Name,
 		UpdatedAt: TimeNow(),
 	}
 }
-func (u SessionTypeDBMongo) ToResponse() SessionTypeResponse {
+func (u SessionTypeDB) ToResponse() SessionTypeResponse {
 	return SessionTypeResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
@@ -43,18 +43,12 @@ func (u SessionTypeDBMongo) ToResponse() SessionTypeResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u SessionTypeDBMongo) IsEmpty() bool {
-	return u == (SessionTypeDBMongo{})
+func (u SessionTypeDB) IsEmpty() bool {
+	return u == (SessionTypeDB{})
 }
 
-func (c *SessionTypeDBMongo) SetID(id any) error {
-	var err error
-	c.ID, err = ID.ToDB(id)
-	return err
-}
-
-func (SessionTypeDBMongo) TableName() string {
+func (SessionTypeDB) TableName() string {
 	return "session_types"
 }
 
-var _ DBModelInterface = (*SessionTypeDBMongo)(nil)
+var _ DBModelInterface = (*SessionTypeDB)(nil)

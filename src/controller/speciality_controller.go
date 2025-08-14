@@ -98,7 +98,7 @@ func (specialityType) GetAll(c *gin.Context) {
 		return
 	}
 
-	students := utils.Map(result.Value(), models.SpecialityDBMongo.ToResponse)
+	students := utils.Map(result.Value(), models.SpecialityDB.ToResponse)
 	if len(students) == 0 {
 		logger.Warning("No specialities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

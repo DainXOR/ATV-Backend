@@ -14,13 +14,13 @@ type specialityType struct{}
 
 var Speciality specialityType
 
-func (specialityType) Create(u models.SpecialityCreate) types.Result[models.SpecialityDBMongo] {
+func (specialityType) Create(u models.SpecialityCreate) types.Result[models.SpecialityDB] {
 	specialityDB := u.ToInsert()
-	result, err := configs.DB.InsertOne(specialityDB)
+	result, err := configs.DB.InsertOne(&specialityDB)
 
 	if err != nil {
 		logger.Error("Error inserting speciality: ", err)
-		return types.ResultErr[models.SpecialityDBMongo](err)
+		return types.ResultErr[models.SpecialityDB](err)
 	}
 
 	specialityDB.ID, err = models.DBIDFrom(result.InsertedID)
@@ -32,13 +32,13 @@ func (specialityType) Create(u models.SpecialityCreate) types.Result[models.Spec
 			"Failed to convert inserted ID to PrimitiveID",
 			"Error: "+err.Error(),
 		)
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
 	return types.ResultOk(specialityDB)
 }
 
-func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] {
+func (specialityType) GetByID(id string) types.Result[models.SpecialityDB] {
 	oid, err := models.ID.ToBson(id)
 
 	if err != nil {
@@ -49,11 +49,11 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 			"Invalid ID format: "+err.Error(),
 			"Speciality ID: "+id,
 		)
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var speciality models.SpecialityDBMongo
+	var speciality models.SpecialityDB
 
 	err = configs.DB.FindOne(filter, &speciality)
 	if err != nil {
@@ -75,14 +75,14 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 			)
 		}
 
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
 	return types.ResultOk(speciality)
 }
-func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
+func (specialityType) GetAll() types.Result[[]models.SpecialityDB] {
 	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted specialities
-	specialities := []models.SpecialityDBMongo{}
+	specialities := []models.SpecialityDB{}
 
 	err := configs.DB.FindAll(filter, &specialities)
 	if err != nil {
@@ -92,7 +92,7 @@ func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
 			err.Error(),
 		)
 
-		return types.ResultErr[[]models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[[]models.SpecialityDB](&httpErr)
 	}
 
 	logger.Debug("Retrieved", len(specialities), "specialities from MongoDB database")

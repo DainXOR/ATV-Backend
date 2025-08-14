@@ -1,7 +1,7 @@
 package models
 
-type SpecialityDBMongo struct {
-	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+type SpecialityDB struct {
+	DBModelBase
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
@@ -21,21 +21,21 @@ type SpecialityResponse struct {
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (u SpecialityCreate) ToInsert() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SpecialityCreate) ToInsert() SpecialityDB {
+	return SpecialityDB{
 		Name:      u.Name,
 		CreatedAt: TimeNow(),
 		UpdatedAt: TimeNow(),
 		DeletedAt: TimeZero(),
 	}
 }
-func (u SpecialityCreate) ToUpdate() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SpecialityCreate) ToUpdate() SpecialityDB {
+	return SpecialityDB{
 		Name:      u.Name,
 		UpdatedAt: TimeNow(),
 	}
 }
-func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
+func (u SpecialityDB) ToResponse() SpecialityResponse {
 	return SpecialityResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
@@ -43,18 +43,12 @@ func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u SpecialityDBMongo) IsEmpty() bool {
-	return u == (SpecialityDBMongo{})
+func (u SpecialityDB) IsEmpty() bool {
+	return u == (SpecialityDB{})
 }
 
-func (c *SpecialityDBMongo) SetID(id any) error {
-	var err error
-	c.ID, err = ID.ToDB(id)
-	return err
-}
-
-func (SpecialityDBMongo) TableName() string {
+func (SpecialityDB) TableName() string {
 	return "specialities"
 }
 
-var _ DBModelInterface = (*SpecialityDBMongo)(nil)
+var _ DBModelInterface = (*SpecialityDB)(nil)

@@ -1,7 +1,7 @@
 package models
 
-type UniversityDBMongo struct {
-	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+type UniversityDB struct {
+	DBModelBase
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
@@ -24,8 +24,8 @@ type UniversityResponse struct {
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (u UniversityCreate) ToInsert() UniversityDBMongo {
-	return UniversityDBMongo{
+func (u UniversityCreate) ToInsert() UniversityDB {
+	return UniversityDB{
 		Name:      u.Name,
 		Location:  u.Location,
 		CreatedAt: Time.Now(),
@@ -33,15 +33,15 @@ func (u UniversityCreate) ToInsert() UniversityDBMongo {
 		DeletedAt: Time.Zero(),
 	}
 }
-func (u UniversityCreate) ToUpdate() UniversityDBMongo {
-	return UniversityDBMongo{
+func (u UniversityCreate) ToUpdate() UniversityDB {
+	return UniversityDB{
 		Name:      u.Name,
 		Location:  u.Location,
 		UpdatedAt: Time.Now(),
 	}
 }
 
-func (u UniversityDBMongo) ToResponse() UniversityResponse {
+func (u UniversityDB) ToResponse() UniversityResponse {
 	return UniversityResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
@@ -50,18 +50,12 @@ func (u UniversityDBMongo) ToResponse() UniversityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u UniversityDBMongo) IsEmpty() bool {
-	return u == (UniversityDBMongo{})
+func (u UniversityDB) IsEmpty() bool {
+	return u == (UniversityDB{})
 }
 
-func (c *UniversityDBMongo) SetID(id any) error {
-	var err error
-	c.ID, err = ID.ToDB(id)
-	return err
-}
-
-func (UniversityDBMongo) TableName() string {
+func (UniversityDB) TableName() string {
 	return "universities"
 }
 
-var _ DBModelInterface = (*UniversityDBMongo)(nil)
+var _ DBModelInterface = (*UniversityDB)(nil)

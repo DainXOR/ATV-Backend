@@ -1,7 +1,7 @@
 package models
 
-type CompanionDBMongo struct {
-	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+type CompanionDB struct {
+	DBModelBase
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -35,8 +35,8 @@ type CompanionResponse struct {
 	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 }
 
-func (c CompanionCreate) ToInsert() CompanionDBMongo {
-	obj := CompanionDBMongo{
+func (c CompanionCreate) ToInsert() CompanionDB {
+	obj := CompanionDB{
 		NumberID:         c.NumberID,
 		FirstName:        c.FirstName,
 		LastName:         c.LastName,
@@ -49,13 +49,13 @@ func (c CompanionCreate) ToInsert() CompanionDBMongo {
 	}
 
 	if !EnsureID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
-		return CompanionDBMongo{}
+		return CompanionDB{}
 	}
 
 	return obj
 }
-func (c CompanionCreate) ToUpdate() CompanionDBMongo {
-	obj := CompanionDBMongo{
+func (c CompanionCreate) ToUpdate() CompanionDB {
+	obj := CompanionDB{
 		NumberID:         c.NumberID,
 		FirstName:        c.FirstName,
 		LastName:         c.LastName,
@@ -66,12 +66,12 @@ func (c CompanionCreate) ToUpdate() CompanionDBMongo {
 	}
 
 	if !OmitEmptyID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
-		return CompanionDBMongo{}
+		return CompanionDB{}
 	}
 
 	return obj
 }
-func (c CompanionDBMongo) ToResponse() CompanionResponse {
+func (c CompanionDB) ToResponse() CompanionResponse {
 	return CompanionResponse{
 		ID:               c.ID.Hex(),
 		NumberID:         c.NumberID,
@@ -85,17 +85,12 @@ func (c CompanionDBMongo) ToResponse() CompanionResponse {
 		UpdatedAt:        c.UpdatedAt,
 	}
 }
-func (c CompanionDBMongo) IsEmpty() bool {
-	return c == (CompanionDBMongo{})
-}
-func (c *CompanionDBMongo) SetID(id any) error {
-	var err error
-	c.ID, err = ID.ToDB(id)
-	return err
+func (c CompanionDB) IsEmpty() bool {
+	return c == (CompanionDB{})
 }
 
-func (CompanionDBMongo) TableName() string {
+func (CompanionDB) TableName() string {
 	return "companions"
 }
 
-var _ DBModelInterface = (*CompanionDBMongo)(nil)
+var _ DBModelInterface = (*CompanionDB)(nil)

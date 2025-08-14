@@ -55,7 +55,7 @@ func (companionType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	companions := utils.Map(result.Value(), models.CompanionDBMongo.ToResponse)
+	companions := utils.Map(result.Value(), models.CompanionDB.ToResponse)
 	if len(companions) == 0 {
 		logger.Warning("No companions found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),
