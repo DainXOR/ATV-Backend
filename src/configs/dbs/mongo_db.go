@@ -58,7 +58,7 @@ func (mongoType) GetOne(filter any, result models.DBModelInterface) types.Result
 	return types.ResultOf(result, err, err != nil)
 }
 func (mongoType) GetAll(filter any, result any) types.Result[any] {
-	logger.Lava("0.1.1", "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
+	logger.Lava(types.V("0.1.1"), "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
 
 	eType, err := utils.SliceType(result)
 	if err != nil {

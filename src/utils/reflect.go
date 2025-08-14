@@ -9,7 +9,6 @@ import (
 // Function to get the structure of a struct as a string
 func StructToString(obj any) string {
 	t := reflect.TypeOf(obj)
-	//v := reflect.ValueOf(obj)
 
 	if t.Kind() != reflect.Struct {
 		return "{ }"
@@ -20,7 +19,7 @@ func StructToString(obj any) string {
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		sb.WriteString(string(field.Tag.Get("json")))
+		sb.WriteString(string(field.Name))
 		sb.WriteString(": ")
 		sb.WriteString(field.Type.String())
 
@@ -86,4 +85,39 @@ func SliceType(slice any) (any, error) {
 	return instance.Interface(), nil
 	//var s S
 	//return s
+}
+
+func ValuesOfType[T any](slice []any) []T {
+	if slice == nil {
+		return nil
+	}
+	result := make([]T, 0)
+
+	for _, v := range slice {
+		if v == nil {
+			continue
+		}
+		if reflect.TypeOf(v).AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
+			result = append(result, v.(T))
+		}
+	}
+
+	return result
+}
+func ExcludeOfType[T any](slice []any) []any {
+	if slice == nil {
+		return nil
+	}
+	result := make([]any, 0)
+
+	for _, v := range slice {
+		if v == nil {
+			continue
+		}
+		if !reflect.TypeOf(v).AssignableTo(reflect.TypeOf((*T)(nil)).Elem()) {
+			result = append(result, v)
+		}
+	}
+
+	return result
 }

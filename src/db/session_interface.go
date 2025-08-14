@@ -64,7 +64,7 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDBMongo] {
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Session ID: "+id,
@@ -124,7 +124,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDBM
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Student ID: "+id,
@@ -205,7 +205,6 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 
 	if result.Value().ModifiedCount == 0 {
 		logger.Info("No changes made to session with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
 		httpErr := types.Error(
 			types.Http.C300().NotModified(),
 			"No changes made",

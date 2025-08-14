@@ -1,5 +1,9 @@
 package types
 
+// Result represents the result of an operation, encapsulating either a value or an error.
+// It can be in two states:
+// 1. Success: Contains a value and no error
+// 2. Failure: Contains an error or no value
 type Result[T any] struct {
 	value Optional[T]
 	err   error
@@ -20,11 +24,11 @@ func ResultOf[T any](value T, err error, isError bool) Result[T] {
 }
 
 func (r Result[T]) IsOk() bool {
-	return r.err == nil
+	return r.err == nil && r.value.IsPresent()
 }
 
 func (r Result[T]) IsErr() bool {
-	return r.err != nil
+	return r.err != nil || r.value.IsEmpty()
 }
 
 func (r Result[T]) Value() T {
@@ -40,15 +44,14 @@ func (r Result[T]) ValueOr(value T) T {
 func (r Result[T]) Error() error {
 	return r.err
 }
-func (r Result[T]) ErrorOr(err error) error {
-	if r.IsErr() {
-		return r.Error()
-	}
-	return err
-}
 
 func (r Result[T]) GetRaw() (T, error) {
-	return r.Value(), r.Error()
+	if r.IsOk() {
+		return r.Value(), nil
+	}
+
+	var zero T
+	return zero, r.Error()
 }
 func (r Result[T]) Get() (Optional[T], error) {
 	return r.value, r.err

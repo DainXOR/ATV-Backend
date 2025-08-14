@@ -3,23 +3,19 @@ package configs
 import (
 	"cmp"
 	"dainxor/atv/logger"
+	"dainxor/atv/types"
 	"os"
 	"strconv"
-	"strings"
 )
 
 const (
 	DEFAULT_ROUTE_VERSION = "1"     // Default version for the API routes
-	DEFAULT_API_VERSION   = "0.1.4" // Default version for the API
+	DEFAULT_API_VERSION   = "0.1.0" // Default version for the API
 )
 
 type appType struct {
-	routesVersion uint64
-
-	apiVersion      string
-	apiMajorVersion uint64
-	apiMinorVersion uint64
-	apiPatchVersion uint64
+	apiVersion    types.Version
+	routesVersion uint32
 }
 
 var App appType
@@ -32,46 +28,28 @@ func ReloadAppEnv() {
 }
 func envInit() {
 	stringRoutesVersion := cmp.Or(os.Getenv("ATV_ROUTE_VERSION"), DEFAULT_ROUTE_VERSION)
-	App.routesVersion, _ = strconv.ParseUint(stringRoutesVersion, 10, 64)
+	routeVersion, err := strconv.ParseUint(stringRoutesVersion, 10, 32)
+	if err != nil {
+		logger.Warningf("Invalid route version '%s': %v, falling back to default '%s'", stringRoutesVersion, err, DEFAULT_ROUTE_VERSION)
+		// Parse default - this should never fail as it's a constant
+		if routeVersion, err = strconv.ParseUint(DEFAULT_ROUTE_VERSION, 10, 32); err != nil {
+			logger.Fatal("Invalid DEFAULT_ROUTE_VERSION constant:", err)
+		}
+	}
+	App.routesVersion = uint32(routeVersion)
 
-	App.apiVersion = cmp.Or(os.Getenv("ATV_API_VERSION"), DEFAULT_API_VERSION)
-	App.apiMajorVersion = versionMajor(App.apiVersion)
-	App.apiMinorVersion = versionMinor(App.apiVersion)
-	App.apiPatchVersion = versionPatch(App.apiVersion)
-
-	logger.Info("Application initialized with API version:", App.apiVersion)
-	logger.Info("Application initialized with Routes version:", App.routesVersion)
+	appVersion, err := types.VersionFrom(cmp.Or(os.Getenv("ATV_API_VERSION"), DEFAULT_API_VERSION))
+	if err != nil {
+		logger.Warningf("Invalid API version: %v, falling back to default '%s'", err, DEFAULT_API_VERSION)
+		appVersion = types.V(DEFAULT_API_VERSION)
+	}
+	App.apiVersion = appVersion
 }
 
-func versionMajor(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[0]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
-}
-func versionMinor(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[1]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
-}
-func versionPatch(version string) uint64 {
-	extractedStr := strings.Split(version, ".")[2]
-	num, _ := strconv.ParseUint(extractedStr, 10, 64)
-	return num
-}
-
-func (appType) RoutesVersion() uint64 {
+func (appType) RoutesVersion() uint32 {
 	return App.routesVersion
 }
 
-func (appType) ApiVersion() string {
+func (appType) ApiVersion() types.Version {
 	return App.apiVersion
-}
-func (appType) ApiMajor() uint64 {
-	return App.apiMajorVersion
-}
-func (appType) ApiMinor() uint64 {
-	return App.apiMinorVersion
-}
-func (appType) ApiPatch() uint64 {
-	return App.apiPatchVersion
 }

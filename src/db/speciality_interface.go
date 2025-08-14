@@ -44,7 +44,7 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Speciality ID: "+id,

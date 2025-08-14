@@ -268,7 +268,7 @@ func (studentType) GetByIDGorm(c *gin.Context) {
 	c.Header("Location", "/api/v1/student/"+c.Param("id"))
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg("0.0.3", "0.1.1", "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
 		),
 	)
 }
@@ -276,7 +276,7 @@ func (studentType) GetAllGorm(c *gin.Context) {
 	c.Header("Location", "/api/v1/student/all")
 	c.JSON(http.StatusOK,
 		types.EmptyResponse(
-			logger.DeprecateMsg("0.0.3", "0.1.1", "Use /api/v1/student/all instead"),
+			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/all instead"),
 		),
 	)
 }
@@ -286,7 +286,7 @@ func (studentType) CreateGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg("0.0.3", "0.1.1", "Use /api/v1/student instead"),
+			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student instead"),
 		),
 	)
 }
@@ -298,7 +298,7 @@ func (studentType) UpdateGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg("0.0.3", "0.1.1", "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
 		),
 	)
 }
@@ -310,7 +310,7 @@ func (studentType) PatchGorm(c *gin.Context) {
 
 	c.JSON(types.Http.C300().MovedPermanently(),
 		types.EmptyResponse(
-			logger.DeprecateMsg("0.0.3", "0.1.1", "Use /api/v1/student/:id instead"),
+			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
 		),
 	)
 }
