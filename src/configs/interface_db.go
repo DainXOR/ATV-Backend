@@ -8,7 +8,7 @@ import (
 
 type dbError struct{}
 
-var dbErr dbError
+var DBErr dbError
 
 func (dbError) NotFound() error {
 	return errors.New("document not found")
@@ -38,7 +38,6 @@ type InterfaceDB interface {
 	Migrate(models ...models.DBModelInterface) error
 
 	CreateFilter(filter ...types.SPair[string]) any
-	// CreateUpdator(update models.DBModelInterface) any
 
 	CreateOne(element models.DBModelInterface) types.Result[models.DBID]
 	CreateMany(elements ...models.DBModelInterface) types.Result[[]models.DBID]
@@ -52,6 +51,9 @@ type InterfaceDB interface {
 	PatchOne(filter any, update models.DBModelInterface) error
 	PatchMany(filter any, update models.DBModelInterface) error
 
-	DeleteOne(filter any, model models.DBModelInterface) error
-	DeleteMany(filter any, model models.DBModelInterface) error
+	SoftDeleteOne(filter any, model models.DBModelInterface) error
+	SoftDeleteMany(filter any, model models.DBModelInterface) error
+
+	PermanentDeleteOne(filter any, model models.DBModelInterface) error
+	PermanentDeleteMany(filter any, model models.DBModelInterface) error
 }

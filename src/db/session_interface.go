@@ -8,7 +8,6 @@ import (
 	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type sessionType struct{}
@@ -18,32 +17,43 @@ var Session sessionType
 func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDB] {
 	logger.Debug("Creating session with data: ", u)
 
-	sessionOptional := utils.Transform(getExtraInfo(u), func(res types.Result[map[string]string]) types.Optional[models.SessionDB] {
+	var session models.SessionDB
+	{
+		res := getExtraInfo(u)
 		if res.IsErr() {
-			return types.OptionalEmpty[models.SessionDB]()
+			logger.Warning("Failed to create session: Invalid session data")
+			httpErr := types.ErrorInternal(
+				"Failed to create session",
+				"Invalid session data provided",
+				"Session data: "+utils.StructToString(u),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
 		}
-		return u.ToInsert(res.Value())
-	})
 
-	if sessionOptional.IsEmpty() {
-		logger.Warning("Failed to create session: Invalid session data")
-		httpErr := types.ErrorInternal(
-			"Failed to create session",
-			"Invalid session data provided",
-			"Session data: "+utils.StructToString(u),
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+		sessionOptional := u.ToInsert(res.Value())
+		if sessionOptional.IsEmpty() {
+			logger.Warning("Failed to create session: Invalid session data")
+			httpErr := types.ErrorInternal(
+				"Failed to create session",
+				"Invalid session data provided",
+				"Session data: "+utils.StructToString(u),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
+		}
+
+		session = sessionOptional.Get()
 	}
-	session := sessionOptional.Get()
+
 	logger.Debug("Session object to insert: ", session)
-	result, err := configs.DB.InsertOne(&session)
+	resultID := configs.DB.InsertOne(session)
 
-	if err != nil {
-		logger.Warning("Error inserting session: ", err)
-		return types.ResultErr[models.SessionDB](err)
+	if resultID.IsErr() {
+		logger.Warning("Error inserting session: ", resultID.Error())
+		return types.ResultErr[models.SessionDB](resultID.Error())
 	}
 
-	session.ID, err = models.ID.ToDB(result.InsertedID)
+	var err error
+	session.ID, err = models.ID.ToDB(resultID.Value())
 
 	if err != nil {
 		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
@@ -75,21 +85,21 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 	filter := bson.D{{Key: "_id", Value: oid}}
 	var session models.SessionDB
 
-	err = configs.DB.FindOne(filter, &session)
-	if err != nil {
+	sessionResult := configs.DB.FindOne(filter, session)
+	if sessionResult.IsErr() {
+		logger.Warning("Failed to get session by ID: ", sessionResult.Error())
 		var httpErr types.HttpError
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get session by ID: ", err)
+		switch sessionResult.Error() {
+		case configs.DBErr.NotFound():
 			httpErr = types.ErrorNotFound(
 				"Session not found",
 				"Session with ID "+id+" not found",
 			)
-		} else {
-			logger.Error("Failed to get session by ID: ", err)
+
+		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve session",
-				"Decoding error",
 				err.Error(),
 				"Session ID: "+id,
 			)
@@ -98,23 +108,34 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	return types.ResultOk(session)
+	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 func (sessionType) GetAll() types.Result[[]models.SessionDB] {
 	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted sessions
-	sessions := []models.SessionDB{}
+	session := models.SessionDB{}
 
-	err := configs.DB.FindAll(filter, &sessions)
-	if err != nil {
-		logger.Error("Failed to get all sessions from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve sessions",
-			err.Error(),
-		)
+	sessionsResult := configs.DB.FindAll(filter, session)
+	if sessionsResult.IsErr() {
+		logger.Warning("Failed to get all sessions from MongoDB:", sessionsResult.Error())
+		var httpErr types.HttpError
 
+		switch sessionsResult.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Sessions not found",
+				"No sessions found matching the criteria",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve sessions",
+				sessionsResult.Error().Error(),
+			)
+		}
 		return types.ResultErr[[]models.SessionDB](&httpErr)
 	}
 
+	sessions := utils.Map(sessionsResult.Value(), models.InterfaceTo[models.SessionDB])
 	logger.Debug("Retrieved", len(sessions), "sessions from MongoDB database")
 	return types.ResultOk(sessions)
 }
@@ -122,7 +143,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID: ", err)
+		logger.Warning("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
@@ -133,19 +154,29 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 	}
 
 	filter := bson.D{{Key: "id_student", Value: oid}, models.Filter.NotDeleted()} // Filter to exclude deleted sessions
-	sessions := []models.SessionDB{}
+	sessionResult := configs.DB.FindAll(filter, models.SessionDB{})
+	if sessionResult.IsErr() {
+		logger.Warning("Failed to get all sessions by student ID from MongoDB:", sessionResult.Error())
+		var httpErr types.HttpError
 
-	err = configs.DB.FindAll(filter, &sessions)
-	if err != nil {
-		logger.Error("Failed to get all sessions by student ID from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve sessions by student ID",
-			err.Error(),
-		)
+		switch sessionResult.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Sessions not found",
+				"No sessions found for student ID: "+id,
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve sessions by student ID",
+				sessionResult.Error().Error(),
+			)
+		}
 
 		return types.ResultErr[[]models.SessionDB](&httpErr)
 	}
 
+	sessions := utils.Map(sessionResult.Value(), models.InterfaceTo[models.SessionDB])
 	logger.Debug("Retrieved", len(sessions), "sessions for student ID", id, "from MongoDB database")
 	return types.ResultOk(sessions)
 }
@@ -163,57 +194,43 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	sessionData := utils.Transform(getExtraInfo(session), func(res types.Result[map[string]string]) types.Result[models.SessionDB] {
-		if res.IsErr() {
-			return types.ResultErr[models.SessionDB](res.Error())
+	var sessionDB models.SessionDB
+	{
+		if res := getExtraInfo(session); res.IsErr() {
+			logger.Warning("Failed to update session:", res.Error())
+			httpErr := types.ErrorInternal(
+				"Failed to update session",
+				"Invalid session data",
+				res.Error().Error(),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
+		} else if sessionResult := session.ToUpdate(res.Value()); sessionResult.IsErr() {
+			logger.Warning("Failed to update session:", sessionResult.Error())
+			httpErr := types.ErrorInternal(
+				"Failed to update session",
+				"Invalid session data",
+				sessionResult.Error().Error(),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
+		} else {
+			sessionDB = sessionResult.Value()
 		}
-		return session.ToUpdate(res.Value())
-	})
-	if sessionData.IsErr() {
-		logger.Warning("Failed to update session:", sessionData.Error())
-		httpErr := types.ErrorInternal(
-			"Failed to update session",
-			"Invalid session data",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	sessionDB := sessionData.Value()
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: sessionDB}}
-
-	result := configs.DB.UpdateOne(filter, update, &sessionDB)
-
-	if result.IsErr() {
-		err := result.Error()
+	err = configs.DB.UpdateOne(filter, sessionDB)
+	if err != nil {
 		logger.Error("Failed to update session in MongoDB: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to update session",
-			err.Error(),
-			"Session ID: "+id,
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+		return types.ResultErr[models.SessionDB](err)
 	}
 
-	if result.Value().MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Session not found",
-			"Session with ID "+id+" not found",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+	sessionResult := configs.DB.FindOne(filter, sessionDB)
+	if sessionResult.IsErr() {
+		logger.Error("Failed to retrieve updated session from MongoDB: ", sessionResult.Error())
+		return types.ResultErr[models.SessionDB](sessionResult.Error())
 	}
 
-	if result.Value().ModifiedCount == 0 {
-		logger.Info("No changes made to session with ID: ", id)
-		httpErr := types.Error(
-			types.Http.C300().NotModified(),
-			"No changes made",
-			"Session with ID "+id+" was not modified",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
-	}
-
-	return types.ResultOk(sessionDB)
+	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 
 func (sessionType) PatchByID(id string, session models.SessionCreate) types.Result[models.SessionDB] {
@@ -229,59 +246,43 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	sessionData := utils.Transform(getExtraInfoAllowEmpty(session),
-		func(res types.Result[map[string]string]) types.Result[models.SessionDB] {
-			if res.IsErr() {
-				return types.ResultErr[models.SessionDB](res.Error())
-			}
-			return session.ToUpdate(res.Value())
-		},
-	)
-	if sessionData.IsErr() {
-		logger.Warning("Failed to update session:", sessionData.Error())
-		httpErr := types.ErrorInternal(
-			"Failed to update session",
-			"Invalid session data",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+	var sessionDB models.SessionDB
+	{
+		if res := getExtraInfo(session); res.IsErr() {
+			logger.Warning("Failed to patch session:", res.Error())
+			httpErr := types.ErrorInternal(
+				"Failed to patch session",
+				"Invalid session data",
+				res.Error().Error(),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
+		} else if sessionResult := session.ToUpdate(res.Value()); sessionResult.IsErr() {
+			logger.Warning("Failed to patch session:", sessionResult.Error())
+			httpErr := types.ErrorInternal(
+				"Failed to patch session",
+				"Invalid session data",
+				sessionResult.Error().Error(),
+			)
+			return types.ResultErr[models.SessionDB](&httpErr)
+		} else {
+			sessionDB = sessionResult.Value()
+		}
 	}
 
-	sessionDB := sessionData.Value()
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: sessionDB}}
-
-	result := configs.DB.PatchOne(filter, update, &sessionDB)
-
-	if result.IsErr() {
-		err := result.Error()
+	err = configs.DB.PatchOne(filter, sessionDB)
+	if err != nil {
 		logger.Error("Failed to patch session in MongoDB: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to patch session",
-			err.Error(),
-			"Session ID: "+id,
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+		return types.ResultErr[models.SessionDB](err)
 	}
 
-	if result.Value().MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Session not found",
-			"Session with ID "+id+" not found",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+	sessionResult := configs.DB.FindOne(filter, sessionDB)
+	if sessionResult.IsErr() {
+		logger.Error("Failed to retrieve patched session from MongoDB: ", sessionResult.Error())
+		return types.ResultErr[models.SessionDB](sessionResult.Error())
 	}
 
-	if result.Value().ModifiedCount == 0 {
-		logger.Info("No changes made to session with ID: ", id)
-		httpErr := types.Error(
-			types.Http.C300().NotModified(),
-			"No changes made",
-			"Session with ID "+id+" was not modified",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
-	}
-
-	return types.ResultOk(sessionDB)
+	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 
 func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
@@ -298,40 +299,20 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "deleted_at", Value: models.Time.Now()}}}}
 
-	var deletedSession models.SessionDB
-	result := configs.DB.UpdateOne(filter, update, &deletedSession)
-	if result.IsErr() {
-		logger.Error("Failed to delete session in MongoDB: ", result.Error())
-		httpErr := types.ErrorInternal(
-			"Failed to delete session",
-			result.Error().Error(),
-			"Session ID: "+id,
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
-	}
-
-	if result.Value().MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Session not found",
-			"Session with ID "+id+" not found",
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
-	}
-
-	err = configs.DB.FindOne(filter, &deletedSession)
+	err = configs.DB.SoftDeleteOne(filter, models.SessionDB{})
 	if err != nil {
-		logger.Error("Failed to retrieve deleted session: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve deleted session",
-			err.Error(),
-			"Session ID: "+id,
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
+		logger.Error("Failed to delete session in MongoDB: ", err)
+		return types.ResultErr[models.SessionDB](err)
 	}
 
-	return types.ResultOk(deletedSession)
+	sessionResult := configs.DB.FindOne(filter, models.SessionDB{})
+	if sessionResult.IsErr() {
+		logger.Error("Failed to retrieve updated session from MongoDB: ", sessionResult.Error())
+		return types.ResultErr[models.SessionDB](sessionResult.Error())
+	}
+
+	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 
 func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] {

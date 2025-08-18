@@ -6,7 +6,7 @@ import (
 )
 
 type SessionDB struct {
-	DBModelBase
+	ID                  DBID          `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDStudent           DBID          `json:"id_student,omitempty" bson:"id_student,omitempty"`
 	StudentName         string        `json:"first_name_student,omitempty" bson:"first_name_student,omitempty"`
 	StudentSurname      string        `json:"last_name_student,omitempty" bson:"last_name_student,omitempty"`

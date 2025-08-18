@@ -21,20 +21,6 @@ import (
 type DBModelInterface interface {
 	TableName() string
 	IsEmpty() bool
-	SetID(id any) error
-	GetID() DBID
-}
-type DBModelBase struct {
-	ID DBID `json:"_id,omitempty" bson:"_id,omitempty"`
-}
-
-func (m *DBModelBase) SetID(id any) error {
-	var err error
-	m.ID, err = ID.ToDB(id)
-	return err
-}
-func (m *DBModelBase) GetID() string {
-	return m.ID.Hex()
 }
 
 type DBID = bson.ObjectID
@@ -175,4 +161,18 @@ func (iFilters) NotDeleted() FilterType {
 }
 func (iFilters) Deleted() FilterType {
 	return FilterType{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
+}
+
+type iUpdate struct{}
+
+var Update iUpdate
+
+type UpdateType = bson.M
+
+func (iUpdate) Delete() UpdateType {
+	return UpdateType{"$set": bson.M{"deleted_at": Time.Now()}} // Soft delete
+}
+
+func InterfaceTo[T DBModelInterface](a DBModelInterface) T {
+	return a.(T)
 }

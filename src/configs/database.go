@@ -4,17 +4,14 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"dainxor/atv/utils"
 	"errors"
-
-	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	"os"
 )
 
 type dbType struct {
-	dbAccessor       InterfaceDB
-	dbName           string
+	accessor         InterfaceDB
+	name             string
 	connectionString string
 }
 
@@ -32,17 +29,17 @@ func (dbType) LoadEnv() {
 	if exist || useTesting == "TRUE" {
 		logger.Debug("Using testing database")
 		DB.connectionString = os.Getenv("CONECTION_STRING_TEST")
-		DB.dbName = os.Getenv("DB_NAME_TEST")
+		DB.name = os.Getenv("DB_NAME_TEST")
 	} else {
 		logger.Debug("Using production database")
 		DB.connectionString = os.Getenv("CONECTION_STRING")
-		DB.dbName = os.Getenv("DB_NAME")
+		DB.name = os.Getenv("DB_NAME")
 	}
 
 	if DB.connectionString == "" {
 		logger.Error("Database connection string is not set")
 	}
-	if DB.dbName == "" {
+	if DB.name == "" {
 		logger.Error("Database name is not set")
 	}
 
@@ -54,95 +51,71 @@ func (dbType) ReloadConnection() {
 }
 
 func (dbType) Use(db InterfaceDB) *dbType {
-	DB.dbAccessor = db
+	DB.accessor = db
 	return &DB
 }
 func (dbType) Start() error {
-	if DB.dbAccessor == nil {
+	if DB.accessor == nil {
 		logger.Error("Database accessor is not set")
 		return errors.New("Database accessor is not set")
 	}
 
-	if DB.connectionString == "" || DB.dbName == "" {
+	if DB.connectionString == "" || DB.name == "" {
 		logger.Error("Database connection string or name is not set")
 		return errors.New("Database connection string or name is not set")
 	}
 
-	return DB.dbAccessor.Connect(DB.dbName, DB.connectionString)
+	return DB.accessor.Connect(DB.name, DB.connectionString)
 }
 func (dbType) ConnectTo(dbName, connectionString string) error {
-	if DB.dbAccessor == nil {
+	if DB.accessor == nil {
 		logger.Error("Database accessor is not set")
 		return errors.New("Database accessor is not set")
 	}
 
-	return DB.dbAccessor.Connect(dbName, connectionString)
+	return DB.accessor.Connect(dbName, connectionString)
 }
 
-func (dbType) FindOne(filter any, result models.DBModelInterface) error {
-	return DB.dbAccessor.GetOne(filter, result).Error()
+func (dbType) InsertOne(document models.DBModelInterface) types.Result[models.DBID] {
+	return DB.accessor.CreateOne(document)
 }
-func (dbType) FindAll(filter any, result any) error {
-	logger.Lava(types.V("0.1.1"), "This mf should be refactored to use []models.DBModelInterface instead of any for the result")
-	ctx, cancel := DB.Context()
-	defer cancel()
-
-	eType, err := utils.SliceType(result)
-	if err != nil {
-		logger.Fatal("This function ONLY works with slices or pointers to slices")
-	}
-
-	iType, ok := eType.(models.DBModelInterface)
-	if !ok {
-		logger.Fatal("Result type does NOT IMPLEMENT TableName method")
-	}
-
-	cursor, err := DB.From(iType).Find(ctx, filter)
-	if err != nil {
-		logger.Error("Failed to find documents:", err)
-		return err
-	}
-	defer cursor.Close(ctx)
-
-	return cursor.All(ctx, result)
+func (dbType) InsertMany(documents ...models.DBModelInterface) types.Result[[]models.DBID] {
+	return DB.accessor.CreateMany(documents...)
 }
 
-func (dbType) InsertOne(document models.DBModelInterface) (*mongo.InsertOneResult, error) {
-	ctx, cancel := DB.Context()
-	defer cancel()
-
-	return DB.From(document).InsertOne(ctx, document)
+func (dbType) FindOne(filter any, result models.DBModelInterface) types.Result[models.DBModelInterface] {
+	return DB.accessor.GetOne(filter, result)
 }
-func (dbType) UpdateOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
-	ctx, cancel := DB.Context()
-	defer cancel()
-
-	updateResult, err := DB.From(result).UpdateOne(ctx, filter, update)
-	if err != nil {
-		logger.Error("Failed to update document:", err)
-		return types.ResultErr[mongo.UpdateResult](err)
-	}
-
-	err = DB.FindOne(filter, result)
-	if err != nil {
-		logger.Error("Failed to find updated document:", err)
-		return types.ResultErr[mongo.UpdateResult](err)
-	}
-	return types.ResultOk(*updateResult)
+func (dbType) FindAll(filter any, result models.DBModelInterface) types.Result[[]models.DBModelInterface] {
+	return DB.accessor.GetMany(filter, result)
 }
-func (dbType) PatchOne(filter any, update any, result models.DBModelInterface) types.Result[mongo.UpdateResult] {
-	ctx, cancel := DB.Context()
-	defer cancel()
 
-	updateResult, err := DB.From(result).UpdateOne(ctx, filter, update)
-	if err != nil {
-		logger.Error("Failed to update document:", err)
-		return types.ResultErr[mongo.UpdateResult](err)
-	}
+func (dbType) UpdateOne(filter any, update models.DBModelInterface) error {
+	return DB.accessor.UpdateOne(filter, update)
+}
+func (dbType) UpdateMany(filter any, update models.DBModelInterface) error {
+	return DB.accessor.UpdateMany(filter, update)
+}
 
-	err = DB.FindOne(filter, result)
+func (dbType) PatchOne(filter any, update models.DBModelInterface) error {
+	return DB.accessor.PatchOne(filter, update)
+}
+func (dbType) PatchMany(filter any, update models.DBModelInterface) error {
+	return DB.accessor.PatchMany(filter, update)
+}
 
-	return types.ResultOf(*updateResult, err, err != nil)
+func (dbType) SoftDeleteOne(filter any, model models.DBModelInterface) error {
+	return DB.accessor.SoftDeleteOne(filter, model)
+}
+func (dbType) SoftDeleteMany(filter any, model models.DBModelInterface) error {
+	return DB.accessor.SoftDeleteMany(filter, model)
+}
+
+func (dbType) PermanentDeleteOne(filter any, model models.DBModelInterface) error {
+	return DB.accessor.PermanentDeleteOne(filter, model)
+}
+func (dbType) PermanentDeleteMany(filter any, model models.DBModelInterface) error {
+	return DB.accessor.PermanentDeleteMany(filter, model)
 }
 
 // Migrate performs database migrations for the provided models
@@ -150,7 +123,7 @@ func (dbType) PatchOne(filter any, update any, result models.DBModelInterface) t
 func (dbType) Migrate(models ...models.DBModelInterface) {
 	logger.Info("Starting migrations")
 
-	if err := DB.dbAccessor.Migrate(models...); err != nil {
+	if err := DB.accessor.Migrate(models...); err != nil {
 		logger.Error("Migration failed:", err)
 		return
 	}
@@ -159,5 +132,5 @@ func (dbType) Migrate(models ...models.DBModelInterface) {
 }
 
 func (dbType) Close() {
-	DB.dbAccessor.Disconnect()
+	DB.accessor.Disconnect()
 }

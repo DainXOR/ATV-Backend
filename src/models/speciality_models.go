@@ -1,7 +1,7 @@
 package models
 
 type SpecialityDB struct {
-	DBModelBase
+	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`

@@ -48,7 +48,7 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 		field := t.Field(i)
 		value := v.Field(i)
 
-		if filter != nil && filter(field, value) {
+		if filter == nil || filter(field, value) {
 			result[string(field.Tag.Get("json"))] = value.Interface()
 		}
 

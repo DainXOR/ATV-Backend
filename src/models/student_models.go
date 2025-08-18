@@ -2,13 +2,15 @@ package models
 
 import (
 	"dainxor/atv/logger"
+	"dainxor/atv/types"
+	"errors"
 	"time"
 )
 
 // UserDBGorm represents the database model for a user
 
 type StudentDB struct {
-	DBModelBase
+	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -82,7 +84,7 @@ func (user StudentCreate) ToInsert() StudentDB {
 }
 
 // This is used to prepare the data for patch into the MongoDB database
-func (user StudentCreate) ToUpdate() StudentDB {
+func (user StudentCreate) ToUpdate() types.Result[StudentDB] {
 	obj := StudentDB{
 		NumberID:         user.NumberID,
 		FirstName:        user.FirstName,
@@ -96,10 +98,10 @@ func (user StudentCreate) ToUpdate() StudentDB {
 	}
 
 	if !ID.OmitEmpty(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
-		return StudentDB{}
+		return types.ResultErr[StudentDB](errors.New("IDUniversity is required"))
 	}
 
-	return obj
+	return types.ResultOk(obj)
 }
 
 // ToDB converts a UserDB struct to a UserResponse struct

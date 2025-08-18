@@ -5,9 +5,9 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type universityType struct{}
@@ -16,25 +16,14 @@ var University universityType
 
 func (universityType) Create(u models.UniversityCreate) types.Result[models.UniversityDB] {
 	universityDB := u.ToInsert()
-	result, err := configs.DB.InsertOne(&universityDB)
+	resultID := configs.DB.InsertOne(universityDB)
 
-	if err != nil {
-		logger.Error("Error inserting university: ", err)
-		return types.ResultErr[models.UniversityDB](err)
+	if resultID.IsErr() {
+		logger.Warning("Error inserting university: ", resultID.Error())
+		return types.ResultErr[models.UniversityDB](resultID.Error())
 	}
 
-	universityDB.ID, err = models.ID.ToDB(result.InsertedID)
-
-	if err != nil {
-		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create university",
-			"Failed to convert inserted ID to PrimitiveID",
-			"Error: "+err.Error(),
-		)
-		return types.ResultErr[models.UniversityDB](&httpErr)
-	}
-
+	universityDB.ID = resultID.Value()
 	return types.ResultOk(universityDB)
 }
 
@@ -42,7 +31,7 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID: ", err)
+		logger.Warning("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
@@ -53,24 +42,23 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var university models.UniversityDB
 
-	err = configs.DB.FindOne(filter, &university)
-	if err != nil {
+	resultUniversity := configs.DB.FindOne(filter, models.UniversityDB{})
+	if resultUniversity.IsErr() {
+		logger.Warning("Failed to get university by ID: ", resultUniversity.Error())
 		var httpErr types.HttpError
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get university by ID: ", err)
+		switch resultUniversity.Error() {
+		case configs.DBErr.NotFound():
 			httpErr = types.ErrorNotFound(
 				"University not found",
 				"University with ID "+id+" not found",
 			)
-		} else {
-			logger.Error("Failed to get university by ID: ", err)
+
+		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve university",
-				"Decoding error",
-				err.Error(),
+				resultUniversity.Error().Error(),
 				"University ID: "+id,
 			)
 		}
@@ -78,23 +66,34 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 		return types.ResultErr[models.UniversityDB](&httpErr)
 	}
 
-	return types.ResultOk(university)
+	return types.ResultOk(resultUniversity.Value().(models.UniversityDB))
 }
 func (universityType) GetAll() types.Result[[]models.UniversityDB] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted universities
-	universities := []models.UniversityDB{}
+	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted universities
 
-	err := configs.DB.FindAll(filter, &universities)
-	if err != nil {
-		logger.Error("Failed to get all universities from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve universities",
-			err.Error(),
-		)
+	resultUniversities := configs.DB.FindAll(filter, models.UniversityDB{})
+	if resultUniversities.IsErr() {
+		logger.Warning("Failed to get all universities from MongoDB:", resultUniversities.Error())
+		var httpErr types.HttpError
+
+		switch resultUniversities.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Universities not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve universities",
+				resultUniversities.Error().Error(),
+			)
+
+		}
 
 		return types.ResultErr[[]models.UniversityDB](&httpErr)
 	}
 
+	universities := utils.Map(resultUniversities.Value(), models.InterfaceTo[models.UniversityDB])
 	logger.Debug("Retrieved", len(universities), "universities from MongoDB database")
 	return types.ResultOk(universities)
 }

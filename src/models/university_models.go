@@ -1,7 +1,7 @@
 package models
 
 type UniversityDB struct {
-	DBModelBase
+	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`

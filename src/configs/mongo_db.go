@@ -61,7 +61,7 @@ func (m mongoType) Context() (context.Context, context.CancelFunc) {
 }
 
 func (m mongoType) CreateFilter(filter ...types.SPair[string]) any {
-	return bson.E{}
+	return bson.D{}
 }
 
 func (m mongoType) in(name string) *mongo.Collection {
@@ -88,7 +88,7 @@ func (m mongoType) CreateOne(element models.DBModelInterface) types.Result[model
 }
 func (m mongoType) CreateMany(elements ...models.DBModelInterface) types.Result[[]models.DBID] {
 	if len(elements) == 0 {
-		return types.ResultErr[[]models.DBID](dbErr.InvalidInput())
+		return types.ResultErr[[]models.DBID](DBErr.InvalidInput())
 	}
 
 	ctx, cancel := m.Context()
@@ -116,7 +116,7 @@ func (m mongoType) GetOne(filter any, model models.DBModelInterface) types.Resul
 	err := m.from(model).FindOne(ctx, filter).Decode(&model)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		logger.Debug("No document found for filter:", filter)
-		return types.ResultErr[models.DBModelInterface](dbErr.NotFound())
+		return types.ResultErr[models.DBModelInterface](DBErr.NotFound())
 	}
 
 	return types.ResultOf(model, err, err != nil)
@@ -124,7 +124,7 @@ func (m mongoType) GetOne(filter any, model models.DBModelInterface) types.Resul
 func (m mongoType) GetMany(filter any, model ...models.DBModelInterface) types.Result[[]models.DBModelInterface] {
 	if len(model) == 0 {
 		logger.Debug("No models provided for GetMany")
-		return types.ResultErr[[]models.DBModelInterface](dbErr.InvalidInput())
+		return types.ResultErr[[]models.DBModelInterface](DBErr.InvalidInput())
 	}
 
 	ctx, cancel := m.Context()
@@ -141,89 +141,136 @@ func (m mongoType) GetMany(filter any, model ...models.DBModelInterface) types.R
 	return types.ResultOf(model, cursorErr, cursorErr != nil)
 }
 
-func (m mongoType) UpdateOne(filter any, update models.DBModelInterface) error {
+func (m mongoType) UpdateOne(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	updateResult, err := m.from(update).UpdateOne(ctx, filter, update)
+	update := bson.D{{Key: "$set", Value: model}}
+	updateResult, err := m.from(model).UpdateOne(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to update document:", err)
 		return err
 	}
 	if updateResult.MatchedCount == 0 {
 		logger.Warning("No documents matched the filter for update:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 	if updateResult.ModifiedCount == 0 {
 		logger.Warning("No documents were modified by the update:", update)
-		return dbErr.NotModified()
+		return DBErr.NotModified()
 	}
 
 	return nil
 }
-func (m mongoType) UpdateMany(filter any, update models.DBModelInterface) error {
+func (m mongoType) UpdateMany(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	res, err := m.from(update).UpdateMany(ctx, filter, update)
+	update := bson.D{{Key: "$set", Value: model}}
+	res, err := m.from(model).UpdateMany(ctx, filter, update)
 	if err != nil {
 		logger.Warning("Failed to update documents:", err)
 		return err
 	}
 	if res.MatchedCount == 0 {
 		logger.Warning("No documents matched the filter for update:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 	if res.ModifiedCount == 0 {
 		logger.Warning("No documents were modified by the update:", update)
-		return dbErr.NotModified()
+		return DBErr.NotModified()
 	}
 
 	return nil
 }
 
-func (m mongoType) PatchOne(filter any, update models.DBModelInterface) error {
+func (m mongoType) PatchOne(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	updateResult, err := m.from(update).UpdateOne(ctx, filter, update)
+	update := bson.D{{Key: "$set", Value: model}}
+	updateResult, err := m.from(model).UpdateOne(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to patch document:", err)
 		return err
 	}
 	if updateResult.MatchedCount == 0 {
 		logger.Warning("No documents matched the filter for update:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 	if updateResult.ModifiedCount == 0 {
 		logger.Warning("No documents were modified by the update:", update)
-		return dbErr.NotModified()
+		return DBErr.NotModified()
 	}
 
 	return nil
 }
-func (m mongoType) PatchMany(filter any, update models.DBModelInterface) error {
+func (m mongoType) PatchMany(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	updateResult, err := m.from(update).UpdateMany(ctx, filter, update)
+	update := bson.D{{Key: "$set", Value: model}}
+	updateResult, err := m.from(model).UpdateMany(ctx, filter, update)
 	if err != nil {
 		logger.Error("Failed to update documents:", err)
 		return err
 	}
 	if updateResult.MatchedCount == 0 {
 		logger.Warning("No documents matched the filter for update:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 	if updateResult.ModifiedCount == 0 {
 		logger.Warning("No documents were modified by the update:", update)
-		return dbErr.NotModified()
+		return DBErr.NotModified()
 	}
 
 	return nil
 }
 
-func (m mongoType) DeleteOne(filter any, model models.DBModelInterface) error {
+func (m mongoType) SoftDeleteOne(filter any, model models.DBModelInterface) error {
+	ctx, cancel := m.Context()
+	defer cancel()
+
+	update := bson.M{"$set": bson.M{"deleted_at": time.Now()}}
+	updateResult, err := m.from(model).UpdateOne(ctx, filter, update)
+	if err != nil {
+		logger.Error("Failed to soft delete document:", err)
+		return err
+	}
+	if updateResult.MatchedCount == 0 {
+		logger.Warning("No documents matched the filter for soft delete:", filter)
+		return DBErr.NotFound()
+	}
+	if updateResult.ModifiedCount == 0 {
+		logger.Warning("No documents were modified by the soft delete:", update)
+		return DBErr.NotModified()
+	}
+
+	return nil
+}
+func (m mongoType) SoftDeleteMany(filter any, model models.DBModelInterface) error {
+	ctx, cancel := m.Context()
+	defer cancel()
+
+	update := bson.M{"$set": bson.M{"deleted_at": time.Now()}}
+	updateResult, err := m.from(model).UpdateMany(ctx, filter, update)
+	if err != nil {
+		logger.Warning("Failed to update documents:", err)
+		return err
+	}
+	if updateResult.MatchedCount == 0 {
+		logger.Warning("No documents matched the filter for update:", filter)
+		return DBErr.NotFound()
+	}
+	if updateResult.ModifiedCount == 0 {
+		logger.Warning("No documents were modified by the update:", model)
+		return DBErr.NotModified()
+	}
+
+	return nil
+}
+
+func (m mongoType) PermanentDeleteOne(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
@@ -234,12 +281,12 @@ func (m mongoType) DeleteOne(filter any, model models.DBModelInterface) error {
 	}
 	if deleteResult.DeletedCount == 0 {
 		logger.Warning("No documents matched the filter for delete:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 
 	return nil
 }
-func (m mongoType) DeleteMany(filter any, model models.DBModelInterface) error {
+func (m mongoType) PermanentDeleteMany(filter any, model models.DBModelInterface) error {
 	ctx, cancel := m.Context()
 	defer cancel()
 
@@ -250,7 +297,7 @@ func (m mongoType) DeleteMany(filter any, model models.DBModelInterface) error {
 	}
 	if deleteResult.DeletedCount == 0 {
 		logger.Warning("No documents matched the filter for delete:", filter)
-		return dbErr.NotFound()
+		return DBErr.NotFound()
 	}
 
 	return nil

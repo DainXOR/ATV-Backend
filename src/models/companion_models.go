@@ -1,7 +1,7 @@
 package models
 
 type CompanionDB struct {
-	DBModelBase
+	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
 	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
 	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
@@ -85,6 +85,7 @@ func (c CompanionDB) ToResponse() CompanionResponse {
 		UpdatedAt:        c.UpdatedAt,
 	}
 }
+
 func (c CompanionDB) IsEmpty() bool {
 	return c == (CompanionDB{})
 }
