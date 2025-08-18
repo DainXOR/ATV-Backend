@@ -1,12 +1,10 @@
 package models
 
 type UniversityDB struct {
-	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
+	ID       DBID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name     string `json:"name,omitempty" bson:"name,omitempty"`
+	Location string `json:"location,omitempty" bson:"location,omitempty"`
+	DBModelBase
 }
 
 // UniversityCreate represents the request body for creating a new university
@@ -26,18 +24,22 @@ type UniversityResponse struct {
 
 func (u UniversityCreate) ToInsert() UniversityDB {
 	return UniversityDB{
-		Name:      u.Name,
-		Location:  u.Location,
-		CreatedAt: Time.Now(),
-		UpdatedAt: Time.Now(),
-		DeletedAt: Time.Zero(),
+		Name:     u.Name,
+		Location: u.Location,
+		DBModelBase: DBModelBase{
+			CreatedAt: Time.Now(),
+			UpdatedAt: Time.Now(),
+			DeletedAt: Time.Zero(),
+		},
 	}
 }
 func (u UniversityCreate) ToUpdate() UniversityDB {
 	return UniversityDB{
-		Name:      u.Name,
-		Location:  u.Location,
-		UpdatedAt: Time.Now(),
+		Name:     u.Name,
+		Location: u.Location,
+		DBModelBase: DBModelBase{
+			UpdatedAt: Time.Now(),
+		},
 	}
 }
 

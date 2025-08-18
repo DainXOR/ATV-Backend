@@ -18,9 +18,7 @@ type SessionDB struct {
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	Date                string        `json:"date,omitempty" bson:"date,omitempty"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
-	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
+	DBModelBase
 }
 
 // SessionCreate represents the request body for creating a new session or updating an existing one
@@ -93,9 +91,11 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
 		Status:              statusCode(u.Status),
-		CreatedAt:           Time.Now(),
-		UpdatedAt:           Time.Now(),
-		DeletedAt:           Time.Zero(),
+		DBModelBase: DBModelBase{
+			CreatedAt: Time.Now(),
+			UpdatedAt: Time.Now(),
+			DeletedAt: Time.Zero(),
+		},
 	}
 
 	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
@@ -116,7 +116,9 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
 		Status:              statusCode(u.Status),
-		UpdatedAt:           Time.Now(),
+		DBModelBase: DBModelBase{
+			UpdatedAt: Time.Now(),
+		},
 	}
 
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||

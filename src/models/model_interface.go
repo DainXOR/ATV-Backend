@@ -21,10 +21,31 @@ import (
 type DBModelInterface interface {
 	TableName() string
 	IsEmpty() bool
+	CreationDate() DBDateTime
+	UpdateDate() DBDateTime
+	DeleteDate() DBDateTime
 }
 
 type DBID = bson.ObjectID
 type DBDateTime = time.Time
+
+type DBModelBase struct {
+	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
+}
+
+func (m DBModelBase) CreationDate() DBDateTime {
+	return m.CreatedAt
+}
+
+func (m DBModelBase) UpdateDate() DBDateTime {
+	return m.UpdatedAt
+}
+
+func (m DBModelBase) DeleteDate() DBDateTime {
+	return m.DeletedAt
+}
 
 // Deprecated: Use models.ID.ToPrimitive() instead.
 func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {

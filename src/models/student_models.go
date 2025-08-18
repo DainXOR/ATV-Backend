@@ -10,19 +10,17 @@ import (
 // UserDBGorm represents the database model for a user
 
 type StudentDB struct {
-	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
-	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
-	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	PersonalEmail    string     `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	ResidenceAddress string     `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
-	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
-	IDUniversity     DBID       `json:"id_university,omitempty" bson:"id_university,omitempty"`
-	PhoneNumber      string     `json:"phone_number,omitempty" bson:"phone_number,omitempty"`
-	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
+	ID               DBID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	NumberID         string `json:"number_id,omitempty" bson:"number_id,omitempty"`
+	FirstName        string `json:"first_name,omitempty" bson:"first_name,omitempty"`
+	LastName         string `json:"last_name,omitempty" bson:"last_name,omitempty"`
+	PersonalEmail    string `json:"email,omitempty" bson:"email,omitempty"`
+	InstitutionEmail string `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
+	ResidenceAddress string `json:"residence_address,omitempty" bson:"residence_address,omitempty"`
+	Semester         uint   `json:"semester,omitempty" bson:"semester,omitempty"`
+	IDUniversity     DBID   `json:"id_university,omitempty" bson:"id_university,omitempty"`
+	PhoneNumber      string `json:"phone_number,omitempty" bson:"phone_number,omitempty"`
+	DBModelBase
 }
 
 // StudentCreate represents the request body for creating a new user or updating an existing user
@@ -77,9 +75,11 @@ func (user StudentCreate) ToInsert() StudentDB {
 		Semester:         user.Semester,
 		IDUniversity:     idu,
 		PhoneNumber:      user.PhoneNumber,
-		CreatedAt:        Time.Now(),
-		UpdatedAt:        Time.Now(),
-		DeletedAt:        Time.Zero(),
+		DBModelBase: DBModelBase{
+			CreatedAt: Time.Now(),
+			UpdatedAt: Time.Now(),
+			DeletedAt: Time.Zero(),
+		},
 	}
 }
 
@@ -94,7 +94,9 @@ func (user StudentCreate) ToUpdate() types.Result[StudentDB] {
 		ResidenceAddress: user.ResidenceAddress,
 		Semester:         user.Semester,
 		PhoneNumber:      user.PhoneNumber,
-		UpdatedAt:        Time.Now(),
+		DBModelBase: DBModelBase{
+			UpdatedAt: Time.Now(),
+		},
 	}
 
 	if !ID.OmitEmpty(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
