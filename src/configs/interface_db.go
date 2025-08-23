@@ -32,18 +32,18 @@ func (dbError) NotImplemented() error {
 	return errors.New("not implemented")
 }
 
-type InterfaceDB interface {
+type InterfaceDBAccessor interface {
 	Connect(dbName, conectionString string) error
 	Disconnect() error
 	Migrate(models ...models.DBModelInterface) error
 
 	CreateFilter(filter ...types.SPair[string]) any
 
-	CreateOne(element models.DBModelInterface) types.Result[models.DBID]
-	CreateMany(elements ...models.DBModelInterface) types.Result[[]models.DBID]
+	InsertOne(element models.DBModelInterface) types.Result[models.DBID]
+	InsertMany(elements ...models.DBModelInterface) types.Result[[]models.DBID]
 
-	GetOne(filter any, model models.DBModelInterface) types.Result[models.DBModelInterface]
-	GetMany(filter any, model ...models.DBModelInterface) types.Result[[]models.DBModelInterface]
+	FindOne(filter any, model models.DBModelInterface) types.Result[models.DBModelInterface]
+	FindMany(filter any, model models.DBModelInterface) types.Result[[]models.DBModelInterface]
 
 	UpdateOne(filter any, update models.DBModelInterface) error
 	UpdateMany(filter any, update models.DBModelInterface) error

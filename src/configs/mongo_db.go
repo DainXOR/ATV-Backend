@@ -5,6 +5,7 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 	"errors"
 	"time"
 
@@ -21,9 +22,13 @@ type mongoType struct {
 
 var mongoT mongoType
 
-var _ InterfaceDB = (*mongoType)(nil)
+var _ InterfaceDBAccessor = (*mongoType)(nil)
 
-func (m mongoType) Connect(dbName, conectionString string) error {
+func GetMongoAccessor() *mongoType {
+	return &mongoType{}
+}
+
+func (m *mongoType) Connect(dbName, conectionString string) error {
 	clientOpts := options.Client().ApplyURI(conectionString)
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
@@ -42,7 +47,7 @@ func (m mongoType) Connect(dbName, conectionString string) error {
 	m.db = client.Database(dbName)
 	return nil
 }
-func (m mongoType) Disconnect() error {
+func (m *mongoType) Disconnect() error {
 	if m.client != nil {
 		err := m.client.Disconnect(context.Background())
 		if err != nil {
@@ -73,7 +78,7 @@ func (m mongoType) from(v models.DBModelInterface) *mongo.Collection {
 	return m.in(collectionName)
 }
 
-func (m mongoType) CreateOne(element models.DBModelInterface) types.Result[models.DBID] {
+func (m mongoType) InsertOne(element models.DBModelInterface) types.Result[models.DBID] {
 	ctx, cancel := m.Context()
 	defer cancel()
 
@@ -86,7 +91,7 @@ func (m mongoType) CreateOne(element models.DBModelInterface) types.Result[model
 	id, _ := models.ID.ToDB(res.InsertedID)
 	return types.ResultOk(id)
 }
-func (m mongoType) CreateMany(elements ...models.DBModelInterface) types.Result[[]models.DBID] {
+func (m mongoType) InsertMany(elements ...models.DBModelInterface) types.Result[[]models.DBID] {
 	if len(elements) == 0 {
 		return types.ResultErr[[]models.DBID](DBErr.InvalidInput())
 	}
@@ -109,36 +114,36 @@ func (m mongoType) CreateMany(elements ...models.DBModelInterface) types.Result[
 	return types.ResultOk(results)
 }
 
-func (m mongoType) GetOne(filter any, model models.DBModelInterface) types.Result[models.DBModelInterface] {
+func (m mongoType) FindOne(filter any, model models.DBModelInterface) types.Result[models.DBModelInterface] {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	err := m.from(model).FindOne(ctx, filter).Decode(&model)
+	concreteModel := utils.InstanceOfUnderlying(model)
+	err := m.from(model).FindOne(ctx, filter).Decode(concreteModel)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		logger.Debug("No document found for filter:", filter)
 		return types.ResultErr[models.DBModelInterface](DBErr.NotFound())
 	}
 
+	model = utils.AsDeref(concreteModel).(models.DBModelInterface)
 	return types.ResultOf(model, err, err != nil)
 }
-func (m mongoType) GetMany(filter any, model ...models.DBModelInterface) types.Result[[]models.DBModelInterface] {
-	if len(model) == 0 {
-		logger.Debug("No models provided for GetMany")
-		return types.ResultErr[[]models.DBModelInterface](DBErr.InvalidInput())
-	}
-
+func (m mongoType) FindMany(filter any, model models.DBModelInterface) types.Result[[]models.DBModelInterface] {
 	ctx, cancel := m.Context()
 	defer cancel()
 
-	cursor, err := m.from(model[0]).Find(ctx, filter)
+	cursor, err := m.from(model).Find(ctx, filter)
 	if err != nil {
 		logger.Error("Failed to find documents:", err)
 		return types.ResultErr[[]models.DBModelInterface](err)
 	}
 	defer cursor.Close(ctx)
 
-	cursorErr := cursor.All(ctx, &model)
-	return types.ResultOf(model, cursorErr, cursorErr != nil)
+	concreteSlice := utils.SliceOfUnderlying(model)
+	cursorErr := cursor.All(ctx, &concreteSlice)
+	temp := utils.AsSliceOfNoPtr[models.DBModelInterface](concreteSlice)
+
+	return types.ResultOf(temp, cursorErr, cursorErr != nil)
 }
 
 func (m mongoType) UpdateOne(filter any, model models.DBModelInterface) error {

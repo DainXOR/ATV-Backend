@@ -1,9 +1,11 @@
 package models
 
 type SpecialityDB struct {
-	ID   DBID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name,omitempty" bson:"name,omitempty"`
-	DBModelBase
+	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
 // SpecialityCreate represents the request body for creating a new Speciality
@@ -21,20 +23,16 @@ type SpecialityResponse struct {
 
 func (u SpecialityCreate) ToInsert() SpecialityDB {
 	return SpecialityDB{
-		Name: u.Name,
-		DBModelBase: DBModelBase{
-			CreatedAt: TimeNow(),
-			UpdatedAt: TimeNow(),
-			DeletedAt: TimeZero(),
-		},
+		Name:      u.Name,
+		CreatedAt: TimeNow(),
+		UpdatedAt: TimeNow(),
+		DeletedAt: TimeZero(),
 	}
 }
 func (u SpecialityCreate) ToUpdate() SpecialityDB {
 	return SpecialityDB{
-		Name: u.Name,
-		DBModelBase: DBModelBase{
-			UpdatedAt: TimeNow(),
-		},
+		Name:      u.Name,
+		UpdatedAt: TimeNow(),
 	}
 }
 func (u SpecialityDB) ToResponse() SpecialityResponse {

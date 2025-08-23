@@ -14,6 +14,7 @@ import (
 
 func init() {
 	logger.SetVersion(configs.App.ApiVersion())
+	configs.DB.Use(configs.GetMongoAccessor()).Start()
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")

@@ -6,6 +6,50 @@ import (
 	"strings"
 )
 
+func InstanceOfUnderlying(v any) any {
+	return reflect.New(reflect.TypeOf(v)).Interface()
+}
+func AsDeref(v any) any {
+	val := reflect.ValueOf(v)
+	if val.Kind() == reflect.Ptr {
+		return val.Elem().Interface()
+	}
+	return v
+}
+func SliceOfUnderlying(v any) any {
+	return reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(v)), 0, 10).Interface()
+}
+func AsSliceOf[T any](v any) []T {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Slice {
+		return nil
+	}
+
+	result := make([]T, val.Len())
+	for i := 0; i < val.Len(); i++ {
+		result[i] = val.Index(i).Interface().(T)
+	}
+	return result
+}
+func AsSliceOfNoPtr[T any](v any) []T {
+	arr := reflect.ValueOf(v)
+	if arr.Kind() != reflect.Slice {
+		return nil
+	}
+
+	result := make([]T, arr.Len())
+	for i := 0; i < arr.Len(); i++ {
+		elem := arr.Index(i)
+
+		if elem.Kind() == reflect.Ptr {
+			result[i] = elem.Elem().Interface().(T)
+		} else {
+			result[i] = elem.Interface().(T)
+		}
+	}
+	return result
+}
+
 // Function to get the structure of a struct as a string
 func StructToString(obj any) string {
 	t := reflect.TypeOf(obj)
@@ -49,9 +93,30 @@ func StructToMap(obj any, filter func(reflect.StructField, reflect.Value) bool) 
 		value := v.Field(i)
 
 		if filter == nil || filter(field, value) {
-			result[string(field.Tag.Get("json"))] = value.Interface()
+			result[string(field.Name)] = value.Interface()
 		}
 
+	}
+
+	return result
+}
+func StructToTagMap(obj any, tagName string, filter func(reflect.StructField, reflect.Value) bool) map[string]any {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+
+	result := make(map[string]any)
+
+	for i := range t.NumField() {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		if filter == nil || filter(field, value) {
+			result[string(field.Tag.Get(tagName))] = value.Interface()
+		}
 	}
 
 	return result

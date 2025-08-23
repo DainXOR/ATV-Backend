@@ -15,14 +15,19 @@ func Recovery() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				logger.Error("Recovered from panic:", err)
 
+				f0, l0 := utils.CallOrigin(4)
 				f1, l1 := utils.CallOrigin(5)
 				f2, l2 := utils.CallOrigin(6)
 				f3, l3 := utils.CallOrigin(7)
+				f4, l4 := utils.CallOrigin(8)
+
 				logger.Error(fmt.Sprintf(
-					"Error originated at: %s:%d > %s:%d > %s:%d",
+					"Error originated at: %s:%d > %s:%d > %s:%d > %s:%d > %s:%d",
+					f4, l4,
 					f3, l3,
 					f2, l2,
 					f1, l1,
+					f0, l0,
 				))
 
 				c.AbortWithStatusJSON(types.Http.C500().InternalServerError(),

@@ -18,7 +18,9 @@ type SessionDB struct {
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	Date                string        `json:"date,omitempty" bson:"date,omitempty"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
-	DBModelBase
+	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
 }
 
 // SessionCreate represents the request body for creating a new session or updating an existing one
@@ -51,6 +53,13 @@ type SessionResponse struct {
 
 type sessionStatus uint8
 
+// To add new session statuses, simply follow this steps:
+//
+// 1. Define the new status as a constant in the sessionStatus type.
+//
+// 2. Add the new status to the STATUS map with its corresponding name.
+//
+// The name you define here will be used in the application to refer to this status.
 const (
 	STATUS_UNKNOWN sessionStatus = iota + 1
 	STATUS_PENDING
@@ -60,6 +69,7 @@ const (
 )
 
 var STATUS = map[sessionStatus]string{
+	STATUS_UNKNOWN:    "Desconocido",
 	STATUS_PENDING:    "Pendiente",
 	STATUS_COMPLETED:  "Completado",
 	STATUS_CANCELLED:  "Cancelado",
@@ -91,11 +101,9 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
 		Status:              statusCode(u.Status),
-		DBModelBase: DBModelBase{
-			CreatedAt: Time.Now(),
-			UpdatedAt: Time.Now(),
-			DeletedAt: Time.Zero(),
-		},
+		CreatedAt:           Time.Now(),
+		UpdatedAt:           Time.Now(),
+		DeletedAt:           Time.Zero(),
 	}
 
 	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
@@ -116,9 +124,7 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		SessionNotes:        u.SessionNotes,
 		Date:                u.Date,
 		Status:              statusCode(u.Status),
-		DBModelBase: DBModelBase{
-			UpdatedAt: Time.Now(),
-		},
+		UpdatedAt:           Time.Now(),
 	}
 
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||

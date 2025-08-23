@@ -10,7 +10,7 @@ import (
 )
 
 type dbType struct {
-	accessor         InterfaceDB
+	accessor         InterfaceDBAccessor
 	name             string
 	connectionString string
 }
@@ -50,7 +50,7 @@ func (dbType) ReloadConnection() {
 	DB.Start()
 }
 
-func (dbType) Use(db InterfaceDB) *dbType {
+func (dbType) Use(db InterfaceDBAccessor) *dbType {
 	DB.accessor = db
 	return &DB
 }
@@ -77,17 +77,17 @@ func (dbType) ConnectTo(dbName, connectionString string) error {
 }
 
 func (dbType) InsertOne(document models.DBModelInterface) types.Result[models.DBID] {
-	return DB.accessor.CreateOne(document)
+	return DB.accessor.InsertOne(document)
 }
 func (dbType) InsertMany(documents ...models.DBModelInterface) types.Result[[]models.DBID] {
-	return DB.accessor.CreateMany(documents...)
+	return DB.accessor.InsertMany(documents...)
 }
 
 func (dbType) FindOne(filter any, result models.DBModelInterface) types.Result[models.DBModelInterface] {
-	return DB.accessor.GetOne(filter, result)
+	return DB.accessor.FindOne(filter, result)
 }
 func (dbType) FindAll(filter any, result models.DBModelInterface) types.Result[[]models.DBModelInterface] {
-	return DB.accessor.GetMany(filter, result)
+	return DB.accessor.FindMany(filter, result)
 }
 
 func (dbType) UpdateOne(filter any, update models.DBModelInterface) error {

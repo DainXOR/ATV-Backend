@@ -17,6 +17,8 @@ var Companion companionType
 
 func (companionType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
+	//filter := Filter.Create(c.Request.URL.Query())
+
 	logger.Debug("Getting companion by ID: ", id)
 
 	result := db.Companion.GetByID(id)

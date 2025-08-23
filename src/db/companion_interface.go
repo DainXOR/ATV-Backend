@@ -275,7 +275,7 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 
 		httpErr := types.ErrorInternal(
 			"Failed to find companion for permanent deletion",
-			err.Error(),
+			companionResult.Error().Error(),
 			"Companion ID: "+id,
 		)
 		return types.ResultErr[models.CompanionDB](&httpErr)

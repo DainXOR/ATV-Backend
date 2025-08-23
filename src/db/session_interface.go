@@ -83,9 +83,8 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	var session models.SessionDB
 
-	sessionResult := configs.DB.FindOne(filter, session)
+	sessionResult := configs.DB.FindOne(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
 		logger.Warning("Failed to get session by ID: ", sessionResult.Error())
 		var httpErr types.HttpError
@@ -100,7 +99,7 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve session",
-				err.Error(),
+				sessionResult.Error().Error(),
 				"Session ID: "+id,
 			)
 		}
@@ -114,7 +113,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDB] {
 	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted sessions
 	session := models.SessionDB{}
 
-	sessionsResult := configs.DB.FindAll(filter, session)
+	sessionsResult := configs.DB.FindAll(filter, &session)
 	if sessionsResult.IsErr() {
 		logger.Warning("Failed to get all sessions from MongoDB:", sessionsResult.Error())
 		var httpErr types.HttpError
@@ -248,7 +247,7 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 
 	var sessionDB models.SessionDB
 	{
-		if res := getExtraInfo(session); res.IsErr() {
+		if res := getExtraInfoAllowEmpty(session); res.IsErr() {
 			logger.Warning("Failed to patch session:", res.Error())
 			httpErr := types.ErrorInternal(
 				"Failed to patch session",
