@@ -24,15 +24,15 @@ type SpecialityResponse struct {
 func (u SpecialityCreate) ToInsert() SpecialityDB {
 	return SpecialityDB{
 		Name:      u.Name,
-		CreatedAt: TimeNow(),
-		UpdatedAt: TimeNow(),
-		DeletedAt: TimeZero(),
+		CreatedAt: Time.Now(),
+		UpdatedAt: Time.Now(),
+		DeletedAt: Time.Zero(),
 	}
 }
 func (u SpecialityCreate) ToUpdate() SpecialityDB {
 	return SpecialityDB{
 		Name:      u.Name,
-		UpdatedAt: TimeNow(),
+		UpdatedAt: Time.Now(),
 	}
 }
 func (u SpecialityDB) ToResponse() SpecialityResponse {

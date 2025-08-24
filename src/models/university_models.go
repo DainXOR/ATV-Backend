@@ -28,9 +28,9 @@ func (u UniversityCreate) ToInsert() UniversityDB {
 	return UniversityDB{
 		Name:      u.Name,
 		Location:  u.Location,
-		CreatedAt: TimeNow(),
-		UpdatedAt: TimeNow(),
-		DeletedAt: TimeZero(),
+		CreatedAt: Time.Now(),
+		UpdatedAt: Time.Now(),
+		DeletedAt: Time.Zero(),
 	}
 }
 func (u UniversityCreate) ToUpdate() UniversityDB {

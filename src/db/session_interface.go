@@ -52,19 +52,7 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDB]
 		return types.ResultErr[models.SessionDB](resultID.Error())
 	}
 
-	var err error
-	session.ID, err = models.ID.ToDB(resultID.Value())
-
-	if err != nil {
-		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create session",
-			"Failed to convert inserted ID to PrimitiveID",
-			"Error: "+err.Error(),
-		)
-		return types.ResultErr[models.SessionDB](&httpErr)
-	}
-
+	session.ID = resultID.Value()
 	return types.ResultOk(session)
 }
 
@@ -317,25 +305,22 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
 func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] {
 	studentResult := Student.GetByID(session.IDStudent)
 	if studentResult.IsErr() {
-		httpErr := studentResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get student by ID: ", httpErr)
-		return types.ResultErr[map[string]string](httpErr)
+		logger.Warning("Failed to get student by ID: ", studentResult.Error())
+		return types.ResultErr[map[string]string](studentResult.Error())
 	}
 
 	companionResult := Companion.GetByID(session.IDCompanion)
 	if companionResult.IsErr() {
-		httpErr := companionResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get companion by ID: ", httpErr)
-		return types.ResultErr[map[string]string](httpErr)
+		logger.Warning("Failed to get companion by ID: ", companionResult.Error())
+		return types.ResultErr[map[string]string](companionResult.Error())
 	}
 	student := studentResult.Value()
 	companion := companionResult.Value()
 
 	specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
 	if specialityResult.IsErr() {
-		httpErr := specialityResult.Error().(*types.HttpError)
-		logger.Warning("Failed to get speciality by ID: ", httpErr)
-		return types.ResultErr[map[string]string](httpErr)
+		logger.Warning("Failed to get speciality by ID: ", specialityResult.Error())
+		return types.ResultErr[map[string]string](specialityResult.Error())
 	}
 
 	extraInfo := make(map[string]string, 5)
@@ -353,9 +338,8 @@ func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[strin
 	if session.IDStudent != "" {
 		studentResult := Student.GetByID(session.IDStudent)
 		if studentResult.IsErr() {
-			httpErr := studentResult.Error().(*types.HttpError)
-			logger.Warning("Failed to get student by ID: ", httpErr)
-			return types.ResultErr[map[string]string](httpErr)
+			logger.Warning("Failed to get student by ID: ", studentResult.Error())
+			return types.ResultErr[map[string]string](studentResult.Error())
 		}
 
 		student = studentResult.Value()
@@ -366,18 +350,16 @@ func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[strin
 	if session.IDCompanion != "" {
 		companionResult := Companion.GetByID(session.IDCompanion)
 		if companionResult.IsErr() {
-			httpErr := companionResult.Error().(*types.HttpError)
-			logger.Warning("Failed to get companion by ID: ", httpErr)
-			return types.ResultErr[map[string]string](httpErr)
+			logger.Warning("Failed to get companion by ID: ", companionResult.Error())
+			return types.ResultErr[map[string]string](companionResult.Error())
 		}
 
 		companion = companionResult.Value()
 
 		specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
 		if specialityResult.IsErr() {
-			httpErr := specialityResult.Error().(*types.HttpError)
-			logger.Warning("Failed to get speciality by ID: ", httpErr)
-			return types.ResultErr[map[string]string](httpErr)
+			logger.Warning("Failed to get speciality by ID: ", specialityResult.Error())
+			return types.ResultErr[map[string]string](specialityResult.Error())
 		}
 
 		speciality = specialityResult.Value()

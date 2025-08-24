@@ -24,15 +24,15 @@ type SessionTypeResponse struct {
 func (u SessionTypeCreate) ToInsert() SessionTypeDB {
 	return SessionTypeDB{
 		Name:      u.Name,
-		CreatedAt: TimeNow(),
-		UpdatedAt: TimeNow(),
-		DeletedAt: TimeZero(),
+		CreatedAt: Time.Now(),
+		UpdatedAt: Time.Now(),
+		DeletedAt: Time.Zero(),
 	}
 }
 func (u SessionTypeCreate) ToUpdate() SessionTypeDB {
 	return SessionTypeDB{
 		Name:      u.Name,
-		UpdatedAt: TimeNow(),
+		UpdatedAt: Time.Now(),
 	}
 }
 func (u SessionTypeDB) ToResponse() SessionTypeResponse {

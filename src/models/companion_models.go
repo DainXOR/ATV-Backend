@@ -43,9 +43,9 @@ func (c CompanionCreate) ToInsert() CompanionDB {
 		Email:            c.Email,
 		InstitutionEmail: c.InstitutionEmail,
 		PhoneNumber:      c.PhoneNumber,
-		CreatedAt:        TimeNow(),
-		UpdatedAt:        TimeNow(),
-		DeletedAt:        TimeZero(),
+		CreatedAt:        Time.Now(),
+		UpdatedAt:        Time.Now(),
+		DeletedAt:        Time.Zero(),
 	}
 
 	if !EnsureID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
@@ -62,7 +62,7 @@ func (c CompanionCreate) ToUpdate() CompanionDB {
 		Email:            c.Email,
 		InstitutionEmail: c.InstitutionEmail,
 		PhoneNumber:      c.PhoneNumber,
-		CreatedAt:        TimeNow(),
+		UpdatedAt:        Time.Now(),
 	}
 
 	if !OmitEmptyID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
