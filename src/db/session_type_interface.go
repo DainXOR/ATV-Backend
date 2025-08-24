@@ -57,7 +57,7 @@ func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDB] {
 		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve session type",
-				err.Error(),
+				resultSessionType.Error().Error(),
 				"SessionType ID: "+id,
 			)
 		}

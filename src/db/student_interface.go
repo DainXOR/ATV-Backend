@@ -69,7 +69,7 @@ func (studentType) GetByID(id string) types.Result[models.StudentDB] {
 		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve student",
-				err.Error(),
+				resultStudent.Error().Error(),
 				"Student ID: "+id,
 			)
 		}
