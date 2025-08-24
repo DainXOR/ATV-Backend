@@ -29,7 +29,7 @@ func (r Result[T]) IsOk() bool {
 func (r Result[T]) IsErr() bool {
 	return r.err != nil || r.value.IsEmpty()
 }
-func (r Result[T]) HasErrorValue() bool {
+func (r Result[T]) HasErrorAndValue() bool {
 	return r.err != nil && r.value.IsPresent()
 }
 

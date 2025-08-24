@@ -31,20 +31,7 @@ func (companionType) Create(companion models.CompanionCreate) types.Result[model
 		return types.ResultErr[models.CompanionDB](resultGet.Error())
 	}
 
-	var err error
-	companionDB.ID, err = models.ID.ToDB(resultCreate.Value())
-
-	if err != nil {
-		logger.Warning("Failed to convert inserted ID to ObjectID:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create companion",
-			"Failed to convert inserted ID to ObjectID",
-			"Error: "+err.Error(),
-		)
-
-		return types.ResultErr[models.CompanionDB](&httpErr)
-	}
-
+	companionDB.ID = resultCreate.Value()
 	return types.ResultOk(companionDB)
 }
 
@@ -76,17 +63,15 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDB] {
 }
 func (companionType) GetByNumberID(idNumber string) types.Result[models.CompanionDB] {
 	filter := bson.D{{Key: "number_id", Value: idNumber}}
-	var companion models.CompanionDB
 
-	resultGet := configs.DB.FindOne(filter, &companion)
-	if resultGet.IsErr() {
-		logger.Warning("Failed to get companion by number id:", resultGet.Error())
+	resultCompanionDB := configs.DB.FindOne(filter, models.CompanionDB{})
+	if resultCompanionDB.IsErr() {
+		logger.Warning("Failed to get companion by number id:", resultCompanionDB.Error())
 
-		return types.ResultErr[models.CompanionDB](resultGet.Error())
+		return types.ResultErr[models.CompanionDB](resultCompanionDB.Error())
 	}
 
-	companion = resultGet.Value().(models.CompanionDB)
-	return types.ResultOk(companion)
+	return types.ResultOk(resultCompanionDB.Value().(models.CompanionDB))
 }
 func (companionType) GetByEmail(email string) types.Result[models.CompanionDB] {
 	filter := bson.D{{Key: "email", Value: email}}
@@ -104,20 +89,18 @@ func (companionType) GetByEmail(email string) types.Result[models.CompanionDB] {
 	return types.ResultOk(companion)
 }
 func (companionType) GetAll() types.Result[[]models.CompanionDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted companions
-	companions := []models.CompanionDB{{}}
+	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted companionsDB
 
-	resultGet := configs.DB.FindAll(filter, companions[0])
-	if resultGet.IsErr() {
-		logger.Error("Failed to get all companions from MongoDB:", resultGet.Error())
+	resultCompanionsDB := configs.DB.FindAll(filter, models.CompanionDB{})
+	if resultCompanionsDB.IsErr() {
+		logger.Error("Failed to get all companions from MongoDB:", resultCompanionsDB.Error())
 
-		return types.ResultErr[[]models.CompanionDB](resultGet.Error())
+		return types.ResultErr[[]models.CompanionDB](resultCompanionsDB.Error())
 	}
 
-	castMapper := func(m models.DBModelInterface) models.CompanionDB { return m.(models.CompanionDB) }
-	companions = utils.Map(resultGet.Value(), castMapper)
-	logger.Debug("Retrieved", len(companions), "companions from MongoDB database")
-	return types.ResultOk(companions)
+	companionsDB := utils.Map(resultCompanionsDB.Value(), models.InterfaceTo[models.CompanionDB])
+	logger.Debug("Retrieved", len(companionsDB), "companions from MongoDB database")
+	return types.ResultOk(companionsDB)
 }
 
 func (companionType) UpdateByID(id string, companion models.CompanionCreate) types.Result[models.CompanionDB] {
@@ -133,20 +116,20 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	companionDB := companion.ToUpdate()
-	if companionDB == (models.CompanionDB{}) {
+	resultCompanionDB := companion.ToUpdate()
+	if resultCompanionDB.IsErr() {
 		logger.Error("Error converting companion to DB model")
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
-			"Invalid companion data",
+			resultCompanionDB.Error().Error(),
 			"Companion ID: "+id,
 		)
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	err = configs.DB.UpdateOne(filter, companionDB)
+	err = configs.DB.UpdateOne(filter, resultCompanionDB.Value())
 
 	if err != nil {
 		logger.Error("Failed to update companion in MongoDB: ", err)
@@ -174,20 +157,20 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	companionDB := companion.ToUpdate()
-	if companionDB == (models.CompanionDB{}) {
+	resultCompanionDB := companion.ToUpdate()
+	if resultCompanionDB.IsErr() {
 		logger.Error("Error converting companion to DB model")
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
-			"Invalid companion data",
+			resultCompanionDB.Error().Error(),
 			"Companion ID: "+id,
 		)
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	err = configs.DB.PatchOne(filter, companionDB)
+	err = configs.DB.PatchOne(filter, resultCompanionDB.Value())
 
 	if err != nil {
 		logger.Error("Failed to update companion in MongoDB: ", err)

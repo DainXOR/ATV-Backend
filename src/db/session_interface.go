@@ -103,7 +103,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDB] {
 
 	sessionsResult := configs.DB.FindAll(filter, &session)
 	if sessionsResult.IsErr() {
-		logger.Warning("Failed to get all sessions from MongoDB:", sessionsResult.Error())
+		logger.Warning("Failed to get all sessions from database:", sessionsResult.Error())
 		var httpErr types.HttpError
 
 		switch sessionsResult.Error() {
@@ -123,7 +123,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDB] {
 	}
 
 	sessions := utils.Map(sessionsResult.Value(), models.InterfaceTo[models.SessionDB])
-	logger.Debug("Retrieved", len(sessions), "sessions from MongoDB database")
+	logger.Debug("Retrieved", len(sessions), "sessions from database")
 	return types.ResultOk(sessions)
 }
 func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB] {
@@ -143,7 +143,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 	filter := bson.D{{Key: "id_student", Value: oid}, models.Filter.NotDeleted()} // Filter to exclude deleted sessions
 	sessionResult := configs.DB.FindAll(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
-		logger.Warning("Failed to get all sessions by student ID from MongoDB:", sessionResult.Error())
+		logger.Warning("Failed to get all sessions by student ID from database:", sessionResult.Error())
 		var httpErr types.HttpError
 
 		switch sessionResult.Error() {
@@ -164,7 +164,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 	}
 
 	sessions := utils.Map(sessionResult.Value(), models.InterfaceTo[models.SessionDB])
-	logger.Debug("Retrieved", len(sessions), "sessions for student ID", id, "from MongoDB database")
+	logger.Debug("Retrieved", len(sessions), "sessions for student ID", id, "from database")
 	return types.ResultOk(sessions)
 }
 
@@ -207,13 +207,13 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 	filter := bson.D{{Key: "_id", Value: oid}}
 	err = configs.DB.UpdateOne(filter, sessionDB)
 	if err != nil {
-		logger.Error("Failed to update session in MongoDB: ", err)
+		logger.Error("Failed to update session in database: ", err)
 		return types.ResultErr[models.SessionDB](err)
 	}
 
 	sessionResult := configs.DB.FindOne(filter, sessionDB)
 	if sessionResult.IsErr() {
-		logger.Error("Failed to retrieve updated session from MongoDB: ", sessionResult.Error())
+		logger.Error("Failed to retrieve updated session from database: ", sessionResult.Error())
 		return types.ResultErr[models.SessionDB](sessionResult.Error())
 	}
 
@@ -259,13 +259,13 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 	filter := bson.D{{Key: "_id", Value: oid}}
 	err = configs.DB.PatchOne(filter, sessionDB)
 	if err != nil {
-		logger.Error("Failed to patch session in MongoDB: ", err)
+		logger.Error("Failed to patch session in database: ", err)
 		return types.ResultErr[models.SessionDB](err)
 	}
 
 	sessionResult := configs.DB.FindOne(filter, sessionDB)
 	if sessionResult.IsErr() {
-		logger.Error("Failed to retrieve patched session from MongoDB: ", sessionResult.Error())
+		logger.Error("Failed to retrieve patched session from database: ", sessionResult.Error())
 		return types.ResultErr[models.SessionDB](sessionResult.Error())
 	}
 
@@ -289,13 +289,13 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
 
 	err = configs.DB.SoftDeleteOne(filter, models.SessionDB{})
 	if err != nil {
-		logger.Error("Failed to delete session in MongoDB: ", err)
+		logger.Error("Failed to delete session in database: ", err)
 		return types.ResultErr[models.SessionDB](err)
 	}
 
 	sessionResult := configs.DB.FindOne(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
-		logger.Error("Failed to retrieve updated session from MongoDB: ", sessionResult.Error())
+		logger.Error("Failed to retrieve updated session from database: ", sessionResult.Error())
 		return types.ResultErr[models.SessionDB](sessionResult.Error())
 	}
 

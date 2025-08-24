@@ -105,7 +105,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
 
 	if len(sessions) == 0 {
-		logger.Warning("No sessions found for student ID in MongoDB database")
+		logger.Warning("No sessions found for student ID")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
 				"No sessions found for student ID",
@@ -135,7 +135,7 @@ func (sessionType) GetAll(c *gin.Context) {
 
 	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
 	if len(sessions) == 0 {
-		logger.Warning("No sessions found in MongoDB database")
+		logger.Warning("No sessions found in database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
 				"No sessions found",

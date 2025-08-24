@@ -1,5 +1,10 @@
 package models
 
+import (
+	"dainxor/atv/types"
+	"errors"
+)
+
 type CompanionDB struct {
 	ID               DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
@@ -14,25 +19,25 @@ type CompanionDB struct {
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 type CompanionCreate struct {
-	NumberID         string `json:"number_id,omitempty" bson:"number_id,omitempty"`
-	FirstName        string `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	Email            string `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	PhoneNumber      string `json:"phone_number" bson:"phone_number"`
-	IDSpeciality     string `json:"id_speciality" bson:"id_speciality"`
+	NumberID         string `json:"number_id,omitempty"`
+	FirstName        string `json:"first_name,omitempty"`
+	LastName         string `json:"last_name,omitempty"`
+	Email            string `json:"email,omitempty"`
+	InstitutionEmail string `json:"institution_email,omitempty"`
+	PhoneNumber      string `json:"phone_number"`
+	IDSpeciality     string `json:"id_speciality"`
 }
 type CompanionResponse struct {
-	ID               string     `json:"id,omitempty" bson:"id,omitempty"`
-	NumberID         string     `json:"number_id,omitempty" bson:"number_id,omitempty"`
-	FirstName        string     `json:"first_name,omitempty" bson:"first_name,omitempty"`
-	LastName         string     `json:"last_name,omitempty" bson:"last_name,omitempty"`
-	Email            string     `json:"email,omitempty" bson:"email,omitempty"`
-	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
-	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
-	IDSpeciality     string     `json:"id_speciality" bson:"id_speciality"`
-	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID               string     `json:"id,omitempty"`
+	NumberID         string     `json:"number_id,omitempty"`
+	FirstName        string     `json:"first_name,omitempty"`
+	LastName         string     `json:"last_name,omitempty"`
+	Email            string     `json:"email,omitempty"`
+	InstitutionEmail string     `json:"institution_email,omitempty"`
+	PhoneNumber      string     `json:"phone_number"`
+	IDSpeciality     string     `json:"id_speciality"`
+	CreatedAt        DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt        DBDateTime `json:"updated_at,omitzero"`
 }
 
 func (c CompanionCreate) ToInsert() CompanionDB {
@@ -48,13 +53,13 @@ func (c CompanionCreate) ToInsert() CompanionDB {
 		DeletedAt:        Time.Zero(),
 	}
 
-	if !EnsureID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
+	if !ID.Ensure(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
 		return CompanionDB{}
 	}
 
 	return obj
 }
-func (c CompanionCreate) ToUpdate() CompanionDB {
+func (c CompanionCreate) ToUpdate() types.Result[CompanionDB] {
 	obj := CompanionDB{
 		NumberID:         c.NumberID,
 		FirstName:        c.FirstName,
@@ -65,11 +70,11 @@ func (c CompanionCreate) ToUpdate() CompanionDB {
 		UpdatedAt:        Time.Now(),
 	}
 
-	if !OmitEmptyID(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
-		return CompanionDB{}
+	if !ID.OmitEmpty(c.IDSpeciality, &obj.IDSpeciality, "IDSpeciality") {
+		return types.ResultErr[CompanionDB](errors.New("Invalid IDSpeciality"))
 	}
 
-	return obj
+	return types.ResultOk(obj)
 }
 func (c CompanionDB) ToResponse() CompanionResponse {
 	return CompanionResponse{

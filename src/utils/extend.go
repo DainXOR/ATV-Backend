@@ -3,6 +3,7 @@ package utils
 import (
 	"dainxor/atv/types"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -94,6 +95,9 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 		result = reducer(result, value)
 	}
 	return result
+}
+func Any[T any](slice []T, predicate Predicate[T]) bool {
+	return slices.ContainsFunc(slice, predicate)
 }
 
 /* Functional utilities for maps */

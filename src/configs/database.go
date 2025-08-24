@@ -28,11 +28,11 @@ func (dbType) LoadEnv() {
 
 	if exist || useTesting == "TRUE" {
 		logger.Debug("Using testing database")
-		DB.connectionString = os.Getenv("CONECTION_STRING_TEST")
+		DB.connectionString = os.Getenv("CONNECTION_STRING_TEST")
 		DB.name = os.Getenv("DB_NAME_TEST")
 	} else {
 		logger.Debug("Using production database")
-		DB.connectionString = os.Getenv("CONECTION_STRING")
+		DB.connectionString = os.Getenv("CONNECTION_STRING")
 		DB.name = os.Getenv("DB_NAME")
 	}
 
@@ -44,10 +44,14 @@ func (dbType) LoadEnv() {
 	}
 
 }
-func (dbType) ReloadConnection() {
+func (dbType) ReloadConnection() error {
 	DB.Close()
 	DB.LoadEnv()
-	DB.Start()
+	if err := DB.Start(); err != nil {
+		logger.Error("Failed to reload DB connection:", err)
+		return err
+	}
+	return nil
 }
 
 func (dbType) Use(db InterfaceDBAccessor) *dbType {
@@ -131,6 +135,11 @@ func (dbType) Migrate(models ...models.DBModelInterface) {
 	logger.Info("Migrations completed")
 }
 
-func (dbType) Close() {
-	DB.accessor.Disconnect()
+func (dbType) Close() error {
+	if DB.accessor == nil {
+		logger.Error("Database accessor is not set")
+		return errors.New("Database accessor is not set")
+	}
+
+	return DB.accessor.Disconnect()
 }

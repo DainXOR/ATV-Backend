@@ -138,7 +138,7 @@ func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
 // Deprecated: Use models.Time.Now() instead.
 func TimeNow() DBDateTime {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Now() instead")
-	return time.Now()
+	return Time.Now()
 }
 
 // Deprecated: Use models.Time.Zero() instead.
@@ -149,12 +149,16 @@ func TimeZero() DBDateTime {
 
 type iTime struct{}
 
+// Unified time handling for models.
+// If you want to change the time type used, first update the Time struct "DBDateTime".
+// Then update the methods in the iTime struct accordingly.
 var Time iTime
 
-// If decide to change the time type, you can only change it here
 func (iTime) Now() DBDateTime {
 	return time.Now()
-} // If decide to change the time type, you can only change it here
+}
+
+// This is not necessarily the unix epoch or a 0 date or any other starting point, but rather default "empty" value used in the application.
 func (iTime) Zero() DBDateTime {
 	return time.Time{}
 }

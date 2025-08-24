@@ -9,31 +9,26 @@ import (
 type dbError struct{}
 
 var DBErr dbError
+var (
+	errNotFound       = errors.New("document not found")
+	errNotModified    = errors.New("document not modified")
+	errNotDeleted     = errors.New("document not deleted")
+	errAlreadyExists  = errors.New("document already exists")
+	errInvalidInput   = errors.New("invalid input")
+	errInternal       = errors.New("internal server error")
+	errNotImplemented = errors.New("not implemented")
+)
 
-func (dbError) NotFound() error {
-	return errors.New("document not found")
-}
-func (dbError) NotModified() error {
-	return errors.New("document not modified")
-}
-func (dbError) NotDeleted() error {
-	return errors.New("document not deleted")
-}
-func (dbError) AlreadyExists() error {
-	return errors.New("document already exists")
-}
-func (dbError) InvalidInput() error {
-	return errors.New("invalid input")
-}
-func (dbError) Internal() error {
-	return errors.New("internal server error")
-}
-func (dbError) NotImplemented() error {
-	return errors.New("not implemented")
-}
+func (dbError) NotFound() error       { return errNotFound }
+func (dbError) NotModified() error    { return errNotModified }
+func (dbError) NotDeleted() error     { return errNotDeleted }
+func (dbError) AlreadyExists() error  { return errAlreadyExists }
+func (dbError) InvalidInput() error   { return errInvalidInput }
+func (dbError) Internal() error       { return errInternal }
+func (dbError) NotImplemented() error { return errNotImplemented }
 
 type InterfaceDBAccessor interface {
-	Connect(dbName, conectionString string) error
+	Connect(dbName, connectionString string) error
 	Disconnect() error
 	Migrate(models ...models.DBModelInterface) error
 

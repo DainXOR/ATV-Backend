@@ -10,15 +10,15 @@ type SpecialityDB struct {
 
 // SpecialityCreate represents the request body for creating a new Speciality
 type SpecialityCreate struct {
-	Name string `json:"name" gorm:"not null"`
+	Name string `json:"name"`
 }
 
 // SpecialityResponse represents the response body for a Speciality
 type SpecialityResponse struct {
-	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID        string     `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
 }
 
 func (u SpecialityCreate) ToInsert() SpecialityDB {

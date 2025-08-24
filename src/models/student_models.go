@@ -28,14 +28,14 @@ type StudentDB struct {
 // StudentCreate represents the request body for creating a new user or updating an existing user
 // It is used to validate the input data before creating or updating a user in the database
 type StudentCreate struct {
-	NumberID         string `json:"number_id" gorm:"unique;not null"`
-	FirstName        string `json:"first_name" gorm:"not null"`
-	LastName         string `json:"last_name" gorm:"not null"`
-	PersonalEmail    string `json:"email" gorm:"unique;not null"`
-	InstitutionEmail string `json:"institution_email" gorm:"unique;not null"`
-	ResidenceAddress string `json:"residence_address" gorm:"not null"`
-	Semester         uint   `json:"semester" gorm:"not null"`
-	IDUniversity     string `json:"id_university" gorm:"not null"`
+	NumberID         string `json:"number_id"`
+	FirstName        string `json:"first_name"`
+	LastName         string `json:"last_name"`
+	PersonalEmail    string `json:"email"`
+	InstitutionEmail string `json:"institution_email"`
+	ResidenceAddress string `json:"residence_address"`
+	Semester         uint   `json:"semester"`
+	IDUniversity     string `json:"id_university"`
 	PhoneNumber      string `json:"phone_number"`
 }
 
@@ -43,15 +43,15 @@ type StudentCreate struct {
 // It is used to format the data returned to the client after a user is created or retrieved
 // It includes the ID, created_at, and updated_at fields
 type StudentResponse struct {
-	ID               string    `json:"id" gorm:"primaryKey;autoIncrement"`
-	NumberID         string    `json:"number_id" gorm:"unique;not null"`
-	FirstName        string    `json:"first_name" gorm:"not null"`
-	LastName         string    `json:"last_name" gorm:"not null"`
-	PersonalEmail    string    `json:"email" gorm:"unique;not null"`
-	InstitutionEmail string    `json:"institution_email" gorm:"unique;not null"`
-	ResidenceAddress string    `json:"residence_address" gorm:"not null"`
-	Semester         uint      `json:"semester" gorm:"not null"`
-	IDUniversity     string    `json:"id_university" gorm:"not null"`
+	ID               string    `json:"id"`
+	NumberID         string    `json:"number_id"`
+	FirstName        string    `json:"first_name"`
+	LastName         string    `json:"last_name"`
+	PersonalEmail    string    `json:"email"`
+	InstitutionEmail string    `json:"institution_email"`
+	ResidenceAddress string    `json:"residence_address"`
+	Semester         uint      `json:"semester"`
+	IDUniversity     string    `json:"id_university"`
 	PhoneNumber      string    `json:"phone_number"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
@@ -63,7 +63,7 @@ func (user StudentCreate) ToInsert() StudentDB {
 	idu, err := ID.ToDB(user.IDUniversity)
 
 	if err != nil {
-		logger.Warning("Failed to convert IDUniversity to primitive.ObjectID:", err)
+		logger.Warning("Failed to convert IDUniversity to DBID:", err)
 		return StudentDB{} // Return an empty struct if conversion fails
 	}
 
@@ -98,7 +98,7 @@ func (user StudentCreate) ToUpdate() types.Result[StudentDB] {
 	}
 
 	if !ID.OmitEmpty(user.IDUniversity, &obj.IDUniversity, "IDUniversity") {
-		return types.ResultErr[StudentDB](errors.New("IDUniversity is required"))
+		return types.ResultErr[StudentDB](errors.New("Invalid IDUniversity"))
 	}
 
 	return types.ResultOk(obj)

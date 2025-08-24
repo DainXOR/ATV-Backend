@@ -16,7 +16,7 @@ var Speciality specialityType
 
 func (specialityType) Create(u models.SpecialityCreate) types.Result[models.SpecialityDB] {
 	specialityDB := u.ToInsert()
-	resultID := configs.DB.InsertOne(&specialityDB)
+	resultID := configs.DB.InsertOne(specialityDB)
 
 	if resultID.IsErr() {
 		logger.Error("Error inserting speciality: ", resultID.Error())
@@ -70,15 +70,15 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDB] {
 	return types.ResultOk(resultSpeciality.Value().(models.SpecialityDB))
 }
 func (specialityType) GetAll() types.Result[[]models.SpecialityDB] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted specialities
+	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted specialities
 
 	resultSpecialities := configs.DB.FindAll(filter, models.SpecialityDB{})
 	if resultSpecialities.IsErr() {
-		logger.Warning("Failed to get all specialities from MongoDB:", resultSpecialities.Error())
+		logger.Warning("Failed to get all specialities from database:", resultSpecialities.Error())
 		return types.ResultErr[[]models.SpecialityDB](resultSpecialities.Error())
 	}
 
 	specialities := utils.Map(resultSpecialities.Value(), models.InterfaceTo[models.SpecialityDB])
-	logger.Debug("Retrieved", len(specialities), "specialities from MongoDB database")
+	logger.Debug("Retrieved", len(specialities), "specialities from database")
 	return types.ResultOk(specialities)
 }

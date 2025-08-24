@@ -10,15 +10,15 @@ type SessionTypeDB struct {
 
 // SessionTypeCreate represents the request body for creating a new SessionType
 type SessionTypeCreate struct {
-	Name string `json:"name" gorm:"not null"`
+	Name string `json:"name"`
 }
 
 // SessionTypeResponse represents the response body for a SessionType
 type SessionTypeResponse struct {
-	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID        string     `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
 }
 
 func (u SessionTypeCreate) ToInsert() SessionTypeDB {

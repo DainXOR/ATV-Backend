@@ -28,8 +28,8 @@ func GetMongoAccessor() *mongoType {
 	return &mongoType{}
 }
 
-func (m *mongoType) Connect(dbName, conectionString string) error {
-	clientOpts := options.Client().ApplyURI(conectionString)
+func (m *mongoType) Connect(dbName, connectionString string) error {
+	clientOpts := options.Client().ApplyURI(connectionString)
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
 		logger.Error("Failed to connect to MongoDB:", err)

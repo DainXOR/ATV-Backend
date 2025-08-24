@@ -73,7 +73,7 @@ func (universityType) GetAll() types.Result[[]models.UniversityDB] {
 
 	resultUniversities := configs.DB.FindAll(filter, models.UniversityDB{})
 	if resultUniversities.IsErr() {
-		logger.Warning("Failed to get all universities from MongoDB:", resultUniversities.Error())
+		logger.Warning("Failed to get all universities from database:", resultUniversities.Error())
 		var httpErr types.HttpError
 
 		switch resultUniversities.Error() {
@@ -94,6 +94,6 @@ func (universityType) GetAll() types.Result[[]models.UniversityDB] {
 	}
 
 	universities := utils.Map(resultUniversities.Value(), models.InterfaceTo[models.UniversityDB])
-	logger.Debug("Retrieved", len(universities), "universities from MongoDB database")
+	logger.Debug("Retrieved", len(universities), "universities from database")
 	return types.ResultOk(universities)
 }

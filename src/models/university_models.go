@@ -11,17 +11,17 @@ type UniversityDB struct {
 
 // UniversityCreate represents the request body for creating a new university
 type UniversityCreate struct {
-	Name     string `json:"name" gorm:"not null"`
-	Location string `json:"location" gorm:"not null"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
 }
 
 // UniversityResponse represents the response body for a university
 type UniversityResponse struct {
-	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID        string     `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	Location  string     `json:"location,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
 }
 
 func (u UniversityCreate) ToInsert() UniversityDB {

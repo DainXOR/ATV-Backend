@@ -30,7 +30,7 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 	resultID := configs.DB.InsertOne(studentDB)
 
 	if resultID.IsErr() {
-		logger.Error("Failed to create student in MongoDB: ", resultID.Error())
+		logger.Error("Failed to create student in database: ", resultID.Error())
 		return types.ResultErr[models.StudentDB](resultID.Error())
 	}
 
@@ -80,7 +80,7 @@ func (studentType) GetByID(id string) types.Result[models.StudentDB] {
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
 func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDB] {
-	filter := bson.D{{Key: "id_number", Value: idNumber}}
+	filter := bson.D{{Key: "number_id", Value: idNumber}}
 
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
@@ -136,11 +136,11 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDB] {
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
 func (studentType) GetAll() types.Result[[]models.StudentDB] {
-	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted students
+	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted students
 
 	resultStudents := configs.DB.FindAll(filter, models.StudentDB{})
 	if resultStudents.IsErr() {
-		logger.Warning("Failed to get all students from MongoDB:", resultStudents.Error())
+		logger.Warning("Failed to get all students from database:", resultStudents.Error())
 		var httpErr types.HttpError
 
 		switch resultStudents.Error() {
@@ -162,7 +162,7 @@ func (studentType) GetAll() types.Result[[]models.StudentDB] {
 	}
 
 	students := utils.Map(resultStudents.Value(), models.InterfaceTo[models.StudentDB])
-	logger.Debug("Retrieved", len(students), "students from MongoDB database")
+	logger.Debug("Retrieved", len(students), "students from database")
 	return types.ResultOk(students)
 }
 
@@ -179,27 +179,32 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	resultStudent := student.ToUpdate()
-	if resultStudent.IsErr() {
-		logger.Warning("Error converting student to DB model: ", resultStudent.Error())
+	resultStudentUpdate := student.ToUpdate()
+	if resultStudentUpdate.IsErr() {
+		logger.Warning("Error converting student to DB model: ", resultStudentUpdate.Error())
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid student data",
-			resultStudent.Error().Error(),
+			resultStudentUpdate.Error().Error(),
 			"Student ID: "+id,
 		)
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	err = configs.DB.UpdateOne(filter, resultStudent.Value())
+	err = configs.DB.UpdateOne(filter, resultStudentUpdate.Value())
 	if err != nil {
-		logger.Warning("Failed to update student in MongoDB: ", err)
+		logger.Warning("Failed to update student in database: ", err)
 		return types.ResultErr[models.StudentDB](err)
 	}
 
-	studentDB := configs.DB.FindOne(filter, models.StudentDB{})
-	return types.ResultOk(studentDB.Value().(models.StudentDB))
+	resultStudentDB := configs.DB.FindOne(filter, models.StudentDB{})
+	if resultStudentDB.IsErr() {
+		logger.Warning("Failed to retrieve updated student: ", resultStudentDB.Error())
+		return types.ResultErr[models.StudentDB](resultStudentDB.Error())
+	}
+
+	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
 }
 
 func (studentType) PatchByID(id string, student models.StudentCreate) types.Result[models.StudentDB] {
@@ -215,27 +220,32 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	resultStudent := student.ToUpdate()
-	if resultStudent.IsErr() {
-		logger.Warning("Error converting student to DB model: ", resultStudent.Error())
+	resultStudentPatch := student.ToUpdate()
+	if resultStudentPatch.IsErr() {
+		logger.Warning("Error converting student to DB model: ", resultStudentPatch.Error())
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid student data",
-			resultStudent.Error().Error(),
+			resultStudentPatch.Error().Error(),
 			"Student ID: "+id,
 		)
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	filter := bson.D{{Key: "_id", Value: oid}}
-	err = configs.DB.PatchOne(filter, resultStudent.Value())
+	err = configs.DB.PatchOne(filter, resultStudentPatch.Value())
 	if err != nil {
-		logger.Warning("Failed to patch student in MongoDB: ", err)
+		logger.Warning("Failed to patch student in database: ", err)
 		return types.ResultErr[models.StudentDB](err)
 	}
 
-	studentDB := configs.DB.FindOne(filter, models.StudentDB{})
-	return types.ResultOk(studentDB.Value().(models.StudentDB))
+	resultStudentDB := configs.DB.FindOne(filter, models.StudentDB{})
+	if resultStudentDB.IsErr() {
+		logger.Warning("Failed to retrieve updated student: ", resultStudentDB.Error())
+		return types.ResultErr[models.StudentDB](resultStudentDB.Error())
+	}
+
+	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
 }
 
 func (studentType) DeleteByID(id string) types.Result[models.StudentDB] {
@@ -278,7 +288,7 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDB] {
 	deletedStudent := resultStudent.Value().(models.StudentDB)
 	err = configs.DB.SoftDeleteOne(filter, deletedStudent)
 	if err != nil {
-		logger.Warning("Failed to delete student in MongoDB: ", err)
+		logger.Warning("Failed to delete student in database: ", err)
 		var httpErr types.HttpError
 
 		switch err {
@@ -348,7 +358,7 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDB]
 
 	err = configs.DB.PermanentDeleteOne(filter, models.StudentDB{})
 	if err != nil {
-		logger.Warning("Failed to permanently delete student in MongoDB: ", err)
+		logger.Warning("Failed to permanently delete student in database: ", err)
 		var httpErr types.HttpError
 
 		switch err {
@@ -398,7 +408,7 @@ func (studentType) DeletePermanentAll() types.Result[[]models.StudentDB] {
 
 	err := configs.DB.PermanentDeleteMany(filter, models.StudentDB{})
 	if err != nil {
-		logger.Warning("Failed to permanently delete all students in MongoDB: ", err)
+		logger.Warning("Failed to permanently delete all students in database: ", err)
 		var httpErr types.HttpError
 
 		switch err {
@@ -417,6 +427,6 @@ func (studentType) DeletePermanentAll() types.Result[[]models.StudentDB] {
 		return types.ResultErr[[]models.StudentDB](&httpErr)
 	}
 
-	Students := utils.Map(resultStudents.Value(), models.InterfaceTo[models.StudentDB])
-	return types.ResultOk(Students)
+	students := utils.Map(resultStudents.Value(), models.InterfaceTo[models.StudentDB])
+	return types.ResultOk(students)
 }

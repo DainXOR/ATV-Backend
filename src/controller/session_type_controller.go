@@ -35,12 +35,12 @@ func (sessionTypeType) Create(c *gin.Context) {
 	logger.Debug("Creating session type in MongoDB: ", body)
 	existent := db.SessionType.GetAll()
 	if existent.IsOk() && len(existent.Value()) > 0 {
-		match := utils.Filter(existent.Value(), func(st models.SessionTypeDB) bool {
+		match := utils.Any(existent.Value(), func(st models.SessionTypeDB) bool {
 			return st.Name == body.Name
 		})
 
-		if len(match) > 0 {
-			logger.Info("Session type with name already exists: ", body.Name)
+		if match {
+			logger.Info("Session type with the name already exists: ", body.Name)
 			c.JSON(types.Http.C400().Conflict(),
 				types.EmptyResponse(
 					"Session type with this name already exists",
@@ -117,7 +117,7 @@ func (sessionTypeType) GetAll(c *gin.Context) {
 
 	sessionTypes := utils.Map(result.Value(), models.SessionTypeDB.ToResponse)
 	if len(sessionTypes) == 0 {
-		logger.Warning("No session types found in MongoDB database")
+		logger.Warning("No session types found in database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
 				"No session types found",
