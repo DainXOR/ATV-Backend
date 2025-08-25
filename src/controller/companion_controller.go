@@ -17,6 +17,8 @@ var Companion companionType
 
 func (companionType) GetByIDMongo(c *gin.Context) {
 	id := c.Param("id")
+	//filter := Filter.Create(c.Request.URL.Query())
+
 	logger.Debug("Getting companion by ID: ", id)
 
 	result := db.Companion.GetByID(id)
@@ -55,7 +57,7 @@ func (companionType) GetAllMongo(c *gin.Context) {
 		return
 	}
 
-	companions := utils.Map(result.Value(), models.CompanionDBMongo.ToResponse)
+	companions := utils.Map(result.Value(), models.CompanionDB.ToResponse)
 	if len(companions) == 0 {
 		logger.Warning("No companions found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

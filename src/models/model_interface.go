@@ -21,10 +21,25 @@ import (
 type DBModelInterface interface {
 	TableName() string
 	IsEmpty() bool
+	//CreationDate() DBDateTime
+	//UpdateDate() DBDateTime
+	//DeleteDate() DBDateTime
 }
 
 type DBID = bson.ObjectID
 type DBDateTime = time.Time
+
+//func (m DBModelBase) CreationDate() DBDateTime {
+//	return m.CreatedAt
+//}
+//
+//func (m DBModelBase) UpdateDate() DBDateTime {
+//	return m.UpdatedAt
+//}
+//
+//func (m DBModelBase) DeleteDate() DBDateTime {
+//	return m.DeletedAt
+//}
 
 // Deprecated: Use models.ID.ToPrimitive() instead.
 func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
@@ -123,7 +138,7 @@ func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
 // Deprecated: Use models.Time.Now() instead.
 func TimeNow() DBDateTime {
 	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Now() instead")
-	return time.Now()
+	return Time.Now()
 }
 
 // Deprecated: Use models.Time.Zero() instead.
@@ -134,12 +149,16 @@ func TimeZero() DBDateTime {
 
 type iTime struct{}
 
+// Unified time handling for models.
+// If you want to change the time type used, first update the Time struct "DBDateTime".
+// Then update the methods in the iTime struct accordingly.
 var Time iTime
 
-// If decide to change the time type, you can only change it here
 func (iTime) Now() DBDateTime {
 	return time.Now()
-} // If decide to change the time type, you can only change it here
+}
+
+// This is not necessarily the unix epoch or a 0 date or any other starting point, but rather default "empty" value used in the application.
 func (iTime) Zero() DBDateTime {
 	return time.Time{}
 }
@@ -148,15 +167,31 @@ type iFilters struct{}
 
 var Filter iFilters
 
-func (iFilters) ID(id bson.ObjectID) bson.E {
-	return bson.E{Key: "_id", Value: id} // Filter by ID
+type FilterType = bson.E
+
+func (iFilters) ID(id bson.ObjectID) FilterType {
+	return FilterType{Key: "_id", Value: id} // Filter by ID
 }
-func (iFilters) IDOf(idName string, id bson.ObjectID) bson.E {
-	return bson.E{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
+func (iFilters) IDOf(idName string, id bson.ObjectID) FilterType {
+	return FilterType{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
 }
-func (iFilters) NotDeleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
+func (iFilters) NotDeleted() FilterType {
+	return FilterType{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
 }
-func (iFilters) Deleted() bson.E {
-	return bson.E{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
+func (iFilters) Deleted() FilterType {
+	return FilterType{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
+}
+
+type iUpdate struct{}
+
+var Update iUpdate
+
+type UpdateType = bson.M
+
+func (iUpdate) Delete() UpdateType {
+	return UpdateType{"$set": bson.M{"deleted_at": Time.Now()}} // Soft delete
+}
+
+func InterfaceTo[T DBModelInterface](a DBModelInterface) T {
+	return a.(T)
 }

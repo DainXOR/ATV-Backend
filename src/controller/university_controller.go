@@ -98,7 +98,7 @@ func (universityType) GetAll(c *gin.Context) {
 		return
 	}
 
-	universities := utils.Map(result.Value(), models.UniversityDBMongo.ToResponse)
+	universities := utils.Map(result.Value(), models.UniversityDB.ToResponse)
 	if len(universities) == 0 {
 		logger.Warning("No universities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

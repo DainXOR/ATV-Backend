@@ -3,6 +3,7 @@ package utils
 import (
 	"dainxor/atv/types"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -19,9 +20,6 @@ func Partial[T, U, R any](value T, fn func(T, U) R) func(arg U) R {
 	return func(arg U) R {
 		return fn(value, arg)
 	}
-}
-func Transform[T, R any](value T, fn func(T) R) R {
-	return fn(value)
 }
 func Extract(prefix string, text string, suffix string) string {
 	size := len(text)
@@ -97,6 +95,9 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 		result = reducer(result, value)
 	}
 	return result
+}
+func Any[T any](slice []T, predicate Predicate[T]) bool {
+	return slices.ContainsFunc(slice, predicate)
 }
 
 /* Functional utilities for maps */
