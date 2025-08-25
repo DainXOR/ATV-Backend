@@ -30,8 +30,24 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 	resultID := configs.DB.InsertOne(studentDB)
 
 	if resultID.IsErr() {
-		logger.Error("Failed to create student in database: ", resultID.Error())
-		return types.ResultErr[models.StudentDB](resultID.Error())
+		logger.Warning("Failed to create student in database: ", resultID.Error())
+		var httpErr types.HttpError
+
+		switch resultID.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+student.IDUniversity+" not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to create student",
+				resultID.Error().Error(),
+			)
+		}
+
+		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	studentDB.ID = resultID.Value()
@@ -195,13 +211,45 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 	err = configs.DB.UpdateOne(filter, resultStudentUpdate.Value())
 	if err != nil {
 		logger.Warning("Failed to update student in database: ", err)
-		return types.ResultErr[models.StudentDB](err)
+		var httpErr types.HttpError
+
+		switch err {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+id+" not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to update student",
+				err.Error(),
+				"Student ID: "+id,
+			)
+		}
+		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	resultStudentDB := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudentDB.IsErr() {
 		logger.Warning("Failed to retrieve updated student: ", resultStudentDB.Error())
-		return types.ResultErr[models.StudentDB](resultStudentDB.Error())
+		var httpErr types.HttpError
+
+		switch resultStudentDB.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+id+" not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve updated student",
+				resultStudentDB.Error().Error(),
+				"Student ID: "+id,
+			)
+		}
+		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
@@ -236,13 +284,45 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 	err = configs.DB.PatchOne(filter, resultStudentPatch.Value())
 	if err != nil {
 		logger.Warning("Failed to patch student in database: ", err)
-		return types.ResultErr[models.StudentDB](err)
+		var httpErr types.HttpError
+
+		switch err {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+id+" not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to patch student",
+				err.Error(),
+				"Student ID: "+id,
+			)
+		}
+		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	resultStudentDB := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudentDB.IsErr() {
 		logger.Warning("Failed to retrieve updated student: ", resultStudentDB.Error())
-		return types.ResultErr[models.StudentDB](resultStudentDB.Error())
+		var httpErr types.HttpError
+
+		switch resultStudentDB.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Student not found",
+				"Student with ID "+id+" not found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve updated student",
+				resultStudentDB.Error().Error(),
+				"Student ID: "+id,
+			)
+		}
+		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
 	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
