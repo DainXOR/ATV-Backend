@@ -6,10 +6,8 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type companionType struct{}
@@ -241,14 +239,14 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "deleted_at", Value: bson.M{"$ne": time.Time{}}}} // Ensure the companion is marked as deleted
+	filter := bson.D{{Key: "_id", Value: oid}, models.Filter.Deleted()} // Ensure the companion is marked as deleted
 	var companion models.CompanionDB
 	companionResult := configs.DB.FindOne(filter, companion)
 
 	if companionResult.IsErr() {
 		logger.Debug("Failed to find companion for permanent deletion: ", companionResult.Error())
 
-		if companionResult.Error() == mongo.ErrNoDocuments {
+		if companionResult.Error() == configs.DBErr.NotFound() {
 			httpErr := types.ErrorNotFound(
 				"Companion not found",
 				"Companion with ID "+id+" not found or not marked as deleted",
@@ -303,8 +301,6 @@ func (companionType) DeletePermanentAll() types.Result[[]models.CompanionDB] {
 		return types.ResultErr[[]models.CompanionDB](&httpErr)
 	}
 
-	companions := utils.Map(companionResult.Value(), func(m models.DBModelInterface) models.CompanionDB {
-		return m.(models.CompanionDB)
-	})
+	companions := utils.Map(companionResult.Value(), models.InterfaceTo[models.CompanionDB])
 	return types.ResultOk(companions)
 }

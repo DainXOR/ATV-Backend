@@ -75,7 +75,22 @@ func (specialityType) GetAll() types.Result[[]models.SpecialityDB] {
 	resultSpecialities := configs.DB.FindAll(filter, models.SpecialityDB{})
 	if resultSpecialities.IsErr() {
 		logger.Warning("Failed to get all specialities from database:", resultSpecialities.Error())
-		return types.ResultErr[[]models.SpecialityDB](resultSpecialities.Error())
+		var httpErr types.HttpError
+
+		switch resultSpecialities.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Specialities not found",
+				"No specialities found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve specialities",
+				resultSpecialities.Error().Error(),
+			)
+		}
+		return types.ResultErr[[]models.SpecialityDB](&httpErr)
 	}
 
 	specialities := utils.Map(resultSpecialities.Value(), models.InterfaceTo[models.SpecialityDB])
