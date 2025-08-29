@@ -15,64 +15,7 @@ type studentType struct{}
 
 var Student studentType
 
-func (studentType) GetByIDMongo(c *gin.Context) {
-	id := c.Param("id")
-	logger.Debug("Getting student by ID: ", id)
-
-	result := db.Student.GetByID(id)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code,
-			types.EmptyResponse(
-				cerror.Msg(),
-				cerror.Details(),
-			),
-		)
-		return
-	}
-
-	student := result.Value()
-	c.JSON(http.StatusOK,
-		types.Response(
-			student.ToResponse(),
-			"",
-		),
-	)
-}
-func (studentType) GetAllMongo(c *gin.Context) {
-	result := db.Student.GetAll()
-
-	if result.IsErr() {
-		err := result.Error().(*types.HttpError)
-		c.JSON(err.Code,
-			types.EmptyResponse(
-				err.Msg(),
-				err.Details(),
-			),
-		)
-		return
-	}
-
-	students := utils.Map(result.Value(), models.StudentDB.ToResponse)
-	if len(students) == 0 {
-		logger.Warning("No students found in MongoDB database")
-		c.JSON(types.Http.C400().NotFound(),
-			types.EmptyResponse(
-				"No students found",
-			))
-		return
-	}
-	c.JSON(types.Http.C200().Ok(),
-		types.Response(
-			students,
-			"",
-		),
-	)
-}
-
-func (studentType) CreateMongo(c *gin.Context) {
+func (studentType) Create(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -116,7 +59,66 @@ func (studentType) CreateMongo(c *gin.Context) {
 	)
 }
 
-func (studentType) UpdateMongo(c *gin.Context) {
+func (studentType) GetByID(c *gin.Context) {
+	id := c.Param("id")
+	logger.Debug("Getting student by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
+
+	result := db.Student.GetByID(id, filter)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
+		return
+	}
+
+	student := result.Value()
+	c.JSON(http.StatusOK,
+		types.Response(
+			student.ToResponse(),
+			"",
+		),
+	)
+}
+func (studentType) GetAll(c *gin.Context) {
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.Student.GetAll(filter)
+
+	if result.IsErr() {
+		err := result.Error().(*types.HttpError)
+		c.JSON(err.Code,
+			types.EmptyResponse(
+				err.Msg(),
+				err.Details(),
+			),
+		)
+		return
+	}
+
+	students := utils.Map(result.Value(), models.StudentDB.ToResponse)
+	if len(students) == 0 {
+		logger.Warning("No students found in MongoDB database")
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No students found",
+			))
+		return
+	}
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			students,
+			"",
+		),
+	)
+}
+
+func (studentType) UpdatebyID(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -136,8 +138,9 @@ func (studentType) UpdateMongo(c *gin.Context) {
 
 	id := c.Param("id")
 	logger.Debug("Updating student by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.UpdateByID(id, body)
+	result := db.Student.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -154,7 +157,7 @@ func (studentType) UpdateMongo(c *gin.Context) {
 	)
 }
 
-func (studentType) PatchMongo(c *gin.Context) {
+func (studentType) PatchByID(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -173,8 +176,9 @@ func (studentType) PatchMongo(c *gin.Context) {
 	}
 
 	id := c.Param("id")
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.PatchByID(id, body)
+	result := db.Student.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -197,12 +201,12 @@ func (studentType) PatchMongo(c *gin.Context) {
 	)
 }
 
-// DeleteByID deletes a student by ID
 func (studentType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Deleting student by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.DeleteByID(id)
+	result := db.Student.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -239,8 +243,9 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 
 	id := c.Param("id")
 	logger.Info("Force deleting student by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.DeletePermanentByID(id)
+	result := db.Student.DeletePermanentByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -260,57 +265,6 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 		types.Response(
 			data,
 			"Student deleted permanently",
-		),
-	)
-}
-
-func (studentType) GetByIDGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
-		),
-	)
-}
-func (studentType) GetAllGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/all")
-	c.JSON(http.StatusOK,
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/all instead"),
-		),
-	)
-}
-
-func (studentType) CreateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student")
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student instead"),
-		),
-	)
-}
-
-// UpdateGorm updates an existing student in the database
-// This will override zeroed fields
-func (studentType) UpdateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
-		),
-	)
-}
-
-// PatchGorm updates an existing student in the database
-// This will keep previous value in zeroed fields
-func (studentType) PatchGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/student/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.0.3"), types.V("0.1.1"), "Use /api/v1/student/:id instead"),
 		),
 	)
 }

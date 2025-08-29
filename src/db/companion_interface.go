@@ -33,7 +33,7 @@ func (companionType) Create(companion models.CompanionCreate) types.Result[model
 	return types.ResultOk(companionDB)
 }
 
-func (companionType) GetByID(id string) types.Result[models.CompanionDB] {
+func (companionType) GetByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
 	oid, err := models.ID.ToBson(id)
 
 	if err != nil {
@@ -47,7 +47,8 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDB] {
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	var companion models.CompanionDB
 
 	resultGet := configs.DB.FindOne(filter, companion)
@@ -59,8 +60,9 @@ func (companionType) GetByID(id string) types.Result[models.CompanionDB] {
 	companion = resultGet.Value().(models.CompanionDB)
 	return types.ResultOk(companion)
 }
-func (companionType) GetByNumberID(idNumber string) types.Result[models.CompanionDB] {
-	filter := bson.D{{Key: "number_id", Value: idNumber}}
+func (companionType) GetByNumberID(numberID string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	filter = models.Filter.Add(filter, "number_id", []string{numberID}) // This is not a DBID
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultCompanionDB := configs.DB.FindOne(filter, models.CompanionDB{})
 	if resultCompanionDB.IsErr() {
@@ -71,8 +73,9 @@ func (companionType) GetByNumberID(idNumber string) types.Result[models.Companio
 
 	return types.ResultOk(resultCompanionDB.Value().(models.CompanionDB))
 }
-func (companionType) GetByEmail(email string) types.Result[models.CompanionDB] {
-	filter := bson.D{{Key: "email", Value: email}}
+func (companionType) GetByEmail(email string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	filter = models.Filter.Add(filter, "email", []string{email})
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	var companion models.CompanionDB
 
 	resultGet := configs.DB.FindOne(filter, &companion)
@@ -86,8 +89,8 @@ func (companionType) GetByEmail(email string) types.Result[models.CompanionDB] {
 	companion = resultGet.Value().(models.CompanionDB)
 	return types.ResultOk(companion)
 }
-func (companionType) GetAll() types.Result[[]models.CompanionDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted companionsDB
+func (companionType) GetAll(filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultCompanionsDB := configs.DB.FindAll(filter, models.CompanionDB{})
 	if resultCompanionsDB.IsErr() {
@@ -101,7 +104,7 @@ func (companionType) GetAll() types.Result[[]models.CompanionDB] {
 	return types.ResultOk(companionsDB)
 }
 
-func (companionType) UpdateByID(id string, companion models.CompanionCreate) types.Result[models.CompanionDB] {
+func (companionType) UpdateByID(id string, companion models.CompanionCreate, filter models.FilterObject) types.Result[models.CompanionDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -126,7 +129,8 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.UpdateOne(filter, resultCompanionDB.Value())
 
 	if err != nil {
@@ -139,10 +143,10 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate) typ
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	return Companion.GetByID(id)
+	return Companion.GetByID(id, models.Filter.Empty())
 }
 
-func (companionType) PatchByID(id string, companion models.CompanionCreate) types.Result[models.CompanionDB] {
+func (companionType) PatchByID(id string, companion models.CompanionCreate, filter models.FilterObject) types.Result[models.CompanionDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -167,7 +171,8 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.PatchOne(filter, resultCompanionDB.Value())
 
 	if err != nil {
@@ -180,10 +185,10 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate) type
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	return Companion.GetByID(id)
+	return Companion.GetByID(id, models.Filter.Empty())
 }
 
-func (companionType) DeleteByID(id string) types.Result[models.CompanionDB] {
+func (companionType) DeleteByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
 	oid, err := models.ID.ToBson(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -196,7 +201,8 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDB] {
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	var companion models.CompanionDB
 	companionResult := configs.DB.FindOne(filter, companion)
 
@@ -225,7 +231,7 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDB] {
 
 	return types.ResultOk(companion)
 }
-func (companionType) DeletePermanentByID(id string) types.Result[models.CompanionDB] {
+func (companionType) DeletePermanentByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
 	logger.Warning("Permanently deleting companion by ID: ", id)
 	oid, err := models.ID.ToBson(id)
 	if err != nil {
@@ -239,7 +245,8 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}, models.Filter.Deleted()} // Ensure the companion is marked as deleted
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	var companion models.CompanionDB
 	companionResult := configs.DB.FindOne(filter, companion)
 
@@ -276,8 +283,8 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 
 	return types.ResultOk(companion)
 }
-func (companionType) DeletePermanentAll() types.Result[[]models.CompanionDB] {
-	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}
+func (companionType) DeletePermanentAll(filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.Deleted())
 
 	var companion models.CompanionDB
 	companionResult := configs.DB.FindAll(filter, companion)

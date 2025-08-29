@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type sessionTypeType struct{}
@@ -27,7 +25,7 @@ func (sessionTypeType) Create(u models.SessionTypeCreate) types.Result[models.Se
 	return types.ResultOk(sessionTypeDB)
 }
 
-func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDB] {
+func (sessionTypeType) GetByID(id string, filter models.FilterObject) types.Result[models.SessionTypeDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -41,7 +39,8 @@ func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDB] {
 		return types.ResultErr[models.SessionTypeDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	resultSessionType := configs.DB.FindOne(filter, models.SessionTypeDB{})
 	if resultSessionType.IsErr() {
 		logger.Warning("Failed to get session type by ID: ", resultSessionType.Error())
@@ -67,8 +66,8 @@ func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDB] {
 
 	return types.ResultOk(resultSessionType.Value().(models.SessionTypeDB))
 }
-func (sessionTypeType) GetAll() types.Result[[]models.SessionTypeDB] {
-	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted session types
+func (sessionTypeType) GetAll(filter models.FilterObject) types.Result[[]models.SessionTypeDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultSessionTypes := configs.DB.FindAll(filter, models.SessionTypeDB{})
 	if resultSessionTypes.IsErr() {

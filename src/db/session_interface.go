@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type sessionType struct{}
@@ -56,7 +54,7 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDB]
 	return types.ResultOk(session)
 }
 
-func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
+func (sessionType) GetByID(id string, filter models.FilterObject) types.Result[models.SessionDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -70,7 +68,8 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	sessionResult := configs.DB.FindOne(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
@@ -97,8 +96,8 @@ func (sessionType) GetByID(id string) types.Result[models.SessionDB] {
 
 	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
-func (sessionType) GetAll() types.Result[[]models.SessionDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted sessions
+func (sessionType) GetAll(filter models.FilterObject) types.Result[[]models.SessionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted()) // Filter to exclude deleted sessions
 	session := models.SessionDB{}
 
 	sessionsResult := configs.DB.FindAll(filter, &session)
@@ -126,7 +125,7 @@ func (sessionType) GetAll() types.Result[[]models.SessionDB] {
 	logger.Debug("Retrieved", len(sessions), "sessions from database")
 	return types.ResultOk(sessions)
 }
-func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB] {
+func (sessionType) GetAllByStudentID(id string, filter models.FilterObject) types.Result[[]models.SessionDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -140,7 +139,8 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 		return types.ResultErr[[]models.SessionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "id_student", Value: oid}, models.Filter.NotDeleted()} // Filter to exclude deleted sessions
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	sessionResult := configs.DB.FindAll(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
 		logger.Warning("Failed to get all sessions by student ID from database:", sessionResult.Error())
@@ -168,7 +168,7 @@ func (sessionType) GetAllByStudentID(id string) types.Result[[]models.SessionDB]
 	return types.ResultOk(sessions)
 }
 
-func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Result[models.SessionDB] {
+func (sessionType) UpdateByID(id string, session models.SessionCreate, filter models.FilterObject) types.Result[models.SessionDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -204,7 +204,8 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 		}
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.UpdateOne(filter, sessionDB)
 	if err != nil {
 		logger.Error("Failed to update session in database: ", err)
@@ -220,7 +221,7 @@ func (sessionType) UpdateByID(id string, session models.SessionCreate) types.Res
 	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 
-func (sessionType) PatchByID(id string, session models.SessionCreate) types.Result[models.SessionDB] {
+func (sessionType) PatchByID(id string, session models.SessionCreate, filter models.FilterObject) types.Result[models.SessionDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -256,7 +257,8 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 		}
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.PatchOne(filter, sessionDB)
 	if err != nil {
 		logger.Error("Failed to patch session in database: ", err)
@@ -272,7 +274,7 @@ func (sessionType) PatchByID(id string, session models.SessionCreate) types.Resu
 	return types.ResultOk(sessionResult.Value().(models.SessionDB))
 }
 
-func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
+func (sessionType) DeleteByID(id string, filter models.FilterObject) types.Result[models.SessionDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
@@ -285,7 +287,8 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
 		return types.ResultErr[models.SessionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	err = configs.DB.SoftDeleteOne(filter, models.SessionDB{})
 	if err != nil {
@@ -303,13 +306,13 @@ func (sessionType) DeleteByID(id string) types.Result[models.SessionDB] {
 }
 
 func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] {
-	studentResult := Student.GetByID(session.IDStudent)
+	studentResult := Student.GetByID(session.IDStudent, models.Filter.Empty())
 	if studentResult.IsErr() {
 		logger.Warning("Failed to get student by ID: ", studentResult.Error())
 		return types.ResultErr[map[string]string](studentResult.Error())
 	}
 
-	companionResult := Companion.GetByID(session.IDCompanion)
+	companionResult := Companion.GetByID(session.IDCompanion, models.Filter.Empty())
 	if companionResult.IsErr() {
 		logger.Warning("Failed to get companion by ID: ", companionResult.Error())
 		return types.ResultErr[map[string]string](companionResult.Error())
@@ -317,7 +320,7 @@ func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] 
 	student := studentResult.Value()
 	companion := companionResult.Value()
 
-	specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
+	specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex(), models.Filter.Empty())
 	if specialityResult.IsErr() {
 		logger.Warning("Failed to get speciality by ID: ", specialityResult.Error())
 		return types.ResultErr[map[string]string](specialityResult.Error())
@@ -336,7 +339,7 @@ func getExtraInfo(session models.SessionCreate) types.Result[map[string]string] 
 func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[string]string] {
 	var student models.StudentDB
 	if session.IDStudent != "" {
-		studentResult := Student.GetByID(session.IDStudent)
+		studentResult := Student.GetByID(session.IDStudent, models.Filter.Empty())
 		if studentResult.IsErr() {
 			logger.Warning("Failed to get student by ID: ", studentResult.Error())
 			return types.ResultErr[map[string]string](studentResult.Error())
@@ -348,7 +351,7 @@ func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[strin
 	var companion models.CompanionDB
 	var speciality models.SpecialityDB
 	if session.IDCompanion != "" {
-		companionResult := Companion.GetByID(session.IDCompanion)
+		companionResult := Companion.GetByID(session.IDCompanion, models.Filter.Empty())
 		if companionResult.IsErr() {
 			logger.Warning("Failed to get companion by ID: ", companionResult.Error())
 			return types.ResultErr[map[string]string](companionResult.Error())
@@ -356,7 +359,7 @@ func getExtraInfoAllowEmpty(session models.SessionCreate) types.Result[map[strin
 
 		companion = companionResult.Value()
 
-		specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex())
+		specialityResult := Speciality.GetByID(companion.IDSpeciality.Hex(), models.Filter.Empty())
 		if specialityResult.IsErr() {
 			logger.Warning("Failed to get speciality by ID: ", specialityResult.Error())
 			return types.ResultErr[map[string]string](specialityResult.Error())

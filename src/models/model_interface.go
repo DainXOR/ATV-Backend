@@ -3,6 +3,7 @@ package models
 import (
 	"dainxor/atv/logger"
 	"dainxor/atv/types"
+	"net/url"
 
 	"fmt"
 	"time"
@@ -163,23 +164,68 @@ func (iTime) Zero() DBDateTime {
 	return time.Time{}
 }
 
-type iFilters struct{}
+type iFilters struct {
+}
 
 var Filter iFilters
 
-type FilterType = bson.E
+type FilterPart = bson.E
+type FilterObject = bson.D
 
-func (iFilters) ID(id bson.ObjectID) FilterType {
-	return FilterType{Key: "_id", Value: id} // Filter by ID
+// If you want to change how the filter key-value pairs are created, modify this function.
+func (iFilters) parse(name string, values []string) FilterPart {
+	return FilterPart{Key: name, Value: values[0]}
 }
-func (iFilters) IDOf(idName string, id bson.ObjectID) FilterType {
-	return FilterType{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
+
+// If you want to filter out certain query parameters, modify this function.
+func (iFilters) skip(_ string, _ []string) bool {
+	return false
 }
-func (iFilters) NotDeleted() FilterType {
-	return FilterType{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
+
+// Returns a filter object from the given query parameters.
+// If you want to change how the filter is created or the type, modify this function.
+// Make sure to modify the corresponding aliases used if needed.
+func (iFilters) Create(queryParams url.Values) FilterObject {
+	var filter FilterObject
+	for key, vals := range queryParams {
+		if Filter.skip(key, vals) {
+			continue
+		}
+
+		filter = append(filter, Filter.parse(key, vals))
+	}
+	return filter
 }
-func (iFilters) Deleted() FilterType {
-	return FilterType{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
+func (iFilters) Add(filter FilterObject, name string, value []string) FilterObject {
+	filter = append(filter, Filter.parse(name, value))
+	return filter
+}
+func (iFilters) AddPart(filter FilterObject, part FilterPart) FilterObject {
+	filter = append(filter, part)
+	return filter
+}
+func (iFilters) Merge(filter1, filter2 FilterObject) FilterObject {
+	return append(filter1, filter2...)
+}
+
+func (iFilters) Empty() FilterObject {
+	return FilterObject{}
+}
+
+func (iFilters) Of(name string, value any) FilterPart {
+	return FilterPart{Key: name, Value: value} // Generic filter by field name and value
+}
+func (iFilters) ID(id bson.ObjectID) FilterPart {
+	return FilterPart{Key: "_id", Value: id} // Filter by ID
+}
+func (iFilters) IDOf(idName string, id bson.ObjectID) FilterPart {
+	return FilterPart{Key: "id_" + idName, Value: id} // Filter by ID with custom field name
+}
+func (iFilters) NotDeleted() FilterPart {
+	return FilterPart{Key: "deleted_at", Value: Time.Zero()} // Filter to exclude deleted records
+}
+func (iFilters) Deleted() FilterPart {
+	return FilterPart{Key: "deleted_at", Value: bson.M{"$ne": Time.Zero()}} // Filter to include deleted records
 }
 
 type iUpdate struct{}
@@ -194,4 +240,7 @@ func (iUpdate) Delete() UpdateType {
 
 func InterfaceTo[T DBModelInterface](a DBModelInterface) T {
 	return a.(T)
+}
+func ToInterface[T DBModelInterface](a T) DBModelInterface {
+	return a
 }

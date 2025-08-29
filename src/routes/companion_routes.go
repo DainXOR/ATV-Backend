@@ -12,14 +12,14 @@ func CompanionRoutes(router *gin.Engine) {
 	// Grouping can also be done inside other groups
 	companionRouter := router.Group("api/v1/companion")
 	{
-		companionRouter.GET("/:id", controller.Companion.GetByIDMongo)
-		companionRouter.GET("/all", controller.Companion.GetAllMongo)
+		companionRouter.GET("/:id", controller.Companion.GetByID)
+		companionRouter.GET("/all", controller.Companion.GetAll)
 
-		companionRouter.POST("/", controller.Companion.CreateMongo)
+		companionRouter.POST("/", controller.Companion.Create)
 
-		companionRouter.PUT("/:id", controller.Companion.UpdateMongo)
+		companionRouter.PUT("/:id", controller.Companion.UpdateByID)
 
-		companionRouter.PATCH("/:id", controller.Companion.PatchMongo)
+		companionRouter.PATCH("/:id", controller.Companion.PatchByID)
 
 		companionRouter.DELETE("/:id", controller.Companion.DeleteByID)
 		//companionRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)

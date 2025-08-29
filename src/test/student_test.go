@@ -47,7 +47,7 @@ func TestStudentOperations(t *testing.T) {
 		return
 	}
 
-	getResult := db.Student.GetByID(resultObj.Value().ID.Hex())
+	getResult := db.Student.GetByID(resultObj.Value().ID.Hex(), models.Filter.Empty())
 
 	patchObg := models.StudentCreate{
 		NumberID:    "1234567890",
@@ -56,7 +56,7 @@ func TestStudentOperations(t *testing.T) {
 		PhoneNumber: "1234567891",
 	}
 
-	patchResult := db.Student.PatchByID(getResult.Value().ID.Hex(), patchObg)
+	patchResult := db.Student.PatchByID(getResult.Value().ID.Hex(), patchObg, models.Filter.Empty())
 	if patchResult.IsErr() {
 		t.Errorf("Failed to patch student: %v", patchResult.Error())
 		return

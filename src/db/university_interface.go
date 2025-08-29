@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type universityType struct{}
@@ -27,7 +25,7 @@ func (universityType) Create(u models.UniversityCreate) types.Result[models.Univ
 	return types.ResultOk(universityDB)
 }
 
-func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
+func (universityType) GetByID(id string, filter models.FilterObject) types.Result[models.UniversityDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -41,7 +39,8 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 		return types.ResultErr[models.UniversityDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultUniversity := configs.DB.FindOne(filter, models.UniversityDB{})
 	if resultUniversity.IsErr() {
@@ -68,8 +67,8 @@ func (universityType) GetByID(id string) types.Result[models.UniversityDB] {
 
 	return types.ResultOk(resultUniversity.Value().(models.UniversityDB))
 }
-func (universityType) GetAll() types.Result[[]models.UniversityDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted universities
+func (universityType) GetAll(filter models.FilterObject) types.Result[[]models.UniversityDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultUniversities := configs.DB.FindAll(filter, models.UniversityDB{})
 	if resultUniversities.IsErr() {

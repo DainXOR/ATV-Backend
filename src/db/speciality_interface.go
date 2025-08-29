@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type specialityType struct{}
@@ -27,7 +25,7 @@ func (specialityType) Create(u models.SpecialityCreate) types.Result[models.Spec
 	return types.ResultOk(specialityDB)
 }
 
-func (specialityType) GetByID(id string) types.Result[models.SpecialityDB] {
+func (specialityType) GetByID(id string, filter models.FilterObject) types.Result[models.SpecialityDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -41,7 +39,8 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDB] {
 		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultSpeciality := configs.DB.FindOne(filter, models.SpecialityDB{})
 	if resultSpeciality.IsErr() {
@@ -69,8 +68,8 @@ func (specialityType) GetByID(id string) types.Result[models.SpecialityDB] {
 
 	return types.ResultOk(resultSpeciality.Value().(models.SpecialityDB))
 }
-func (specialityType) GetAll() types.Result[[]models.SpecialityDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted specialities
+func (specialityType) GetAll(filter models.FilterObject) types.Result[[]models.SpecialityDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultSpecialities := configs.DB.FindAll(filter, models.SpecialityDB{})
 	if resultSpecialities.IsErr() {

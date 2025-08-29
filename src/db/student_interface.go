@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type studentType struct{}
@@ -54,7 +52,7 @@ func (studentType) Create(student models.StudentCreate) types.Result[models.Stud
 	return types.ResultOk(studentDB)
 }
 
-func (studentType) GetByID(id string) types.Result[models.StudentDB] {
+func (studentType) GetByID(id string, filter models.FilterObject) types.Result[models.StudentDB] {
 	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
@@ -68,7 +66,8 @@ func (studentType) GetByID(id string) types.Result[models.StudentDB] {
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
@@ -95,8 +94,9 @@ func (studentType) GetByID(id string) types.Result[models.StudentDB] {
 
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
-func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDB] {
-	filter := bson.D{{Key: "number_id", Value: idNumber}}
+func (studentType) GetByNumberID(idNumber string, filter models.FilterObject) types.Result[models.StudentDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.Of("number_id", idNumber))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
@@ -123,8 +123,9 @@ func (studentType) GetByNumberID(idNumber string) types.Result[models.StudentDB]
 
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
-func (studentType) GetByEmail(email string) types.Result[models.StudentDB] {
-	filter := bson.D{{Key: "email", Value: email}}
+func (studentType) GetByEmail(email string, filter models.FilterObject) types.Result[models.StudentDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.Of("email", email))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
@@ -151,8 +152,8 @@ func (studentType) GetByEmail(email string) types.Result[models.StudentDB] {
 
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
-func (studentType) GetAll() types.Result[[]models.StudentDB] {
-	filter := bson.D{models.Filter.NotDeleted()} // Filter to exclude deleted students
+func (studentType) GetAll(filter models.FilterObject) types.Result[[]models.StudentDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
 	resultStudents := configs.DB.FindAll(filter, models.StudentDB{})
 	if resultStudents.IsErr() {
@@ -182,7 +183,7 @@ func (studentType) GetAll() types.Result[[]models.StudentDB] {
 	return types.ResultOk(students)
 }
 
-func (studentType) UpdateByID(id string, student models.StudentCreate) types.Result[models.StudentDB] {
+func (studentType) UpdateByID(id string, student models.StudentCreate, filter models.FilterObject) types.Result[models.StudentDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Warning("Failed to convert ID to ObjectID: ", err)
@@ -207,7 +208,8 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.UpdateOne(filter, resultStudentUpdate.Value())
 	if err != nil {
 		logger.Warning("Failed to update student in database: ", err)
@@ -255,7 +257,7 @@ func (studentType) UpdateByID(id string, student models.StudentCreate) types.Res
 	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
 }
 
-func (studentType) PatchByID(id string, student models.StudentCreate) types.Result[models.StudentDB] {
+func (studentType) PatchByID(id string, student models.StudentCreate, filter models.FilterObject) types.Result[models.StudentDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Warning("Failed to convert ID to ObjectID: ", err)
@@ -280,7 +282,8 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	err = configs.DB.PatchOne(filter, resultStudentPatch.Value())
 	if err != nil {
 		logger.Warning("Failed to patch student in database: ", err)
@@ -328,7 +331,7 @@ func (studentType) PatchByID(id string, student models.StudentCreate) types.Resu
 	return types.ResultOk(resultStudentDB.Value().(models.StudentDB))
 }
 
-func (studentType) DeleteByID(id string) types.Result[models.StudentDB] {
+func (studentType) DeleteByID(id string, filter models.FilterObject) types.Result[models.StudentDB] {
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Warning("Failed to convert ID to ObjectID: ", err)
@@ -341,7 +344,8 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDB] {
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
 		logger.Warning("Failed to retrieve student: ", resultStudent.Error())
@@ -398,7 +402,7 @@ func (studentType) DeleteByID(id string) types.Result[models.StudentDB] {
 
 	return types.ResultOk(deletedStudent)
 }
-func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDB] {
+func (studentType) DeletePermanentByID(id string, filter models.FilterObject) types.Result[models.StudentDB] {
 	logger.Warning("Permanently deleting student by ID: ", id)
 	oid, err := models.ID.ToDB(id)
 	if err != nil {
@@ -412,7 +416,8 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDB]
 		return types.ResultErr[models.StudentDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}, models.Filter.Deleted()} // Ensure the student is marked as deleted
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.Deleted())
 	resultStudent := configs.DB.FindOne(filter, models.StudentDB{})
 	if resultStudent.IsErr() {
 		logger.Warning("Failed to find student for permanent deletion: ", resultStudent.Error())
@@ -461,8 +466,8 @@ func (studentType) DeletePermanentByID(id string) types.Result[models.StudentDB]
 
 	return types.ResultOk(resultStudent.Value().(models.StudentDB))
 }
-func (studentType) DeletePermanentAll() types.Result[[]models.StudentDB] {
-	filter := bson.D{models.Filter.Deleted()}
+func (studentType) DeletePermanentAll(filter models.FilterObject) types.Result[[]models.StudentDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.Deleted())
 
 	resultStudents := configs.DB.FindAll(filter, models.StudentDB{})
 	if resultStudents.IsErr() {

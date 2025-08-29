@@ -62,8 +62,9 @@ func (sessionType) Create(c *gin.Context) {
 func (sessionType) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting session by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.GetByID(id)
+	result := db.Session.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -88,8 +89,9 @@ func (sessionType) GetByID(c *gin.Context) {
 func (sessionType) GetAllByStudentID(c *gin.Context) {
 	studentID := c.Param("student_id")
 	logger.Debug("Getting all sessions by student ID: ", studentID)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.GetAllByStudentID(studentID)
+	result := db.Session.GetAllByStudentID(studentID, filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -120,7 +122,8 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 	)
 }
 func (sessionType) GetAll(c *gin.Context) {
-	result := db.Session.GetAll()
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.Session.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -170,8 +173,9 @@ func (sessionType) UpdateByID(c *gin.Context) {
 
 	id := c.Param("id")
 	logger.Debug("Updating session by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.UpdateByID(id, body)
+	result := db.Session.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -207,8 +211,9 @@ func (sessionType) PatchByID(c *gin.Context) {
 	}
 
 	id := c.Param("id")
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.PatchByID(id, body)
+	result := db.Session.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -234,8 +239,9 @@ func (sessionType) PatchByID(c *gin.Context) {
 func (sessionType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Deleting session by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.DeleteByID(id)
+	result := db.Session.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
