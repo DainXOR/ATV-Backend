@@ -61,8 +61,9 @@ func (specialityType) Create(c *gin.Context) {
 func (specialityType) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting speciality by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.GetByID(id)
+	result := db.Speciality.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -85,7 +86,8 @@ func (specialityType) GetByID(c *gin.Context) {
 	)
 }
 func (specialityType) GetAll(c *gin.Context) {
-	result := db.Speciality.GetAll()
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.Speciality.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)

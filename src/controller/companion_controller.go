@@ -15,66 +15,7 @@ type companionType struct{}
 
 var Companion companionType
 
-func (companionType) GetByIDMongo(c *gin.Context) {
-	id := c.Param("id")
-	//filter := Filter.Create(c.Request.URL.Query())
-
-	logger.Debug("Getting companion by ID: ", id)
-
-	result := db.Companion.GetByID(id)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code,
-			types.EmptyResponse(
-				cerror.Msg(),
-				cerror.Details(),
-			),
-		)
-		return
-	}
-
-	companion := result.Value()
-	c.JSON(http.StatusOK,
-		types.Response(
-			companion.ToResponse(),
-			"",
-		),
-	)
-}
-func (companionType) GetAllMongo(c *gin.Context) {
-	result := db.Companion.GetAll()
-
-	if result.IsErr() {
-		err := result.Error().(*types.HttpError)
-		c.JSON(err.Code,
-			types.EmptyResponse(
-				err.Msg(),
-				err.Details(),
-			),
-		)
-		return
-	}
-
-	companions := utils.Map(result.Value(), models.CompanionDB.ToResponse)
-	if len(companions) == 0 {
-		logger.Warning("No companions found in MongoDB database")
-		c.JSON(types.Http.C400().NotFound(),
-			types.EmptyResponse(
-				"No companions found",
-			))
-		return
-	}
-	c.JSON(types.Http.C200().Ok(),
-		types.Response(
-			companions,
-			"",
-		),
-	)
-}
-
-func (companionType) CreateMongo(c *gin.Context) {
+func (companionType) Create(c *gin.Context) {
 	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -118,7 +59,67 @@ func (companionType) CreateMongo(c *gin.Context) {
 	)
 }
 
-func (companionType) UpdateMongo(c *gin.Context) {
+func (companionType) GetByID(c *gin.Context) {
+	id := c.Param("id")
+	logger.Debug("Getting companion by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
+
+	result := db.Companion.GetByID(id, filter)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
+		return
+	}
+
+	companion := result.Value()
+	c.JSON(http.StatusOK,
+		types.Response(
+			companion.ToResponse(),
+			"",
+		),
+	)
+}
+func (companionType) GetAll(c *gin.Context) {
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.Companion.GetAll(filter)
+
+	if result.IsErr() {
+		err := result.Error().(*types.HttpError)
+		c.JSON(err.Code,
+			types.EmptyResponse(
+				err.Msg(),
+				err.Details(),
+			),
+		)
+		return
+	}
+
+	if len(result.Value()) == 0 {
+		logger.Warning("No companions found in database")
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No companions found",
+			))
+		return
+	}
+
+	companionsDB := utils.Map(result.Value(), models.CompanionDB.ToResponse)
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			companionsDB,
+			"",
+		),
+	)
+}
+
+func (companionType) UpdateByID(c *gin.Context) {
 	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -138,8 +139,9 @@ func (companionType) UpdateMongo(c *gin.Context) {
 
 	id := c.Param("id")
 	logger.Debug("Updating companion by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.UpdateByID(id, body)
+	result := db.Companion.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -156,7 +158,7 @@ func (companionType) UpdateMongo(c *gin.Context) {
 	)
 }
 
-func (companionType) PatchMongo(c *gin.Context) {
+func (companionType) PatchByID(c *gin.Context) {
 	var body models.CompanionCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -175,8 +177,9 @@ func (companionType) PatchMongo(c *gin.Context) {
 	}
 
 	id := c.Param("id")
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.PatchByID(id, body)
+	result := db.Companion.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -203,8 +206,9 @@ func (companionType) PatchMongo(c *gin.Context) {
 func (companionType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Deleting companion by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.DeleteByID(id)
+	result := db.Companion.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -241,8 +245,9 @@ func (companionType) ForceDeleteByID(c *gin.Context) {
 
 	id := c.Param("id")
 	logger.Info("Force deleting companion by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.DeletePermanentByID(id)
+	result := db.Companion.DeletePermanentByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -262,57 +267,6 @@ func (companionType) ForceDeleteByID(c *gin.Context) {
 		types.Response(
 			data,
 			"Companion deleted permanently",
-		),
-	)
-}
-
-func (companionType) GetByIDGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.1.1"), types.V("0.1.2"), "Use /api/v1/companion/:id instead"),
-		),
-	)
-}
-func (companionType) GetAllGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/companion/all")
-	c.JSON(http.StatusOK,
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.1.1"), types.V("0.1.2"), "Use /api/v1/companion/all instead"),
-		),
-	)
-}
-
-func (companionType) CreateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/companion")
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.1.1"), types.V("0.1.2"), "Use /api/v1/companion instead"),
-		),
-	)
-}
-
-// UpdateGorm updates an existing companion in the database
-// This will override zeroed fields
-func (companionType) UpdateGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.1.1"), types.V("0.1.2"), "Use /api/v1/companion/:id instead"),
-		),
-	)
-}
-
-// PatchGorm updates an existing companion in the database
-// This will keep previous value in zeroed fields
-func (companionType) PatchGorm(c *gin.Context) {
-	c.Header("Location", "/api/v1/companion/"+c.Param("id"))
-
-	c.JSON(types.Http.C300().MovedPermanently(),
-		types.EmptyResponse(
-			logger.DeprecateMsg(types.V("0.1.1"), types.V("0.1.2"), "Use /api/v1/companion/:id instead"),
 		),
 	)
 }
