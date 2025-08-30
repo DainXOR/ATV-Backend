@@ -61,8 +61,9 @@ func (universityType) Create(c *gin.Context) {
 func (universityType) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting university by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.University.GetByID(id)
+	result := db.University.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -85,7 +86,8 @@ func (universityType) GetByID(c *gin.Context) {
 	)
 }
 func (universityType) GetAll(c *gin.Context) {
-	result := db.University.GetAll()
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.University.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -98,7 +100,7 @@ func (universityType) GetAll(c *gin.Context) {
 		return
 	}
 
-	universities := utils.Map(result.Value(), models.UniversityDBMongo.ToResponse)
+	universities := utils.Map(result.Value(), models.UniversityDB.ToResponse)
 	if len(universities) == 0 {
 		logger.Warning("No universities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),

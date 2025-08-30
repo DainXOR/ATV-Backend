@@ -5,96 +5,94 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	"dainxor/atv/utils"
 )
 
 type specialityType struct{}
 
 var Speciality specialityType
 
-func (specialityType) Create(u models.SpecialityCreate) types.Result[models.SpecialityDBMongo] {
+func (specialityType) Create(u models.SpecialityCreate) types.Result[models.SpecialityDB] {
 	specialityDB := u.ToInsert()
-	result, err := configs.DB.InsertOne(specialityDB)
+	resultID := configs.DB.InsertOne(specialityDB)
 
-	if err != nil {
-		logger.Error("Error inserting speciality: ", err)
-		return types.ResultErr[models.SpecialityDBMongo](err)
+	if resultID.IsErr() {
+		logger.Error("Error inserting speciality: ", resultID.Error())
+		return types.ResultErr[models.SpecialityDB](resultID.Error())
 	}
 
-	specialityDB.ID, err = models.DBIDFrom(result.InsertedID)
-
-	if err != nil {
-		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create speciality",
-			"Failed to convert inserted ID to PrimitiveID",
-			"Error: "+err.Error(),
-		)
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
-	}
-
+	specialityDB.ID = resultID.Value()
 	return types.ResultOk(specialityDB)
 }
 
-func (specialityType) GetByID(id string) types.Result[models.SpecialityDBMongo] {
-	oid, err := models.ID.ToBson(id)
+func (specialityType) GetByID(id string, filter models.FilterObject) types.Result[models.SpecialityDB] {
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Speciality ID: "+id,
 		)
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	var speciality models.SpecialityDBMongo
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
-	err = configs.DB.FindOne(filter, &speciality)
-	if err != nil {
+	resultSpeciality := configs.DB.FindOne(filter, models.SpecialityDB{})
+	if resultSpeciality.IsErr() {
+		logger.Warning("Failed to get speciality by ID: ", resultSpeciality.Error())
 		var httpErr types.HttpError
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get speciality by ID: ", err)
+		switch resultSpeciality.Error() {
+		case configs.DBErr.NotFound():
 			httpErr = types.ErrorNotFound(
 				"Speciality not found",
 				"Speciality with ID "+id+" not found",
 			)
-		} else {
-			logger.Error("Failed to get speciality by ID: ", err)
+
+		default:
+			logger.Error("Failed to get speciality by ID: ", resultSpeciality.Error())
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve speciality",
-				"Decoding error",
-				err.Error(),
+				resultSpeciality.Error().Error(),
 				"Speciality ID: "+id,
 			)
 		}
 
-		return types.ResultErr[models.SpecialityDBMongo](&httpErr)
+		return types.ResultErr[models.SpecialityDB](&httpErr)
 	}
 
-	return types.ResultOk(speciality)
+	return types.ResultOk(resultSpeciality.Value().(models.SpecialityDB))
 }
-func (specialityType) GetAll() types.Result[[]models.SpecialityDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: nil}} // Filter to exclude deleted specialities
-	specialities := []models.SpecialityDBMongo{}
+func (specialityType) GetAll(filter models.FilterObject) types.Result[[]models.SpecialityDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
-	err := configs.DB.FindAll(filter, &specialities)
-	if err != nil {
-		logger.Error("Failed to get all specialities from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve specialities",
-			err.Error(),
-		)
+	resultSpecialities := configs.DB.FindAll(filter, models.SpecialityDB{})
+	if resultSpecialities.IsErr() {
+		logger.Warning("Failed to get all specialities from database:", resultSpecialities.Error())
+		var httpErr types.HttpError
 
-		return types.ResultErr[[]models.SpecialityDBMongo](&httpErr)
+		switch resultSpecialities.Error() {
+		case configs.DBErr.NotFound():
+			httpErr = types.ErrorNotFound(
+				"Specialities not found",
+				"No specialities found",
+			)
+
+		default:
+			httpErr = types.ErrorInternal(
+				"Failed to retrieve specialities",
+				resultSpecialities.Error().Error(),
+			)
+		}
+		return types.ResultErr[[]models.SpecialityDB](&httpErr)
 	}
 
-	logger.Debug("Retrieved", len(specialities), "specialities from MongoDB database")
+	specialities := utils.Map(resultSpecialities.Value(), models.InterfaceTo[models.SpecialityDB])
+	logger.Debug("Retrieved", len(specialities), "specialities from database")
 	return types.ResultOk(specialities)
 }

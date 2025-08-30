@@ -1,13 +1,8 @@
 package main
 
 import (
-	"cmp"
-	"os"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-
-	//"github.com/joho/godotenv"
 
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
@@ -18,24 +13,22 @@ import (
 //var envErr = godotenv.Load()
 
 func init() {
-	logger.SetAppVersion(configs.App.ApiVersion())
+	logger.SetVersion(configs.App.ApiVersion())
+	configs.DB.Use(configs.GetMongoAccessor()).Start()
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")
 }
 
-// address returns the server address from the environment variable
-func address() string {
-	envAddress := os.Getenv("SERVER_ADDRESS")
-	return cmp.Or(envAddress, ":8080")
-}
-
 func main() {
 	defer configs.DB.Close()
+	defer logger.Close()
 
-	router := gin.Default()
-	router.Use(middleware.RecoverMiddleware()) // Middleware to recover from panics and logs a small trace
-	router.Use(middleware.CORSMiddleware())
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	router.Use(middleware.Recovery()) // Middleware to recover from panics and logs a small trace
+	router.Use(middleware.CORS())
 	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
@@ -53,5 +46,5 @@ func main() {
 	routes.SessionTypeRoutes(router)
 	routes.SessionRoutes(router)
 
-	router.Run(address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
+	router.Run(configs.App.Address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

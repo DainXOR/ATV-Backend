@@ -33,14 +33,14 @@ func (sessionTypeType) Create(c *gin.Context) {
 	}
 
 	logger.Debug("Creating session type in MongoDB: ", body)
-	existent := db.SessionType.GetAll()
+	existent := db.SessionType.GetAll(models.Filter.Empty())
 	if existent.IsOk() && len(existent.Value()) > 0 {
-		match := utils.Filter(existent.Value(), func(st models.SessionTypeDBMongo) bool {
+		match := utils.Any(existent.Value(), func(st models.SessionTypeDB) bool {
 			return st.Name == body.Name
 		})
 
-		if len(match) > 0 {
-			logger.Info("Session type with name already exists: ", body.Name)
+		if match {
+			logger.Info("Session type with the name already exists: ", body.Name)
 			c.JSON(types.Http.C400().Conflict(),
 				types.EmptyResponse(
 					"Session type with this name already exists",
@@ -78,8 +78,9 @@ func (sessionTypeType) Create(c *gin.Context) {
 func (sessionTypeType) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting session type by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.SessionType.GetByID(id)
+	result := db.SessionType.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -102,7 +103,8 @@ func (sessionTypeType) GetByID(c *gin.Context) {
 	)
 }
 func (sessionTypeType) GetAll(c *gin.Context) {
-	result := db.SessionType.GetAll()
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.SessionType.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -115,9 +117,9 @@ func (sessionTypeType) GetAll(c *gin.Context) {
 		return
 	}
 
-	sessionTypes := utils.Map(result.Value(), models.SessionTypeDBMongo.ToResponse)
+	sessionTypes := utils.Map(result.Value(), models.SessionTypeDB.ToResponse)
 	if len(sessionTypes) == 0 {
-		logger.Warning("No session types found in MongoDB database")
+		logger.Warning("No session types found in database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
 				"No session types found",

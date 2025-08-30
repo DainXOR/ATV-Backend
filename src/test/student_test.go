@@ -4,6 +4,7 @@ import (
 	"dainxor/atv/db"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
+	"dainxor/atv/types"
 	"testing"
 
 	"github.com/joho/godotenv"
@@ -18,7 +19,7 @@ func init() {
 	//envVersion, _ := strconv.ParseUint(os.Getenv("ATV_ROUTE_VERSION"), 10, 32)
 	//programVersion := uint64(cmp.Or(envVersion, 1))
 
-	logger.SetAppVersion("0.1.2")
+	logger.SetVersion(types.V("0.1.2"))
 
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
@@ -46,7 +47,7 @@ func TestStudentOperations(t *testing.T) {
 		return
 	}
 
-	getResult := db.Student.GetByID(resultObj.Value().ID.Hex())
+	getResult := db.Student.GetByID(resultObj.Value().ID.Hex(), models.Filter.Empty())
 
 	patchObg := models.StudentCreate{
 		NumberID:    "1234567890",
@@ -55,7 +56,7 @@ func TestStudentOperations(t *testing.T) {
 		PhoneNumber: "1234567891",
 	}
 
-	patchResult := db.Student.PatchByID(getResult.Value().ID.Hex(), patchObg)
+	patchResult := db.Student.PatchByID(getResult.Value().ID.Hex(), patchObg, models.Filter.Empty())
 	if patchResult.IsErr() {
 		t.Errorf("Failed to patch student: %v", patchResult.Error())
 		return

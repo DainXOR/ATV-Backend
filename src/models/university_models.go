@@ -1,31 +1,31 @@
 package models
 
-type UniversityDBMongo struct {
+type UniversityDB struct {
 	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
+	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
 // UniversityCreate represents the request body for creating a new university
 type UniversityCreate struct {
-	Name     string `json:"name" gorm:"not null"`
-	Location string `json:"location" gorm:"not null"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
 }
 
 // UniversityResponse represents the response body for a university
 type UniversityResponse struct {
-	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID        string     `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	Location  string     `json:"location,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
 }
 
-func (u UniversityCreate) ToInsert() UniversityDBMongo {
-	return UniversityDBMongo{
+func (u UniversityCreate) ToInsert() UniversityDB {
+	return UniversityDB{
 		Name:      u.Name,
 		Location:  u.Location,
 		CreatedAt: Time.Now(),
@@ -33,15 +33,15 @@ func (u UniversityCreate) ToInsert() UniversityDBMongo {
 		DeletedAt: Time.Zero(),
 	}
 }
-func (u UniversityCreate) ToUpdate() UniversityDBMongo {
-	return UniversityDBMongo{
+func (u UniversityCreate) ToUpdate() UniversityDB {
+	return UniversityDB{
 		Name:      u.Name,
 		Location:  u.Location,
 		UpdatedAt: Time.Now(),
 	}
 }
 
-func (u UniversityDBMongo) ToResponse() UniversityResponse {
+func (u UniversityDB) ToResponse() UniversityResponse {
 	return UniversityResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
@@ -50,12 +50,12 @@ func (u UniversityDBMongo) ToResponse() UniversityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u UniversityDBMongo) IsEmpty() bool {
-	return u == (UniversityDBMongo{})
+func (u UniversityDB) IsEmpty() bool {
+	return u == (UniversityDB{})
 }
 
-func (UniversityDBMongo) TableName() string {
+func (UniversityDB) TableName() string {
 	return "universities"
 }
 
-var _ DBModelInterface = (*UniversityDBMongo)(nil)
+var _ DBModelInterface = (*UniversityDB)(nil)

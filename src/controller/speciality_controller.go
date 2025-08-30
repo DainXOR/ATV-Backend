@@ -61,8 +61,9 @@ func (specialityType) Create(c *gin.Context) {
 func (specialityType) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting speciality by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.GetByID(id)
+	result := db.Speciality.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -85,7 +86,8 @@ func (specialityType) GetByID(c *gin.Context) {
 	)
 }
 func (specialityType) GetAll(c *gin.Context) {
-	result := db.Speciality.GetAll()
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := db.Speciality.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -98,8 +100,8 @@ func (specialityType) GetAll(c *gin.Context) {
 		return
 	}
 
-	students := utils.Map(result.Value(), models.SpecialityDBMongo.ToResponse)
-	if len(students) == 0 {
+	specialities := utils.Map(result.Value(), models.SpecialityDB.ToResponse)
+	if len(specialities) == 0 {
 		logger.Warning("No specialities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
@@ -109,7 +111,7 @@ func (specialityType) GetAll(c *gin.Context) {
 	}
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			students,
+			specialities,
 			"",
 		),
 	)

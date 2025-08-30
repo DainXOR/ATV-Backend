@@ -5,298 +5,220 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-	"time"
+	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type companionType struct{}
 
 var Companion companionType
 
-func (companionType) Create(companion models.CompanionCreate) types.Result[models.CompanionDBMongo] {
+func (companionType) Create(companion models.CompanionCreate) types.Result[models.CompanionDB] {
 	companionDB := companion.ToInsert()
-	result, err := configs.DB.InsertOne(companionDB)
-
-	if err != nil {
-		logger.Error("Failed to create companion in MongoDB: ", err)
-		return types.ResultErr[models.CompanionDBMongo](err)
+	resultCreate := configs.DB.InsertOne(companionDB)
+	if resultCreate.IsErr() {
+		logger.Warning("Failed to create companion in MongoDB:", resultCreate.Error())
+		return types.ResultErr[models.CompanionDB](resultCreate.Error())
 	}
 
-	companionDB.ID, err = models.DBIDFrom(result.InsertedID)
+	resultGet := configs.DB.FindOne(bson.D{{Key: "_id", Value: resultCreate.Value()}}, &companionDB)
 
-	if err != nil {
-		logger.Error("Failed to convert inserted ID to ObjectID: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create companion",
-			"Failed to convert inserted ID to ObjectID",
-			"Error: "+err.Error(),
-		)
-
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+	if resultGet.IsErr() {
+		logger.Warning("Failed to get created companion in MongoDB:", resultGet.Error())
+		return types.ResultErr[models.CompanionDB](resultGet.Error())
 	}
 
+	companionDB.ID = resultCreate.Value()
 	return types.ResultOk(companionDB)
 }
 
-func (companionType) GetByID(id string) types.Result[models.CompanionDBMongo] {
-	oid, err := bson.ObjectIDFromHex(id)
+func (companionType) GetByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	oid, err := models.ID.ToBson(id)
 
 	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID: ", err)
+		logger.Warning("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	var companion models.CompanionDBMongo
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	var companion models.CompanionDB
 
-	err = configs.DB.FindOne(filter, &companion)
-	if err != nil {
-		var httpErr types.HttpError
+	resultGet := configs.DB.FindOne(filter, companion)
+	if resultGet.IsErr() {
+		logger.Warning("Failed to get companion by ID: ", resultGet.Error())
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get companion by ID: ", err)
-			httpErr = types.ErrorNotFound(
-				"Companion not found",
-				"Companion with ID "+id+" not found",
-			)
-		} else {
-			logger.Error("Failed to get companion by ID: ", err)
-			httpErr = types.ErrorInternal(
-				"Failed to retrieve companion",
-				"Decoding error",
-				err.Error(),
-				"Companion ID: "+id,
-			)
-		}
-
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](resultGet.Error())
 	}
-
+	companion = resultGet.Value().(models.CompanionDB)
 	return types.ResultOk(companion)
 }
-func (companionType) GetByNumberID(idNumber string) types.Result[models.CompanionDBMongo] {
-	filter := bson.D{{Key: "id_number", Value: idNumber}}
-	var companion models.CompanionDBMongo
+func (companionType) GetByNumberID(numberID string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	filter = models.Filter.Add(filter, "number_id", []string{numberID}) // This is not a DBID
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
-	err := configs.DB.FindOne(filter, &companion)
-	if err != nil {
-		var httpErr types.HttpError
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get companion by ID number: ", err)
-			httpErr = types.ErrorNotFound(
-				"Companion not found",
-				"Companion with ID number "+idNumber+" not found",
-			)
-		} else {
-			logger.Error("Failed to get companion by ID number: ", err)
-			httpErr = types.ErrorInternal(
-				"Failed to retrieve companion",
-				"Decoding error",
-				err.Error(),
-				"Companion ID number: "+idNumber,
-			)
-		}
+	resultCompanionDB := configs.DB.FindOne(filter, models.CompanionDB{})
+	if resultCompanionDB.IsErr() {
+		logger.Warning("Failed to get companion by number id:", resultCompanionDB.Error())
 
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](resultCompanionDB.Error())
 	}
 
+	return types.ResultOk(resultCompanionDB.Value().(models.CompanionDB))
+}
+func (companionType) GetByEmail(email string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	filter = models.Filter.Add(filter, "email", []string{email})
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	var companion models.CompanionDB
+
+	resultGet := configs.DB.FindOne(filter, &companion)
+	if resultGet.IsErr() {
+		logger.Warning("Failed to get companion by email:", resultGet.Error())
+
+		return types.ResultErr[models.CompanionDB](resultGet.Error())
+
+	}
+
+	companion = resultGet.Value().(models.CompanionDB)
 	return types.ResultOk(companion)
 }
-func (companionType) GetByEmail(email string) types.Result[models.CompanionDBMongo] {
-	filter := bson.D{{Key: "email", Value: email}}
-	var companion models.CompanionDBMongo
+func (companionType) GetAll(filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
-	err := configs.DB.FindOne(filter, &companion)
-	if err != nil {
-		var httpErr types.HttpError
+	resultCompanionsDB := configs.DB.FindAll(filter, models.CompanionDB{})
+	if resultCompanionsDB.IsErr() {
+		logger.Error("Failed to get all companions from MongoDB:", resultCompanionsDB.Error())
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get companion by email: ", err)
-			httpErr = types.ErrorNotFound(
-				"Companion not found",
-				"Companion with email "+email+" not found",
-			)
-		} else {
-			logger.Error("Failed to get companion by email: ", err)
-			httpErr = types.ErrorInternal(
-				"Failed to retrieve companion",
-				"Decoding error",
-				err.Error(),
-				"Companion email: "+email,
-			)
-		}
-
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[[]models.CompanionDB](resultCompanionsDB.Error())
 	}
 
-	return types.ResultOk(companion)
-}
-func (companionType) GetAll() types.Result[[]models.CompanionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted companions
-	companions := []models.CompanionDBMongo{}
-
-	err := configs.DB.FindAll(filter, &companions)
-	if err != nil {
-		logger.Error("Failed to get all companions from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve companions",
-			err.Error(),
-		)
-
-		return types.ResultErr[[]models.CompanionDBMongo](&httpErr)
-	}
-
-	logger.Debug("Retrieved", len(companions), "companions from MongoDB database")
-	return types.ResultOk(companions)
+	companionsDB := utils.Map(resultCompanionsDB.Value(), models.InterfaceTo[models.CompanionDB])
+	logger.Debug("Retrieved", len(companionsDB), "companions from MongoDB database")
+	return types.ResultOk(companionsDB)
 }
 
-func (companionType) UpdateByID(id string, companion models.CompanionCreate) types.Result[models.CompanionDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+func (companionType) UpdateByID(id string, companion models.CompanionCreate, filter models.FilterObject) types.Result[models.CompanionDB] {
+	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: companion.ToUpdate()}}
-	companionDB := companion.ToUpdate()
-
-	result := configs.DB.PatchOne(filter, update, &companionDB)
-	// .From(models.CompanionDBMongo{}).UpdateOne(ctx, filter, update)
-
-	if result.IsErr() {
-		err := result.Error()
-		logger.Error("Failed to update companion in MongoDB: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to update companion",
-			err.Error(),
-			"Companion ID: "+id,
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	if result.Value().MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Companion not found",
-			"Companion with ID "+id+" not found",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	if result.Value().ModifiedCount == 0 {
-		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
-		httpErr := types.Error(
-			types.Http.C200().Accepted(),
-			"No changes made",
-			"Companion with ID "+id+" was not modified",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	return Companion.GetByID(id)
-}
-
-func (companionType) PatchByID(id string, companion models.CompanionCreate) types.Result[models.CompanionDBMongo] {
-	oid, err := models.BsonIDFrom(id)
-	if err != nil {
-		logger.Error("Failed to convert ID to ObjectID: ", err)
-		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
-			"Invalid value",
-			"Invalid ID format: "+err.Error(),
-			"Companion ID: "+id,
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	companionDB := companion.ToUpdate()
-	if companionDB == (models.CompanionDBMongo{}) {
+	resultCompanionDB := companion.ToUpdate()
+	if resultCompanionDB.IsErr() {
 		logger.Error("Error converting companion to DB model")
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
-			"Invalid companion data",
+			resultCompanionDB.Error().Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: companionDB}}
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	err = configs.DB.UpdateOne(filter, resultCompanionDB.Value())
 
-	result := configs.DB.PatchOne(filter, update, &companionDB)
-
-	if result.IsErr() {
-		err := result.Error()
+	if err != nil {
 		logger.Error("Failed to update companion in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
 			"Failed to update companion",
 			err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	if result.Value().MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Companion not found",
-			"Companion with ID "+id+" not found",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	if result.Value().ModifiedCount == 0 {
-		logger.Info("No changes made to companion with ID: ", id)
-		logger.Lava("0.1.2", "Send a more proper code for no changes made")
-		httpErr := types.Error(
-			types.Http.C200().Accepted(),
-			"No changes made",
-			"Companion with ID "+id+" was not modified",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	return types.ResultOk(companionDB)
+	return Companion.GetByID(id, models.Filter.Empty())
 }
 
-func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo] {
-	oid, err := bson.ObjectIDFromHex(id)
+func (companionType) PatchByID(id string, companion models.CompanionCreate, filter models.FilterObject) types.Result[models.CompanionDB] {
+	oid, err := models.ID.ToDB(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "deleted_at", Value: time.Now()}}}}
-	ctx, cancel := configs.DB.Context()
-	defer cancel()
+	resultCompanionDB := companion.ToUpdate()
+	if resultCompanionDB.IsErr() {
+		logger.Error("Error converting companion to DB model")
+		httpErr := types.Error(
+			types.Http.C400().UnprocessableEntity(),
+			"Invalid value",
+			resultCompanionDB.Error().Error(),
+			"Companion ID: "+id,
+		)
+		return types.ResultErr[models.CompanionDB](&httpErr)
+	}
 
-	var companion models.CompanionDBMongo
-	//result, err := configs.DB.UpdateOne(filter, update, deletedCompanion)
-	v := logger.Lava("0.1.1", "Use the code above to update the companion with deleted_at field")
-	v.LavaStart()
-	result, err := configs.DB.From(models.CompanionDBMongo{}).UpdateOne(ctx, filter, update)
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	err = configs.DB.PatchOne(filter, resultCompanionDB.Value())
+
+	if err != nil {
+		logger.Error("Failed to update companion in MongoDB: ", err)
+		httpErr := types.ErrorInternal(
+			"Failed to update companion",
+			err.Error(),
+			"Companion ID: "+id,
+		)
+		return types.ResultErr[models.CompanionDB](&httpErr)
+	}
+
+	return Companion.GetByID(id, models.Filter.Empty())
+}
+
+func (companionType) DeleteByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
+	oid, err := models.ID.ToBson(id)
+	if err != nil {
+		logger.Error("Failed to convert ID to ObjectID: ", err)
+		httpErr := types.Error(
+			types.Http.C400().UnprocessableEntity(),
+			"Invalid value",
+			"Invalid ID format: "+err.Error(),
+			"Companion ID: "+id,
+		)
+		return types.ResultErr[models.CompanionDB](&httpErr)
+	}
+
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	var companion models.CompanionDB
+	companionResult := configs.DB.FindOne(filter, companion)
+
+	if companionResult.IsErr() {
+		logger.Error("Failed to find companion for soft delete: ", companionResult.Error())
+		httpErr := types.ErrorInternal(
+			"Failed to find companion for soft delete",
+			companionResult.Error().Error(),
+			"Companion ID: "+id,
+		)
+		return types.ResultErr[models.CompanionDB](&httpErr)
+	}
+
+	companion = companionResult.Value().(models.CompanionDB)
+	err = configs.DB.UpdateOne(filter, companion)
+
 	if err != nil {
 		logger.Error("Failed to delete companion in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
@@ -304,72 +226,51 @@ func (companionType) DeleteByID(id string) types.Result[models.CompanionDBMongo]
 			err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
-
-	if result.MatchedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Companion not found",
-			"Companion with ID "+id+" not found",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	err = configs.DB.FindOne(filter, &companion)
-	if err != nil {
-		logger.Error("Failed to retrieve deleted companion: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve deleted companion",
-			err.Error(),
-			"Companion ID: "+id,
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	v.LavaEnd()
 
 	return types.ResultOk(companion)
 }
-func (companionType) DeletePermanentByID(id string) types.Result[models.CompanionDBMongo] {
+func (companionType) DeletePermanentByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
 	logger.Warning("Permanently deleting companion by ID: ", id)
-	oid, err := models.BsonIDFrom(id)
+	oid, err := models.ID.ToBson(id)
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}, {Key: "deleted_at", Value: bson.M{"$ne": time.Time{}}}} // Ensure the companion is marked as deleted
-	ctx, cancel := configs.DB.Context()
-	defer cancel()
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	var companion models.CompanionDB
+	companionResult := configs.DB.FindOne(filter, companion)
 
-	var companion models.CompanionDBMongo
-	err = configs.DB.FindOne(filter, &companion)
-	if err != nil {
-		logger.Debug("Failed to find companion for permanent deletion: ", err)
+	if companionResult.IsErr() {
+		logger.Debug("Failed to find companion for permanent deletion: ", companionResult.Error())
 
-		if err == mongo.ErrNoDocuments {
+		if companionResult.Error() == configs.DBErr.NotFound() {
 			httpErr := types.ErrorNotFound(
 				"Companion not found",
 				"Companion with ID "+id+" not found or not marked as deleted",
 			)
-			return types.ResultErr[models.CompanionDBMongo](&httpErr)
+			return types.ResultErr[models.CompanionDB](&httpErr)
 		}
 
 		httpErr := types.ErrorInternal(
 			"Failed to find companion for permanent deletion",
-			err.Error(),
+			companionResult.Error().Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
-	result, err := configs.DB.From(models.CompanionDBMongo{}).DeleteOne(ctx, filter)
+	companion = companionResult.Value().(models.CompanionDB)
+	err = configs.DB.PermanentDeleteOne(filter, companion)
 	if err != nil {
 		logger.Debug("Failed to permanently delete companion in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
@@ -377,42 +278,36 @@ func (companionType) DeletePermanentByID(id string) types.Result[models.Companio
 			err.Error(),
 			"Companion ID: "+id,
 		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
-	}
-
-	if result.DeletedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"Companion not found.",
-			"Companion with ID "+id+" not found.",
-			"Ensure the companion is marked as deleted before permanent deletion.",
-		)
-		return types.ResultErr[models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[models.CompanionDB](&httpErr)
 	}
 
 	return types.ResultOk(companion)
 }
-func (companionType) DeletePermanentAll() types.Result[[]models.CompanionDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: bson.M{"$ne": nil}}}
-	ctx, cancel := configs.DB.Context()
-	defer cancel()
+func (companionType) DeletePermanentAll(filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.Deleted())
 
-	result, err := configs.DB.From(models.CompanionDBMongo{}).DeleteMany(ctx, filter)
+	var companion models.CompanionDB
+	companionResult := configs.DB.FindAll(filter, companion)
+	if companionResult.IsErr() {
+		logger.Error("Failed to find companions for permanent deletion: ", companionResult.Error())
+		httpErr := types.ErrorInternal(
+			"Failed to find companions for permanent deletion",
+			companionResult.Error().Error(),
+			"Companion filter: "+filter.String(),
+		)
+		return types.ResultErr[[]models.CompanionDB](&httpErr)
+	}
+
+	err := configs.DB.PermanentDeleteMany(filter, companion)
 	if err != nil {
 		logger.Error("Failed to permanently delete all companions in MongoDB: ", err)
 		httpErr := types.ErrorInternal(
 			"Failed to permanently delete all companions",
 			err.Error(),
 		)
-		return types.ResultErr[[]models.CompanionDBMongo](&httpErr)
+		return types.ResultErr[[]models.CompanionDB](&httpErr)
 	}
 
-	if result.DeletedCount == 0 {
-		httpErr := types.ErrorNotFound(
-			"No deleted companions found",
-			"No companions marked as deleted found",
-		)
-		return types.ResultErr[[]models.CompanionDBMongo](&httpErr)
-	}
-
-	return types.ResultOk([]models.CompanionDBMongo{})
+	companions := utils.Map(companionResult.Value(), models.InterfaceTo[models.CompanionDB])
+	return types.ResultOk(companions)
 }

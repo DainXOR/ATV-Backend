@@ -5,96 +5,77 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	"dainxor/atv/utils"
 )
 
 type sessionTypeType struct{}
 
 var SessionType sessionTypeType
 
-func (sessionTypeType) Create(u models.SessionTypeCreate) types.Result[models.SessionTypeDBMongo] {
+func (sessionTypeType) Create(u models.SessionTypeCreate) types.Result[models.SessionTypeDB] {
 	sessionTypeDB := u.ToInsert()
-	result, err := configs.DB.InsertOne(sessionTypeDB)
+	resultID := configs.DB.InsertOne(sessionTypeDB)
 
-	if err != nil {
-		logger.Error("Error inserting session type: ", err)
-		return types.ResultErr[models.SessionTypeDBMongo](err)
+	if resultID.IsErr() {
+		logger.Warning("Error inserting session type: ", resultID.Error())
+		return types.ResultErr[models.SessionTypeDB](resultID.Error())
 	}
 
-	sessionTypeDB.ID, err = models.DBIDFrom(result.InsertedID)
-
-	if err != nil {
-		logger.Error("Error converting inserted ID to PrimitiveID: ", err)
-		httpErr := types.ErrorInternal(
-			"Failed to create session type",
-			"Failed to convert inserted ID to PrimitiveID",
-			"Error: "+err.Error(),
-		)
-		return types.ResultErr[models.SessionTypeDBMongo](&httpErr)
-	}
-
+	sessionTypeDB.ID = resultID.Value()
 	return types.ResultOk(sessionTypeDB)
 }
 
-func (sessionTypeType) GetByID(id string) types.Result[models.SessionTypeDBMongo] {
-	oid, err := models.BsonIDFrom(id)
+func (sessionTypeType) GetByID(id string, filter models.FilterObject) types.Result[models.SessionTypeDB] {
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Error("Failed to convert ID to ObjectID: ", err)
 		httpErr := types.Error(
-			types.Http.UnprocessableEntity(),
+			types.Http.C400().UnprocessableEntity(),
 			"Invalid value",
 			"Invalid ID format: "+err.Error(),
 			"SessionType ID: "+id,
 		)
-		return types.ResultErr[models.SessionTypeDBMongo](&httpErr)
+		return types.ResultErr[models.SessionTypeDB](&httpErr)
 	}
 
-	filter := bson.D{{Key: "_id", Value: oid}}
-	var sessionType models.SessionTypeDBMongo
-
-	err = configs.DB.FindOne(filter, &sessionType)
-	if err != nil {
+	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+	resultSessionType := configs.DB.FindOne(filter, models.SessionTypeDB{})
+	if resultSessionType.IsErr() {
+		logger.Warning("Failed to get session type by ID: ", resultSessionType.Error())
 		var httpErr types.HttpError
 
-		if err == mongo.ErrNoDocuments {
-			logger.Error("Failed to get session type by ID: ", err)
+		switch resultSessionType.Error() {
+		case configs.DBErr.NotFound():
 			httpErr = types.ErrorNotFound(
 				"SessionType not found",
 				"SessionType with ID "+id+" not found",
 			)
-		} else {
-			logger.Error("Failed to get session type by ID: ", err)
+
+		default:
 			httpErr = types.ErrorInternal(
 				"Failed to retrieve session type",
-				"Decoding error",
-				err.Error(),
+				resultSessionType.Error().Error(),
 				"SessionType ID: "+id,
 			)
 		}
 
-		return types.ResultErr[models.SessionTypeDBMongo](&httpErr)
+		return types.ResultErr[models.SessionTypeDB](&httpErr)
 	}
 
-	return types.ResultOk(sessionType)
+	return types.ResultOk(resultSessionType.Value().(models.SessionTypeDB))
 }
-func (sessionTypeType) GetAll() types.Result[[]models.SessionTypeDBMongo] {
-	filter := bson.D{{Key: "deleted_at", Value: models.Time.Zero()}} // Filter to exclude deleted session types
-	sessionTypes := []models.SessionTypeDBMongo{}
+func (sessionTypeType) GetAll(filter models.FilterObject) types.Result[[]models.SessionTypeDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 
-	err := configs.DB.FindAll(filter, &sessionTypes)
-	if err != nil {
-		logger.Error("Failed to get all session types from MongoDB:", err)
-		httpErr := types.ErrorInternal(
-			"Failed to retrieve session types",
-			err.Error(),
-		)
-
-		return types.ResultErr[[]models.SessionTypeDBMongo](&httpErr)
+	resultSessionTypes := configs.DB.FindAll(filter, models.SessionTypeDB{})
+	if resultSessionTypes.IsErr() {
+		logger.Warning("Failed to get all session types from MongoDB:", resultSessionTypes.Error())
+		return types.ResultErr[[]models.SessionTypeDB](resultSessionTypes.Error())
 	}
 
+	sessionTypes := utils.Map(resultSessionTypes.Value(), models.InterfaceTo[models.SessionTypeDB])
 	logger.Debug("Retrieved", len(sessionTypes), "session types from MongoDB database")
 	return types.ResultOk(sessionTypes)
 }

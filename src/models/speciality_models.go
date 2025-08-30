@@ -1,41 +1,41 @@
 package models
 
-type SpecialityDBMongo struct {
+type SpecialityDB struct {
 	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt DBDateTime `json:"deleted_at,omitzero" bson:"deleted_at,omitempty"`
+	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
 // SpecialityCreate represents the request body for creating a new Speciality
 type SpecialityCreate struct {
-	Name string `json:"name" gorm:"not null"`
+	Name string `json:"name"`
 }
 
 // SpecialityResponse represents the response body for a Speciality
 type SpecialityResponse struct {
-	ID        string     `json:"id,omitempty" bson:"id,omitempty"`
-	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	ID        string     `json:"id,omitempty"`
+	Name      string     `json:"name,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
 }
 
-func (u SpecialityCreate) ToInsert() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SpecialityCreate) ToInsert() SpecialityDB {
+	return SpecialityDB{
 		Name:      u.Name,
-		CreatedAt: TimeNow(),
-		UpdatedAt: TimeNow(),
-		DeletedAt: TimeZero(),
+		CreatedAt: Time.Now(),
+		UpdatedAt: Time.Now(),
+		DeletedAt: Time.Zero(),
 	}
 }
-func (u SpecialityCreate) ToUpdate() SpecialityDBMongo {
-	return SpecialityDBMongo{
+func (u SpecialityCreate) ToUpdate() SpecialityDB {
+	return SpecialityDB{
 		Name:      u.Name,
-		UpdatedAt: TimeNow(),
+		UpdatedAt: Time.Now(),
 	}
 }
-func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
+func (u SpecialityDB) ToResponse() SpecialityResponse {
 	return SpecialityResponse{
 		ID:        u.ID.Hex(),
 		Name:      u.Name,
@@ -43,12 +43,12 @@ func (u SpecialityDBMongo) ToResponse() SpecialityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u SpecialityDBMongo) IsEmpty() bool {
-	return u == (SpecialityDBMongo{})
+func (u SpecialityDB) IsEmpty() bool {
+	return u == (SpecialityDB{})
 }
 
-func (SpecialityDBMongo) TableName() string {
+func (SpecialityDB) TableName() string {
 	return "specialities"
 }
 
-var _ DBModelInterface = (*SpecialityDBMongo)(nil)
+var _ DBModelInterface = (*SpecialityDB)(nil)
