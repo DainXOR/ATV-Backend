@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-type Predicate[T any] func(T) bool
-
 /* Functional utilities for single values */
 
 func Curry[T, R any](value T, fn func(T) R) func() R {
@@ -53,7 +51,7 @@ func Extract(prefix string, text string, suffix string) string {
 
 /* Functional utilities for slices */
 
-func Filter[T any](slice []T, predicate Predicate[T]) []T {
+func Filter[T any](slice []T, predicate func(T) bool) []T {
 	result := make([]T, 0, len(slice))
 
 	for _, value := range slice {
@@ -96,7 +94,7 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	}
 	return result
 }
-func Any[T any](slice []T, predicate Predicate[T]) bool {
+func Any[T any](slice []T, predicate func(T) bool) bool {
 	return slices.ContainsFunc(slice, predicate)
 }
 

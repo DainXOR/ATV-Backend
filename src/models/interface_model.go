@@ -3,7 +3,10 @@ package models
 import (
 	"dainxor/atv/logger"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
+	"errors"
 	"net/url"
+	"strings"
 
 	"fmt"
 	"time"
@@ -164,6 +167,18 @@ func (iTime) Zero() DBDateTime {
 	return time.Time{}
 }
 
+func (iTime) Format() string {
+	return "02-01-2006T15:04"
+}
+
+func (iTime) Parse(dateStr string, format string) (DBDateTime, error) {
+	parsedTime, err := time.Parse(format, dateStr)
+	if err != nil {
+		return Time.Zero(), err
+	}
+	return parsedTime, nil
+}
+
 type iFilters struct {
 }
 
@@ -172,9 +187,75 @@ var Filter iFilters
 type FilterPart = bson.E
 type FilterObject = bson.D
 
+var timeValues = []string{
+	"created",
+	"updated",
+	"deleted",
+}
+
+func (iFilters) dateFormatString() string {
+	return "02-01-2006T15:04"
+}
+func (iFilters) dateFormatLetters() string {
+	dateString := strings.Replace(Filter.dateFormatString(), "02", "dd", 1)
+	dateString = strings.Replace(dateString, "01", "MM", 1)
+	dateString = strings.Replace(dateString, "04", "mm", 1)
+	dateString = strings.Replace(dateString, "06", "yy", 1)
+	dateString = strings.Replace(dateString, "20yy", "yyyy", 1)
+
+	if strings.Contains(dateString, "15") {
+		dateString = strings.Replace(dateString, "15", "HH", 1)
+	} else {
+		dateString = strings.Replace(dateString, "03", "HH", 1)
+	}
+
+	return dateString
+}
+func (iFilters) ParseDate(dateStr string) (DBDateTime, error) {
+	return Time.Parse(dateStr, Filter.dateFormatString())
+}
+
 // If you want to change how the filter key-value pairs are created, modify this function.
-func (iFilters) parse(name string, values []string) FilterPart {
-	return FilterPart{Key: name, Value: values[0]}
+func (iFilters) parse(name string, values []string) (FilterPart, error) {
+	logger.Debugf("Filter for %s: %#v", name, values)
+
+	if len(values) == 1 {
+		return FilterPart{Key: name, Value: values[0]}, nil
+	}
+
+	dateFirst, err := Filter.ParseDate(values[0])
+	if err != nil {
+		logger.Warning("Failed to parse date:", err)
+		logger.Warningf("Format should be %s (e.g., 29-06-2025T15:32)", Filter.dateFormatLetters())
+		return FilterPart{}, err
+	}
+
+	dateLast, err := Filter.ParseDate(values[1])
+	if err != nil {
+		logger.Warning("Failed to parse date:", err)
+		logger.Warningf("Format should be %s (e.g., 29-06-2025T15:32)", Filter.dateFormatLetters())
+		return FilterPart{}, err
+	}
+
+	if dateFirst.Compare(dateLast) > 0 {
+		auxDate := dateFirst
+		dateFirst = dateLast
+		dateLast = auxDate
+	}
+
+	logger.Lava(types.V("0.2.0"), "Using mongoDB specific syntax for date ranges.")
+
+	// { "created_at": { "$gte": ISODate("2025-06-29T01:32:45.401+00:00"), "$lte": ISODate("2025-07-29T01:32:45.401+00:00") } }
+	// { "created_at": { "$gte": ISODate("2025-06-29T00:00:00Z"), "$lte": ISODate("2025-07-29T23:59:59Z") } }
+	if utils.Any(timeValues, func(s string) bool { return name == s }) {
+		return FilterPart{Key: name + "_at", Value: bson.M{"$gte": dateFirst, "$lte": dateLast}}, nil
+
+	} else if name == "date" {
+		return FilterPart{}, errors.New("unsupported filter")
+		// return FilterPart{Key: name, Value: bson.M{"$gte": dateFirst, "$lte": dateLast}}, nil
+	}
+
+	return FilterPart{}, errors.New("unsupported filter")
 }
 
 // If you want to filter out certain query parameters, modify this function.
@@ -192,12 +273,21 @@ func (iFilters) Create(queryParams url.Values) FilterObject {
 			continue
 		}
 
-		filter = append(filter, Filter.parse(key, vals))
+		part, err := Filter.parse(key, vals)
+		if err != nil {
+			logger.Warning("Failed to parse filter part:", err)
+			continue
+		}
+		filter = append(filter, part)
 	}
 	return filter
 }
 func (iFilters) Add(filter FilterObject, name string, value []string) FilterObject {
-	filter = append(filter, Filter.parse(name, value))
+	part, err := Filter.parse(name, value)
+	if err != nil {
+		return filter
+	}
+	filter = append(filter, part)
 	return filter
 }
 func (iFilters) AddPart(filter FilterObject, part FilterPart) FilterObject {

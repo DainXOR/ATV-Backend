@@ -1,6 +1,7 @@
 package models
 
 import (
+	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"errors"
 )
@@ -16,7 +17,8 @@ type SessionDB struct {
 	CompanionSpeciality string        `json:"companion_speciality,omitempty" bson:"companion_speciality,omitempty"`
 	IDSessionType       DBID          `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
-	Date                string        `json:"date,omitempty" bson:"date,omitempty"`
+	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
+	Date                DBDateTime    `json:"session_date,omitempty" bson:"date,omitempty"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
 	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
@@ -45,7 +47,8 @@ type SessionResponse struct {
 	CompanionSpeciality string     `json:"companion_speciality,omitempty"`
 	IDSessionType       string     `json:"id_session_type,omitempty"`
 	SessionNotes        string     `json:"session_notes,omitempty"`
-	Date                string     `json:"date,omitempty"`
+	DeprDate            string     `json:"date,omitempty"`
+	Date                DBDateTime `json:"session_date,omitzero"`
 	Status              string     `json:"status,omitempty"`
 	CreatedAt           DBDateTime `json:"created_at,omitzero"`
 	UpdatedAt           DBDateTime `json:"updated_at,omitzero"`
@@ -99,7 +102,7 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		CompanionSurname:    extra["CompanionSurname"],
 		CompanionSpeciality: extra["CompanionSpeciality"],
 		SessionNotes:        u.SessionNotes,
-		Date:                u.Date,
+		DeprDate:            u.Date,
 		Status:              statusCode(u.Status),
 		CreatedAt:           Time.Now(),
 		UpdatedAt:           Time.Now(),
@@ -110,6 +113,11 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		!ID.Ensure(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.OptionalEmpty[SessionDB]()
+	}
+	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
+		obj.Date = date
+	} else {
+		logger.Warning("Failed to parse session date:", err)
 	}
 
 	return types.OptionalOf(obj)
@@ -122,7 +130,7 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		CompanionSurname:    extra["CompanionSurname"],
 		CompanionSpeciality: extra["CompanionSpeciality"],
 		SessionNotes:        u.SessionNotes,
-		Date:                u.Date,
+		DeprDate:            u.Date,
 		Status:              statusCode(u.Status),
 		UpdatedAt:           Time.Now(),
 	}
@@ -131,6 +139,11 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		!ID.OmitEmpty(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
+	}
+	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
+		obj.Date = date
+	} else {
+		logger.Warning("Failed to parse session date:", err)
 	}
 
 	return types.ResultOk(obj)
@@ -147,6 +160,7 @@ func (u SessionDB) ToResponse() SessionResponse {
 		CompanionSpeciality: u.CompanionSpeciality,
 		IDSessionType:       u.IDSessionType.Hex(),
 		SessionNotes:        u.SessionNotes,
+		DeprDate:            u.DeprDate,
 		Date:                u.Date,
 		Status:              statusName(u.Status),
 		CreatedAt:           u.CreatedAt,
