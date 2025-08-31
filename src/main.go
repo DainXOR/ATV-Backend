@@ -34,10 +34,6 @@ func main() {
 	// Root level routes
 	routes.MainRoutes(router)
 
-	// Api routes
-	routes.InfoRoutes(router) // Routes for information about the API
-	routes.TestRoutes(router) // Routes for testing purposes
-
 	// Versioned API routes
 	routes.StudentRoutes(router)
 	routes.UniversityRoutes(router)
@@ -45,6 +41,10 @@ func main() {
 	routes.CompanionRoutes(router)
 	routes.SessionTypeRoutes(router)
 	routes.SessionRoutes(router)
+
+	// Api informative routes
+	routes.TestRoutes(router) // Routes for testing purposes
+	routes.InfoRoutes(router) // Routes for information about the API
 
 	router.Run(configs.App.Address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }
