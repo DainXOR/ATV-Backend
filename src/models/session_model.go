@@ -18,11 +18,11 @@ type SessionDB struct {
 	IDSessionType       DBID          `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
-	Date                DBDateTime    `json:"session_date,omitempty" bson:"date,omitempty"`
+	Date                DBDateTime    `json:"session_date,omitzero" bson:"date,omitzero"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
-	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
+	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitzero"`
+	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
+	DeletedAt           DBDateTime    `json:"deleted_at,omitzero" bson:"deleted_at,omitzero"`
 }
 
 // SessionCreate represents the request body for creating a new session or updating an existing one
