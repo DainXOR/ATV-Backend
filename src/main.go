@@ -5,9 +5,9 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"dainxor/atv/configs"
+	"dainxor/atv/controller"
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
-	"dainxor/atv/routes"
 )
 
 //var envErr = godotenv.Load()
@@ -32,19 +32,21 @@ func main() {
 	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
-	routes.MainRoutes(router)
+	controller.MainRoutes(router)
 
 	// Versioned API routes
-	routes.StudentRoutes(router)
-	routes.UniversityRoutes(router)
-	routes.SpecialityRoutes(router)
-	routes.CompanionRoutes(router)
-	routes.SessionTypeRoutes(router)
-	routes.SessionRoutes(router)
+	controller.StudentsRoutes(router)
+	controller.UniversitiesRoutes(router)
+	controller.SpecialitiesRoutes(router)
+	controller.CompanionsRoutes(router)
+	controller.SessionTypesRoutes(router)
+	controller.SessionsRoutes(router)
+	controller.PrioritiesRoutes(router)
+	controller.AlertsRoutes(router)
 
 	// Api informative routes
-	routes.TestRoutes(router) // Routes for testing purposes
-	routes.InfoRoutes(router) // Routes for information about the API
+	controller.TestRoutes(router) // Routes for testing purposes
+	controller.InfoRoutes(router) // Routes for information about the API
 
 	router.Run(configs.App.Address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

@@ -1,19 +1,19 @@
-package routes
+package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/controller"
 	"dainxor/atv/logger"
+	"dainxor/atv/service"
 	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
-func UniversityRoutes(router *gin.Engine) {
+func UniversitiesRoutes(router *gin.Engine) {
 	rv := configs.App.RoutesVersion()
 	beforeRoute := fmt.Sprintf("/api/v%d/university", rv-1)
-	lastRoute := fmt.Sprintf("/api/v%d/university", rv)
+	lastRoute := fmt.Sprintf("/api/v%d/universities", rv)
 
 	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().PermanentRedirect(),
@@ -26,9 +26,15 @@ func UniversityRoutes(router *gin.Engine) {
 
 	universityRouter := router.Group(lastRoute)
 	{
-		universityRouter.POST("/", controller.University.Create)
+		universityRouter.POST("/", service.University.Create)
 
-		universityRouter.GET("/:id", controller.University.GetByID)
-		universityRouter.GET("/all", controller.University.GetAll)
+		universityRouter.GET("/:id", service.University.GetByID)
+		universityRouter.GET("/all", service.University.GetAll)
+
+		universityRouter.PUT("/:id", service.University.UpdateByID)
+
+		universityRouter.PATCH("/:id", service.University.PatchByID)
+
+		universityRouter.DELETE("/:id", service.University.DeleteByID)
 	}
 }

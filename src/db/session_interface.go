@@ -28,23 +28,23 @@ func (sessionType) Create(u models.SessionCreate) types.Result[models.SessionDB]
 			return types.ResultErr[models.SessionDB](&httpErr)
 		}
 
-		sessionOptional := u.ToInsert(res.Value())
-		if sessionOptional.IsEmpty() {
+		resultSessionDB := u.ToInsert(res.Value())
+		if resultSessionDB.IsErr() {
 			logger.Warning("Failed to create session: Invalid session data")
+			logger.Warning("Error details: ", resultSessionDB.Error())
 			httpErr := types.ErrorInternal(
 				"Failed to create session",
 				"Invalid session data provided",
-				"Session data: "+utils.StructToString(u),
+				resultSessionDB.Error().Error(),
 			)
 			return types.ResultErr[models.SessionDB](&httpErr)
 		}
 
-		session = sessionOptional.Get()
+		session = resultSessionDB.Value()
 	}
 
 	logger.Debug("Session object to insert: ", session)
 	resultID := configs.DB.InsertOne(session)
-
 	if resultID.IsErr() {
 		logger.Warning("Error inserting session: ", resultID.Error())
 		return types.ResultErr[models.SessionDB](resultID.Error())

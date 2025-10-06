@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"dainxor/atv/db"
@@ -6,22 +6,21 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type sessionType struct{}
+type specialityType struct{}
 
-var Session sessionType
+var Speciality specialityType
 
-func (sessionType) Create(c *gin.Context) {
-	var body models.SessionCreate
+func (specialityType) Create(c *gin.Context) {
+	var body models.SpecialityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to create session: JSON request body is invalid")
+		logger.Error("Failed to create speciality: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -33,12 +32,12 @@ func (sessionType) Create(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating session in MongoDB: ", body)
+	logger.Debug("Creating speciality in MongoDB: ", body)
 
-	result := db.Session.Create(body)
+	result := db.Speciality.Create(body)
 
 	if result.IsErr() {
-		logger.Warning("Failed to create session in MongoDB: ", result.Error())
+		logger.Error("Failed to create speciality in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,
@@ -50,21 +49,21 @@ func (sessionType) Create(c *gin.Context) {
 		return
 	}
 
-	session := result.Value()
+	speciality := result.Value()
 	c.JSON(types.Http.C200().Created(),
 		types.Response(
-			session.ToResponse(),
+			speciality.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (sessionType) GetByID(c *gin.Context) {
+func (specialityType) GetByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Getting session by ID: ", id)
+	logger.Debug("Getting speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.GetByID(id, filter)
+	result := db.Speciality.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -78,20 +77,17 @@ func (sessionType) GetByID(c *gin.Context) {
 		return
 	}
 
-	session := result.Value()
+	speciality := result.Value()
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			session.ToResponse(),
+			speciality.ToResponse(),
 			"",
 		),
 	)
 }
-func (sessionType) GetAllByStudentID(c *gin.Context) {
-	studentID := c.Param("student_id")
-	logger.Debug("Getting all sessions by student ID: ", studentID)
+func (specialityType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-
-	result := db.Session.GetAllByStudentID(studentID, filter)
+	result := db.Speciality.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -104,62 +100,30 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 		return
 	}
 
-	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
-
-	if len(sessions) == 0 {
-		logger.Warning("No sessions found for student ID")
+	specialities := utils.Map(result.Value(), models.SpecialityDB.ToResponse)
+	if len(specialities) == 0 {
+		logger.Warning("No specialities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
-				"No sessions found for student ID",
+				"No specialities found",
 			))
 		return
 	}
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			sessions,
-			"",
-		),
-	)
-}
-func (sessionType) GetAll(c *gin.Context) {
-	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Session.GetAll(filter)
-
-	if result.IsErr() {
-		err := result.Error().(*types.HttpError)
-		c.JSON(err.Code,
-			types.EmptyResponse(
-				err.Msg(),
-				err.Details(),
-			),
-		)
-		return
-	}
-
-	sessions := utils.Map(result.Value(), models.SessionDB.ToResponse)
-	if len(sessions) == 0 {
-		logger.Warning("No sessions found in database")
-		c.JSON(types.Http.C400().NotFound(),
-			types.EmptyResponse(
-				"No sessions found",
-			))
-		return
-	}
-	c.JSON(types.Http.C200().Ok(),
-		types.Response(
-			sessions,
+			specialities,
 			"",
 		),
 	)
 }
 
-func (sessionType) UpdateByID(c *gin.Context) {
-	var body models.SessionCreate
+func (specialityType) UpdateByID(c *gin.Context) {
+	var body models.SpecialityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to update session: JSON request body is invalid")
+		logger.Error("Failed to update speciality: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -172,10 +136,10 @@ func (sessionType) UpdateByID(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	logger.Debug("Updating session by ID: ", id)
+	logger.Debug("Updating speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.UpdateByID(id, body, filter)
+	result := db.Speciality.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -183,22 +147,22 @@ func (sessionType) UpdateByID(c *gin.Context) {
 		return
 	}
 
-	session := result.Value()
-	c.JSON(http.StatusOK,
+	speciality := result.Value()
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			session.ToResponse(),
+			speciality.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (sessionType) PatchByID(c *gin.Context) {
-	var body models.SessionCreate
+func (specialityType) PatchByID(c *gin.Context) {
+	var body models.SpecialityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to patch session: JSON request body is invalid")
+		logger.Error("Failed to patch speciality: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -213,7 +177,7 @@ func (sessionType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.PatchByID(id, body, filter)
+	result := db.Speciality.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -227,21 +191,21 @@ func (sessionType) PatchByID(c *gin.Context) {
 		return
 	}
 
-	session := result.Value()
+	speciality := result.Value()
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			session.ToResponse(),
+			speciality.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (sessionType) DeleteByID(c *gin.Context) {
+func (specialityType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Deleting session by ID: ", id)
+	logger.Debug("Deleting speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.DeleteByID(id, filter)
+	result := db.Speciality.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -255,11 +219,12 @@ func (sessionType) DeleteByID(c *gin.Context) {
 		return
 	}
 
-	session := result.Value()
-	c.JSON(types.Http.C200().Ok(),
+	data := result.Value().ToResponse()
+
+	c.JSON(types.Http.C200().Accepted(),
 		types.Response(
-			session.ToResponse(),
-			"Session marked for deletion",
+			data,
+			"Speciality marked for deletion",
 		),
 	)
 }

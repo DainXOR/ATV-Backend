@@ -20,38 +20,38 @@ type SessionDB struct {
 	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
 	Date                DBDateTime    `json:"session_date,omitempty" bson:"date,omitempty"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
-	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	CreatedAt           DBDateTime    `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdatedAt           DBDateTime    `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
 }
 
 // SessionCreate represents the request body for creating a new session or updating an existing one
 type SessionCreate struct {
-	IDStudent     string `json:"id_student,omitempty"`
-	IDCompanion   string `json:"id_companion,omitempty"`
-	IDSessionType string `json:"id_session_type,omitempty"`
-	SessionNotes  string `json:"session_notes,omitempty"`
-	Status        string `json:"status,omitempty"`
-	Date          string `json:"date,omitempty"`
+	IDStudent     string `json:"id_student"`
+	IDCompanion   string `json:"id_companion"`
+	IDSessionType string `json:"id_session_type"`
+	SessionNotes  string `json:"session_notes"`
+	Status        string `json:"status"`
+	Date          string `json:"date"`
 }
 
 // SessionResponse represents the response body for a session
 type SessionResponse struct {
-	ID                  string     `json:"id,omitempty"`
-	IDStudent           string     `json:"id_student,omitempty"`
-	StudentName         string     `json:"name,omitempty"`
-	StudentSurname      string     `json:"surname,omitempty"`
-	IDCompanion         string     `json:"id_companion,omitempty"`
-	CompanionName       string     `json:"companion_name,omitempty"`
-	CompanionSurname    string     `json:"companion_surname,omitempty"`
-	CompanionSpeciality string     `json:"companion_speciality,omitempty"`
-	IDSessionType       string     `json:"id_session_type,omitempty"`
-	SessionNotes        string     `json:"session_notes,omitempty"`
-	DeprDate            string     `json:"date,omitempty"`
-	Date                DBDateTime `json:"session_date,omitzero"`
-	Status              string     `json:"status,omitempty"`
-	CreatedAt           DBDateTime `json:"created_at,omitzero"`
-	UpdatedAt           DBDateTime `json:"updated_at,omitzero"`
+	ID                  string     `json:"id"`
+	IDStudent           string     `json:"id_student"`
+	StudentName         string     `json:"name"`
+	StudentSurname      string     `json:"surname"`
+	IDCompanion         string     `json:"id_companion"`
+	CompanionName       string     `json:"companion_name"`
+	CompanionSurname    string     `json:"companion_surname"`
+	CompanionSpeciality string     `json:"companion_speciality"`
+	IDSessionType       string     `json:"id_session_type"`
+	SessionNotes        string     `json:"session_notes"`
+	DeprDate            string     `json:"date"`
+	Date                DBDateTime `json:"session_date"`
+	Status              string     `json:"status"`
+	CreatedAt           DBDateTime `json:"created_at"`
+	UpdatedAt           DBDateTime `json:"updated_at"`
 }
 
 type sessionStatus uint8
@@ -94,7 +94,7 @@ func statusCode(name string) sessionStatus {
 	return STATUS_UNKNOWN
 }
 
-func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionDB] {
+func (u SessionCreate) ToInsert(extra map[string]string) types.Result[SessionDB] {
 	obj := SessionDB{
 		StudentName:         extra["StudentName"],
 		StudentSurname:      extra["StudentSurname"],
@@ -112,7 +112,8 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.Ensure(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
-		return types.OptionalEmpty[SessionDB]()
+		logger.Lava(types.V("0.2.0"), "Using not standarized error")
+		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
 	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
 		obj.Date = date
@@ -120,7 +121,7 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		logger.Warning("Failed to parse session date:", err)
 	}
 
-	return types.OptionalOf(obj)
+	return types.ResultOk(obj)
 }
 func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB] {
 	obj := SessionDB{

@@ -20,8 +20,8 @@ type StudentDB struct {
 	Semester         uint       `json:"semester,omitempty" bson:"semester,omitempty"`
 	IDUniversity     DBID       `json:"id_university,omitempty" bson:"id_university,omitempty"`
 	PhoneNumber      string     `json:"phone_number,omitempty" bson:"phone_number,omitempty"`
-	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	CreatedAt        DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdatedAt        DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 

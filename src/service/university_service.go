@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"dainxor/atv/db"
@@ -6,22 +6,21 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type companionType struct{}
+type universityType struct{}
 
-var Companion companionType
+var University universityType
 
-func (companionType) Create(c *gin.Context) {
-	var body models.CompanionCreate
+func (universityType) Create(c *gin.Context) {
+	var body models.UniversityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to create companion: JSON request body is invalid")
+		logger.Error("Failed to create university: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -33,12 +32,12 @@ func (companionType) Create(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating companion in MongoDB: ", body)
+	logger.Debug("Creating university in MongoDB: ", body)
 
-	result := db.Companion.Create(body)
+	result := db.University.Create(body)
 
 	if result.IsErr() {
-		logger.Error("Failed to create companion in MongoDB: ", result.Error())
+		logger.Error("Failed to create university in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,
@@ -50,21 +49,21 @@ func (companionType) Create(c *gin.Context) {
 		return
 	}
 
-	companion := result.Value()
+	university := result.Value()
 	c.JSON(types.Http.C200().Created(),
 		types.Response(
-			companion.ToResponse(),
+			university.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (companionType) GetByID(c *gin.Context) {
+func (universityType) GetByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Getting companion by ID: ", id)
+	logger.Debug("Getting university by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.GetByID(id, filter)
+	result := db.University.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -78,17 +77,17 @@ func (companionType) GetByID(c *gin.Context) {
 		return
 	}
 
-	companion := result.Value()
-	c.JSON(http.StatusOK,
+	university := result.Value()
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			companion.ToResponse(),
+			university.ToResponse(),
 			"",
 		),
 	)
 }
-func (companionType) GetAll(c *gin.Context) {
+func (universityType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Companion.GetAll(filter)
+	result := db.University.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -101,31 +100,30 @@ func (companionType) GetAll(c *gin.Context) {
 		return
 	}
 
-	if len(result.Value()) == 0 {
-		logger.Warning("No companions found in database")
+	universities := utils.Map(result.Value(), models.UniversityDB.ToResponse)
+	if len(universities) == 0 {
+		logger.Warning("No universities found in MongoDB database")
 		c.JSON(types.Http.C400().NotFound(),
 			types.EmptyResponse(
-				"No companions found",
+				"No universities found",
 			))
 		return
 	}
-
-	companionsDB := utils.Map(result.Value(), models.CompanionDB.ToResponse)
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			companionsDB,
+			universities,
 			"",
 		),
 	)
 }
 
-func (companionType) UpdateByID(c *gin.Context) {
-	var body models.CompanionCreate
+func (universityType) UpdateByID(c *gin.Context) {
+	var body models.UniversityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to update companion: JSON request body is invalid")
+		logger.Error("Failed to update university: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -138,10 +136,10 @@ func (companionType) UpdateByID(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	logger.Debug("Updating companion by ID: ", id)
+	logger.Debug("Updating university by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.UpdateByID(id, body, filter)
+	result := db.University.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -149,22 +147,22 @@ func (companionType) UpdateByID(c *gin.Context) {
 		return
 	}
 
-	companion := result.Value()
-	c.JSON(http.StatusOK,
+	university := result.Value()
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			companion.ToResponse(),
+			university.ToResponse(),
 			"",
 		),
 	)
 }
 
-func (companionType) PatchByID(c *gin.Context) {
-	var body models.CompanionCreate
+func (universityType) PatchByID(c *gin.Context) {
+	var body models.UniversityCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to patch companion: JSON request body is invalid")
+		logger.Error("Failed to patch university: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -179,7 +177,7 @@ func (companionType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.PatchByID(id, body, filter)
+	result := db.University.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -193,22 +191,21 @@ func (companionType) PatchByID(c *gin.Context) {
 		return
 	}
 
-	companion := result.Value()
+	university := result.Value()
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			companion.ToResponse(),
+			university.ToResponse(),
 			"",
 		),
 	)
 }
 
-// DeleteByID deletes a companion by ID
-func (companionType) DeleteByID(c *gin.Context) {
+func (universityType) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Deleting companion by ID: ", id)
+	logger.Debug("Deleting university by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.DeleteByID(id, filter)
+	result := db.University.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -227,46 +224,7 @@ func (companionType) DeleteByID(c *gin.Context) {
 	c.JSON(types.Http.C200().Accepted(),
 		types.Response(
 			data,
-			"Companion marked for deletion",
-		),
-	)
-}
-func (companionType) ForceDeleteByID(c *gin.Context) {
-	confirm := c.Param("confirm")
-	if confirm != "delete-permanently" {
-		c.JSON(types.Http.C400().BadRequest(),
-			types.EmptyResponse(
-				"Invalid confirmation parameter",
-				"Use 'delete-permanently' to confirm deletion",
-			),
-		)
-		return
-	}
-
-	id := c.Param("id")
-	logger.Info("Force deleting companion by ID: ", id)
-	filter := models.Filter.Create(c.Request.URL.Query())
-
-	result := db.Companion.DeletePermanentByID(id, filter)
-
-	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code,
-			types.EmptyResponse(
-				cerror.Msg(),
-				cerror.Details(),
-			),
-		)
-		return
-	}
-
-	data := result.Value().ToResponse()
-
-	c.JSON(types.Http.C200().Ok(),
-		types.Response(
-			data,
-			"Companion deleted permanently",
+			"University marked for deletion",
 		),
 	)
 }
