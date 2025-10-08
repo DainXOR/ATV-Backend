@@ -31,8 +31,7 @@ func Recovery() gin.HandlerFunc {
 				))
 
 				c.AbortWithStatusJSON(types.Http.C500().InternalServerError(),
-					types.Response(
-						gin.H{},
+					types.EmptyResponse(
 						"An unexpected error occurred. Please try again later.",
 						"Check the server logs for more details.",
 					))

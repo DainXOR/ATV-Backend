@@ -1,19 +1,19 @@
-package routes
+package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/controller"
 	"dainxor/atv/logger"
+	"dainxor/atv/service"
 	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SessionTypeRoutes(router *gin.Engine) {
+func SessionTypesRoutes(router *gin.Engine) {
 	rv := configs.App.RoutesVersion()
 	beforeRoute := fmt.Sprintf("/api/v%d/session-type", rv-1)
-	lastRoute := fmt.Sprintf("/api/v%d/session-type", rv)
+	lastRoute := fmt.Sprintf("/api/v%d/session-types", rv)
 
 	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().PermanentRedirect(),
@@ -26,9 +26,15 @@ func SessionTypeRoutes(router *gin.Engine) {
 
 	sessionTypeRouter := router.Group(lastRoute)
 	{
-		sessionTypeRouter.POST("/", controller.SessionType.Create)
+		sessionTypeRouter.POST("/", service.SessionType.Create)
 
-		sessionTypeRouter.GET("/:id", controller.SessionType.GetByID)
-		sessionTypeRouter.GET("/all", controller.SessionType.GetAll)
+		sessionTypeRouter.GET("/:id", service.SessionType.GetByID)
+		sessionTypeRouter.GET("/all", service.SessionType.GetAll)
+
+		sessionTypeRouter.PUT("/:id", service.SessionType.UpdateByID)
+
+		sessionTypeRouter.PATCH("/:id", service.SessionType.PatchByID)
+
+		sessionTypeRouter.DELETE("/:id", service.SessionType.DeleteByID)
 	}
 }

@@ -145,6 +145,14 @@ func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaul
 	}
 	return result
 }
+func DReduce[K comparable, V, R any](m map[K]V, reducer func(R, K, V) R, initial R) R {
+	result := initial
+
+	for k, v := range m {
+		result = reducer(result, k, v)
+	}
+	return result
+}
 
 /* Functional utilities for strings */
 

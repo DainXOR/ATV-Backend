@@ -1,19 +1,19 @@
-package routes
+package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/controller"
 	"dainxor/atv/logger"
+	"dainxor/atv/service"
 	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
-func StudentRoutes(router *gin.Engine) {
+func StudentsRoutes(router *gin.Engine) {
 	rv := configs.App.RoutesVersion()
 	beforeRoute := fmt.Sprintf("/api/v%d/student", rv-1)
-	lastRoute := fmt.Sprintf("/api/v%d/student", rv)
+	lastRoute := fmt.Sprintf("/api/v%d/students", rv)
 
 	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().PermanentRedirect(),
@@ -42,16 +42,16 @@ func StudentRoutes(router *gin.Engine) {
 
 	studentRouter := router.Group(lastRoute)
 	{
-		studentRouter.GET("/:id", controller.Student.GetByID)
-		studentRouter.GET("/all", controller.Student.GetAll)
+		studentRouter.GET("/:id", service.Student.GetByID)
+		studentRouter.GET("/all", service.Student.GetAll)
 
-		studentRouter.POST("/", controller.Student.Create)
+		studentRouter.POST("/", service.Student.Create)
 
-		studentRouter.PUT("/:id", controller.Student.UpdatebyID)
+		studentRouter.PUT("/:id", service.Student.UpdateByID)
 
-		studentRouter.PATCH("/:id", controller.Student.PatchByID)
+		studentRouter.PATCH("/:id", service.Student.PatchByID)
 
-		studentRouter.DELETE("/:id", controller.Student.DeleteByID)
+		studentRouter.DELETE("/:id", service.Student.DeleteByID)
 		//studentRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
 
 	}
