@@ -16,6 +16,8 @@ type SessionDB struct {
 	CompanionSurname    string        `json:"last_name_companion,omitempty" bson:"last_name_companion,omitempty"`
 	CompanionSpeciality string        `json:"companion_speciality,omitempty" bson:"companion_speciality,omitempty"`
 	IDSessionType       DBID          `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
+	IDContactReason     DBID          `json:"id_contact_reason,omitempty" bson:"id_contact_reason,omitempty"`
+	IDVulnerabilityType DBID          `json:"id_vulnerability_type,omitempty" bson:"id_vulnerability_type,omitempty"`
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
 	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
 	Date                DBDateTime    `json:"session_date,omitempty" bson:"date,omitempty"`
@@ -27,12 +29,14 @@ type SessionDB struct {
 
 // SessionCreate represents the request body for creating a new session or updating an existing one
 type SessionCreate struct {
-	IDStudent     string `json:"id_student"`
-	IDCompanion   string `json:"id_companion"`
-	IDSessionType string `json:"id_session_type"`
-	SessionNotes  string `json:"session_notes"`
-	Status        string `json:"status"`
-	Date          string `json:"date"`
+	IDStudent           string `json:"id_student"`
+	IDCompanion         string `json:"id_companion"`
+	IDSessionType       string `json:"id_session_type"`
+	IDContactReason     string `json:"id_contact_reason"`
+	IDVulnerabilityType string `json:"id_vulnerability_type"`
+	SessionNotes        string `json:"session_notes"`
+	Status              string `json:"status"`
+	Date                string `json:"date"`
 }
 
 // SessionResponse represents the response body for a session
@@ -46,6 +50,8 @@ type SessionResponse struct {
 	CompanionSurname    string     `json:"companion_surname"`
 	CompanionSpeciality string     `json:"companion_speciality"`
 	IDSessionType       string     `json:"id_session_type"`
+	IDContactReason     string     `json:"id_contact_reason"`
+	IDVulnerabilityType string     `json:"id_vulnerability_type"`
 	SessionNotes        string     `json:"session_notes"`
 	DeprDate            string     `json:"date"`
 	Date                DBDateTime `json:"session_date"`
@@ -111,7 +117,9 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Result[SessionDB]
 
 	if !ID.Ensure(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.Ensure(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
-		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
+		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") ||
+		!ID.Ensure(u.IDContactReason, &obj.IDContactReason, "IDContactReason") ||
+		!ID.Ensure(u.IDVulnerabilityType, &obj.IDVulnerabilityType, "IDVulnerabilityType") {
 		logger.Lava(types.V("0.2.0"), "Using not standarized error")
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
@@ -138,7 +146,10 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 
 	if !ID.OmitEmpty(u.IDStudent, &obj.IDStudent, "IDStudent") ||
 		!ID.OmitEmpty(u.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
-		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
+		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") ||
+		!ID.OmitEmpty(u.IDContactReason, &obj.IDContactReason, "IDContactReason") ||
+		!ID.OmitEmpty(u.IDVulnerabilityType, &obj.IDVulnerabilityType, "IDVulnerabilityType") {
+		logger.Lava(types.V("0.2.0"), "Using not standarized error")
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
 	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
@@ -160,6 +171,8 @@ func (u SessionDB) ToResponse() SessionResponse {
 		CompanionSurname:    u.CompanionSurname,
 		CompanionSpeciality: u.CompanionSpeciality,
 		IDSessionType:       u.IDSessionType.Hex(),
+		IDContactReason:     u.IDContactReason.Hex(),
+		IDVulnerabilityType: u.IDVulnerabilityType.Hex(),
 		SessionNotes:        u.SessionNotes,
 		DeprDate:            u.DeprDate,
 		Date:                u.Date,

@@ -43,6 +43,8 @@ func main() {
 	controller.SessionsRoutes(router)
 	controller.PrioritiesRoutes(router)
 	controller.AlertsRoutes(router)
+	controller.ContactReasonsRoutes(router)
+	controller.VulnerabilityTypesRoutes(router)
 
 	// Api informative routes
 	controller.TestRoutes(router) // Routes for testing purposes
