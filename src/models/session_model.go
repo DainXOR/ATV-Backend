@@ -17,8 +17,8 @@ type SessionDB struct {
 	CompanionSpeciality string        `json:"companion_speciality,omitempty" bson:"companion_speciality,omitempty"`
 	IDSessionType       DBID          `json:"id_session_type,omitempty" bson:"id_session_type,omitempty"`
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
-	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
-	Date                DBDateTime    `json:"session_date,omitzero" bson:"date,omitzero"`
+	DeprDate            string        `json:"depr_date,omitempty" bson:"depr_date,omitempty"`
+	Date                DBDateTime    `json:"date,omitzero" bson:"date,omitzero"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
 	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitzero"`
 	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
@@ -47,8 +47,8 @@ type SessionResponse struct {
 	CompanionSpeciality string     `json:"companion_speciality,omitempty"`
 	IDSessionType       string     `json:"id_session_type,omitempty"`
 	SessionNotes        string     `json:"session_notes,omitempty"`
-	DeprDate            string     `json:"date,omitempty"`
-	Date                DBDateTime `json:"session_date,omitzero"`
+	Date                DBDateTime `json:"date,omitzero"`
+	DeprDate            string     `json:"depr_date,omitempty"`
 	Status              string     `json:"status,omitempty"`
 	CreatedAt           DBDateTime `json:"created_at,omitzero"`
 	UpdatedAt           DBDateTime `json:"updated_at,omitzero"`
@@ -114,9 +114,10 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Optional[SessionD
 		!ID.Ensure(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.OptionalEmpty[SessionDB]()
 	}
-	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
-		obj.Date = date
-	} else {
+
+	var err error
+	obj.Date, err = Time.Parse(u.Date)
+	if err != nil {
 		logger.Warning("Failed to parse session date:", err)
 	}
 
@@ -140,9 +141,10 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		!ID.OmitEmpty(u.IDSessionType, &obj.IDSessionType, "IDSessionType") {
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
-	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
-		obj.Date = date
-	} else {
+
+	var err error
+	obj.Date, err = Time.Parse(u.Date)
+	if err != nil {
 		logger.Warning("Failed to parse session date:", err)
 	}
 
@@ -167,6 +169,7 @@ func (u SessionDB) ToResponse() SessionResponse {
 		UpdatedAt:           u.UpdatedAt,
 	}
 }
+
 func (u SessionDB) IsEmpty() bool {
 	return u == (SessionDB{})
 }
