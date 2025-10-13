@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"dainxor/atv/db"
@@ -130,6 +130,118 @@ func (sessionTypeType) GetAll(c *gin.Context) {
 		types.Response(
 			sessionTypes,
 			"",
+		),
+	)
+}
+
+func (sessionTypeType) UpdateByID(c *gin.Context) {
+	var body models.SessionTypeCreate
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to update sessionType: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	logger.Debug("Updating sessionType by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
+
+	result := db.SessionType.UpdateByID(id, body, filter)
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code, err)
+		return
+	}
+
+	sessionType := result.Value()
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			sessionType.ToResponse(),
+			"",
+		),
+	)
+}
+
+func (sessionTypeType) PatchByID(c *gin.Context) {
+	var body models.SessionTypeCreate
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		expected := utils.StructToString(body)
+		logger.Error(err.Error())
+		logger.Error("Failed to patch sessionType: JSON request body is invalid")
+		logger.Error("Expected body: ", expected)
+
+		c.JSON(types.Http.C400().BadRequest(),
+			types.EmptyResponse(
+				"Invalid request body",
+				"Expected body: "+expected,
+			),
+		)
+		return
+	}
+
+	id := c.Param("id")
+	filter := models.Filter.Create(c.Request.URL.Query())
+
+	result := db.SessionType.PatchByID(id, body, filter)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
+		return
+	}
+
+	sessionType := result.Value()
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			sessionType.ToResponse(),
+			"",
+		),
+	)
+}
+
+func (sessionTypeType) DeleteByID(c *gin.Context) {
+	id := c.Param("id")
+	logger.Debug("Deleting sessionType by ID: ", id)
+	filter := models.Filter.Create(c.Request.URL.Query())
+
+	result := db.SessionType.DeleteByID(id, filter)
+
+	if result.IsErr() {
+		err := result.Error()
+		cerror := err.(*types.HttpError)
+		c.JSON(cerror.Code,
+			types.EmptyResponse(
+				cerror.Msg(),
+				cerror.Details(),
+			),
+		)
+		return
+	}
+
+	data := result.Value().ToResponse()
+
+	c.JSON(types.Http.C200().Accepted(),
+		types.Response(
+			data,
+			"SessionType marked for deletion",
 		),
 	)
 }

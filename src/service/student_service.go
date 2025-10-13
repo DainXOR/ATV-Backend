@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"dainxor/atv/db"
@@ -118,7 +118,7 @@ func (studentType) GetAll(c *gin.Context) {
 	)
 }
 
-func (studentType) UpdatebyID(c *gin.Context) {
+func (studentType) UpdateByID(c *gin.Context) {
 	var body models.StudentCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -149,7 +149,7 @@ func (studentType) UpdatebyID(c *gin.Context) {
 	}
 
 	student := result.Value()
-	c.JSON(http.StatusOK,
+	c.JSON(types.Http.C200().Ok(),
 		types.Response(
 			student.ToResponse(),
 			"",

@@ -3,8 +3,8 @@ package models
 type SpecialityDB struct {
 	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdatedAt DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
@@ -15,10 +15,10 @@ type SpecialityCreate struct {
 
 // SpecialityResponse represents the response body for a Speciality
 type SpecialityResponse struct {
-	ID        string     `json:"id,omitempty"`
-	Name      string     `json:"name,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
+	ID        string     `json:"id"`
+	Name      string     `json:"name"`
+	CreatedAt DBDateTime `json:"created_at"`
+	UpdatedAt DBDateTime `json:"updated_at"`
 }
 
 func (u SpecialityCreate) ToInsert() SpecialityDB {

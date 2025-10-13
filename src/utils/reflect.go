@@ -75,6 +75,30 @@ func StructToString(obj any) string {
 	sb.WriteString("}")
 	return sb.String()
 }
+func StructToTagString(obj any, tagName string) string {
+	t := reflect.TypeOf(obj)
+
+	if t.Kind() != reflect.Struct {
+		return "{ }"
+	}
+
+	var sb strings.Builder
+	sb.WriteString("{")
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		sb.WriteString(string(field.Tag.Get(tagName)))
+		sb.WriteString(": ")
+		sb.WriteString(field.Type.String())
+
+		if i < t.NumField()-1 {
+			sb.WriteString(", ")
+		}
+	}
+
+	sb.WriteString("}")
+	return sb.String()
+}
 
 // Function to convert a struct to a map[string]any
 // It takes a filter function to determine which fields to include in the map

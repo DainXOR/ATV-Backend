@@ -15,7 +15,13 @@ type companionType struct{}
 var Companion companionType
 
 func (companionType) Create(companion models.CompanionCreate) types.Result[models.CompanionDB] {
-	companionDB := companion.ToInsert()
+	resultCompanionDB := companion.ToInsert()
+	if resultCompanionDB.IsErr() {
+		logger.Warning("Error converting companion to DB model:", resultCompanionDB.Error())
+		return types.ResultErr[models.CompanionDB](resultCompanionDB.Error())
+	}
+
+	companionDB := resultCompanionDB.Value()
 	resultCreate := configs.DB.InsertOne(companionDB)
 	if resultCreate.IsErr() {
 		logger.Warning("Failed to create companion in MongoDB:", resultCreate.Error())

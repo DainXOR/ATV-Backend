@@ -1,4 +1,4 @@
-package routes
+package controller
 
 import (
 	"dainxor/atv/configs"
@@ -62,15 +62,11 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 		if utils.Any(omitMethods, func(m string) bool { return m == method }) || path == "/" {
 			continue
 		}
-		//logger.Debug("Route:", method, path)
 
 		pathParts := strings.Split(strings.Trim(path, "/"), "/")[1:]
-		//logger.Debug("Route parts:", pathParts)
-
 		current := result
-		for len(pathParts) > 1 {
-			//logger.Debug("Entering group:", pathParts[0])
 
+		for len(pathParts) > 1 {
 			if _, ok := current[pathParts[0]]; !ok {
 				current[pathParts[0]] = gin.H{}
 			}
@@ -84,8 +80,6 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 			continue
 		}
 		current[opName] = path
-		//logger.Debug("Result:", result)
-
 	}
 
 	return result
