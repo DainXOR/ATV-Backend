@@ -15,6 +15,22 @@ func StudentsRoutes(router *gin.Engine) {
 	beforeRoute := fmt.Sprintf("/api/v%d/student", rv-1)
 	lastRoute := fmt.Sprintf("/api/v%d/students", rv)
 
+	studentRouterOld := router.Group(beforeRoute)
+	{
+		studentRouterOld.GET("/:id", service.Student.GetByID)
+		studentRouterOld.GET("/all", service.Student.GetAll)
+
+		studentRouterOld.POST("/", service.Student.Create)
+
+		studentRouterOld.PUT("/:id", service.Student.UpdateByID)
+
+		studentRouterOld.PATCH("/:id", service.Student.PatchByID)
+
+		studentRouterOld.DELETE("/:id", service.Student.DeleteByID)
+		//studentRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
+
+	}
+
 	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
 		ctx.JSON(types.Http.C300().PermanentRedirect(),
 			types.EmptyResponse(
@@ -23,22 +39,6 @@ func StudentsRoutes(router *gin.Engine) {
 		)
 		ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
 	})
-
-	//studentRouter := router.Group(beforeRoute)
-	//{
-	//	studentRouter.GET("/:id", controller.Student.GetByID)
-	//	studentRouter.GET("/all", controller.Student.GetAll)
-	//
-	//	studentRouter.POST("/", controller.Student.Create)
-	//
-	//	studentRouter.PUT("/:id", controller.Student.UpdatebyID)
-	//
-	//	studentRouter.PATCH("/:id", controller.Student.PatchByID)
-	//
-	//	studentRouter.DELETE("/:id", controller.Student.DeleteByID)
-	//	//studentRouter.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
-	//
-	//}
 
 	studentRouter := router.Group(lastRoute)
 	{

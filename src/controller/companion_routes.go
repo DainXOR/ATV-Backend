@@ -2,9 +2,7 @@ package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/logger"
 	"dainxor/atv/service"
-	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -15,14 +13,29 @@ func CompanionsRoutes(router *gin.Engine) {
 	beforeRoute := fmt.Sprintf("/api/v%d/companion", rv-1)
 	lastRoute := fmt.Sprintf("/api/v%d/companions", rv)
 
-	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
-		ctx.JSON(types.Http.C300().PermanentRedirect(),
-			types.EmptyResponse(
-				logger.DeprecateMsg(types.V("0.2.0"), types.V("0.3.0"), "Use", lastRoute, "instead"),
-			),
-		)
-		ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
-	})
+	companionRouterOld := router.Group(beforeRoute)
+	{
+		companionRouterOld.GET("/:id", service.Companion.GetByID)
+		companionRouterOld.GET("/all", service.Companion.GetAll)
+
+		companionRouterOld.POST("/", service.Companion.Create)
+
+		companionRouterOld.PUT("/:id", service.Companion.UpdateByID)
+
+		companionRouterOld.PATCH("/:id", service.Companion.PatchByID)
+
+		companionRouterOld.DELETE("/:id", service.Companion.DeleteByID)
+		//companionRouterOld.DELETE("/permanent-delete/:id/:confirm", controller.Student.ForceDeleteByID)
+
+	}
+	//router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
+	//	ctx.JSON(types.Http.C300().PermanentRedirect(),
+	//		types.EmptyResponse(
+	//			logger.DeprecateMsg(types.V("0.2.0"), types.V("0.3.0"), "Use", lastRoute, "instead"),
+	//		),
+	//	)
+	//	ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
+	//})
 
 	companionRouter := router.Group(lastRoute)
 	{

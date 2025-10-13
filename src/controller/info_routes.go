@@ -2,9 +2,9 @@ package controller
 
 import (
 	"dainxor/atv/configs"
+	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -22,23 +22,23 @@ func InfoRoutes(router *gin.Engine) {
 	infoRouter := router.Group("api/info")
 	{
 		infoRouter.GET("/", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(types.Http.C200().Ok(), gin.H{
 				"message": "Available routes",
 				"routes":  availableRoutes,
 			})
 		})
 		infoRouter.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(types.Http.C200().Ok(), gin.H{
 				"message": "pong",
 			})
 		})
 		infoRouter.GET("/api-version", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(types.Http.C200().Ok(), gin.H{
 				"version": configs.App.ApiVersion(),
 			})
 		})
 		infoRouter.GET("/route-version", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(types.Http.C200().Ok(), gin.H{
 				"version": configs.App.RoutesVersion(),
 			})
 		})

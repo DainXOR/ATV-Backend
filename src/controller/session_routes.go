@@ -2,9 +2,7 @@ package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/logger"
 	"dainxor/atv/service"
-	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -15,14 +13,14 @@ func SessionsRoutes(router *gin.Engine) {
 	beforeRoute := fmt.Sprintf("/api/v%d/session", rv-1)
 	lastRoute := fmt.Sprintf("/api/v%d/sessions", rv)
 
-	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
-		ctx.JSON(types.Http.C300().PermanentRedirect(),
-			types.EmptyResponse(
-				logger.DeprecateMsg(types.V("0.3.0"), types.V("0.4.0"), "Use", lastRoute, "instead"),
-			),
-		)
-		ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
-	})
+	//router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
+	//	ctx.JSON(types.Http.C300().PermanentRedirect(),
+	//		types.EmptyResponse(
+	//			logger.DeprecateMsg(types.V("0.3.0"), types.V("0.4.0"), "Use", lastRoute, "instead"),
+	//		),
+	//	)
+	//	ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
+	//})
 
 	sessionRouter := router.Group(beforeRoute)
 	{
