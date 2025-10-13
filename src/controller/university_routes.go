@@ -2,9 +2,7 @@ package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/logger"
 	"dainxor/atv/service"
-	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -15,14 +13,28 @@ func UniversitiesRoutes(router *gin.Engine) {
 	beforeRoute := fmt.Sprintf("/api/v%d/university", rv-1)
 	lastRoute := fmt.Sprintf("/api/v%d/universities", rv)
 
-	router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
-		ctx.JSON(types.Http.C300().PermanentRedirect(),
-			types.EmptyResponse(
-				logger.DeprecateMsg(types.V("0.2.0"), types.V("0.3.0"), "Use", lastRoute, "instead"),
-			),
-		)
-		ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
-	})
+	universityRouterOld := router.Group(beforeRoute)
+	{
+		universityRouterOld.POST("/", service.University.Create)
+
+		universityRouterOld.GET("/:id", service.University.GetByID)
+		universityRouterOld.GET("/all", service.University.GetAll)
+
+		universityRouterOld.PUT("/:id", service.University.UpdateByID)
+
+		universityRouterOld.PATCH("/:id", service.University.PatchByID)
+
+		universityRouterOld.DELETE("/:id", service.University.DeleteByID)
+	}
+
+	//router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
+	//	ctx.JSON(types.Http.C300().PermanentRedirect(),
+	//		types.EmptyResponse(
+	//			logger.DeprecateMsg(types.V("0.2.0"), types.V("0.3.0"), "Use", lastRoute, "instead"),
+	//		),
+	//	)
+	//	ctx.Redirect(types.Http.C300().PermanentRedirect(), lastRoute)
+	//})
 
 	universityRouter := router.Group(lastRoute)
 	{

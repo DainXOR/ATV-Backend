@@ -19,11 +19,11 @@ type SessionDB struct {
 	IDContactReason     DBID          `json:"id_contact_reason,omitempty" bson:"id_contact_reason,omitempty"`
 	IDVulnerabilityType DBID          `json:"id_vulnerability_type,omitempty" bson:"id_vulnerability_type,omitempty"`
 	SessionNotes        string        `json:"session_notes,omitempty" bson:"session_notes,omitempty"`
-	DeprDate            string        `json:"date,omitempty" bson:"temp_date,omitempty"`
-	Date                DBDateTime    `json:"session_date,omitempty" bson:"date,omitempty"`
+	DeprDate            string        `json:"depr_date,omitempty" bson:"depr_date,omitempty"`
+	Date                DBDateTime    `json:"date,omitzero" bson:"date,omitzero"`
 	Status              sessionStatus `json:"status,omitempty" bson:"status,omitempty"`
-	CreatedAt           DBDateTime    `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdatedAt           DBDateTime    `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	CreatedAt           DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitzero"`
+	UpdatedAt           DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitzero"`
 	DeletedAt           DBDateTime    `json:"deleted_at" bson:"deleted_at"`
 }
 
@@ -53,8 +53,8 @@ type SessionResponse struct {
 	IDContactReason     string     `json:"id_contact_reason"`
 	IDVulnerabilityType string     `json:"id_vulnerability_type"`
 	SessionNotes        string     `json:"session_notes"`
-	DeprDate            string     `json:"date"`
-	Date                DBDateTime `json:"session_date"`
+	DeprDate            string     `json:"depr_date"`
+	Date                DBDateTime `json:"date"`
 	Status              string     `json:"status"`
 	CreatedAt           DBDateTime `json:"created_at"`
 	UpdatedAt           DBDateTime `json:"updated_at"`
@@ -123,9 +123,10 @@ func (u SessionCreate) ToInsert(extra map[string]string) types.Result[SessionDB]
 		logger.Lava(types.V("0.2.0"), "Using not standarized error")
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
-	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
-		obj.Date = date
-	} else {
+
+	var err error
+	obj.Date, err = Time.Parse(u.Date)
+	if err != nil {
 		logger.Warning("Failed to parse session date:", err)
 	}
 
@@ -152,9 +153,10 @@ func (u SessionCreate) ToUpdate(extra map[string]string) types.Result[SessionDB]
 		logger.Lava(types.V("0.2.0"), "Using not standarized error")
 		return types.ResultErr[SessionDB](errors.New("Invalid session data"))
 	}
-	if date, err := Time.Parse(u.Date, Time.Format()); err == nil {
-		obj.Date = date
-	} else {
+
+	var err error
+	obj.Date, err = Time.Parse(u.Date)
+	if err != nil {
 		logger.Warning("Failed to parse session date:", err)
 	}
 
@@ -181,6 +183,7 @@ func (u SessionDB) ToResponse() SessionResponse {
 		UpdatedAt:           u.UpdatedAt,
 	}
 }
+
 func (u SessionDB) IsEmpty() bool {
 	return u == (SessionDB{})
 }

@@ -33,6 +33,8 @@ func (m *mongoType) Connect(dbName, connectionString string) error {
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
 		logger.Error("Failed to connect to MongoDB:", err)
+		logger.Debug("Connection string used:", connectionString)
+		logger.Debug("Database name used:", dbName)
 		return err
 	}
 
