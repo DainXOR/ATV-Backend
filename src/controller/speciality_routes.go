@@ -24,7 +24,7 @@ func SpecialitiesRoutes(router *gin.Engine) {
 
 		specialityRouterOld.PATCH("/:id", service.Speciality.PatchByID)
 
-		specialityRouterOld.DELETE("/:id", service.Alert.DeleteByID)
+		specialityRouterOld.DELETE("/:id", service.Speciality.DeleteByID)
 	}
 
 	//router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
@@ -47,6 +47,6 @@ func SpecialitiesRoutes(router *gin.Engine) {
 
 		specialityRouter.PATCH("/:id", service.Speciality.PatchByID)
 
-		specialityRouter.DELETE("/:id", service.Alert.DeleteByID)
+		specialityRouter.DELETE("/:id", service.Speciality.DeleteByID)
 	}
 }
