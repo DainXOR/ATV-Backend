@@ -1,0 +1,58 @@
+#Workflow name
+name: CI/CD Pipeline
+on:
+  #Manually trigger workflow runs
+  workflow_dispatch:
+  #Trigger the workflow on push from the main branch
+  push:
+    branches:
+      - main
+      - dev
+jobs:
+  #Test's job
+  tests:
+    name: Unit tests
+    #Run on Ubuntu using the latest version
+    runs-on: ubuntu-latest
+    #Job's steps
+    steps:
+      #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
+      - uses: actions/checkout@v5
+      #Set up JDK 11
+      - name: Set up Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.2'
+          cache-dependency-path: src/go.sum
+          
+      - name: Install dependencies
+        run: | 
+          cd src
+          go get .
+        
+      - name: Build
+        run: | 
+          cd src
+          go build -v ./...
+        
+      - name: Test with the Go CLI
+        run: | 
+          cd src
+          go test
+
+  #Sonar's job
+  sonar:
+    #Depends on sonar's job
+    needs: tests
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
+
