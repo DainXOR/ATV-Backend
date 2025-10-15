@@ -19,11 +19,6 @@ jobs:
       #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
       - uses: actions/checkout@v5
       #Go to the project root directory
-      - run: ls -la
-      - run: cd src
-      - run: ls -la
-      - run: cd src
-      - run: ls -la
       #Set up JDK 11
       - name: Set up Golang
         uses: actions/setup-go@v6
@@ -31,7 +26,7 @@ jobs:
           go-version: '1.25.2'
 
       - run: go version
-      - run: go run .
+      - run: go run "src/."
 
       #Run Tests
       #- name: Run Tests
