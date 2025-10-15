@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     #Job's steps
     steps:
+      #Go to the project root directory
+      - run: cd src
       #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
       - uses: actions/checkout@v5
       #Set up JDK 11
@@ -25,7 +27,6 @@ jobs:
           go-version: '1.25.2'
 
       - run: go version
-      - run: cd src
       - run: go run .
 
       #Run Tests
