@@ -139,7 +139,7 @@ func (sessionType) GetAllByStudentID(id string, filter models.FilterObject) type
 		return types.ResultErr[[]models.SessionDB](&httpErr)
 	}
 
-	filter = models.Filter.AddPart(filter, models.Filter.ID(oid))
+	filter = models.Filter.AddPart(filter, models.Filter.IDOf("student", oid))
 	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 	sessionResult := configs.DB.FindAll(filter, models.SessionDB{})
 	if sessionResult.IsErr() {
