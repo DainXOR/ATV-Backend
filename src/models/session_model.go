@@ -184,7 +184,7 @@ func (u SessionDB) ToResponse() SessionResponse {
 	}
 }
 
-func (u SessionDB) IsEmpty() bool {
+func (u SessionDB) IsZero() bool {
 	return u == (SessionDB{})
 }
 

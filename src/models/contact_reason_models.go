@@ -43,7 +43,7 @@ func (p ContactReasonDB) ToResponse() ContactReasonResponse {
 	}
 }
 
-func (p ContactReasonDB) IsEmpty() bool {
+func (p ContactReasonDB) IsZero() bool {
 	return p.ID == (DBID{})
 }
 

@@ -55,7 +55,7 @@ func (p PriorityDB) ToResponse() PriorityResponse {
 	}
 }
 
-func (p PriorityDB) IsEmpty() bool {
+func (p PriorityDB) IsZero() bool {
 	return p.ID == (DBID{})
 }
 

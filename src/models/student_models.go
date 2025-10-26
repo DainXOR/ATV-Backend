@@ -122,7 +122,7 @@ func (user StudentDB) ToResponse() StudentResponse {
 		UpdatedAt:        user.UpdatedAt,
 	}
 }
-func (user StudentDB) IsEmpty() bool {
+func (user StudentDB) IsZero() bool {
 	return user == (StudentDB{})
 }
 

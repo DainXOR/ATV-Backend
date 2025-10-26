@@ -14,7 +14,7 @@ var Student studentType
 
 func (studentType) Create(student models.StudentCreate) types.Result[models.StudentDB] {
 	studentDB := student.ToInsert()
-	if studentDB.IsEmpty() {
+	if studentDB.IsZero() {
 		logger.Error("Error converting student to DB model")
 		httpErr := types.Error(
 			types.Http.C400().UnprocessableEntity(),

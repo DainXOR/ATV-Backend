@@ -4,6 +4,7 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
+
 	"errors"
 	"net/url"
 	"strings"
@@ -24,7 +25,7 @@ import (
 // Yes, that's it, nothing else is required.
 type DBModelInterface interface {
 	TableName() string
-	IsEmpty() bool
+	IsZero() bool
 	//CreationDate() DBDateTime
 	//UpdateDate() DBDateTime
 	//DeleteDate() DBDateTime
@@ -264,7 +265,12 @@ func (iFilters) skip(_ string, _ []string) bool {
 // If you want to change how the filter is created or the type, modify this function.
 // Make sure to modify the corresponding aliases used if needed.
 func (iFilters) Create(queryParams url.Values) FilterObject {
+	if queryParams == nil {
+		return FilterObject{}
+	}
+
 	var filter FilterObject
+
 	for key, vals := range queryParams {
 		if Filter.skip(key, vals) {
 			continue
