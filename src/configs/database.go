@@ -199,15 +199,16 @@ func (dbNS) PermanentDeleteMany(filter any, model models.DBModelInterface) error
 
 // Migrate performs database migrations for the provided models
 // It uses the gorm library to automatically migrate the models to the database
-func (dbNS) Migrate(models ...models.DBModelInterface) {
+func (dbNS) Migrate(models ...models.DBModelInterface) error {
 	logger.Info("Starting migrations")
 
 	if err := DB.accessor.Migrate(models...); err != nil {
 		logger.Error("Migration failed:", err)
-		return
+		return err
 	}
 
 	logger.Info("Migrations completed")
+	return nil
 }
 
 func (dbNS) Close() error {
