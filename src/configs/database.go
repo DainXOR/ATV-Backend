@@ -137,11 +137,6 @@ func (dbNS) Start() error {
 	return DB.accessor.Connect(DB.name, DB.connectionString)
 }
 func (dbNS) ConnectTo(dbName, connectionString string) error {
-	if DB.accessor == nil {
-		logger.Error("Database accessor is not set")
-		return errors.New("Database accessor is not set")
-	}
-
 	DB.connectionString = connectionString
 	DB.name = dbName
 
