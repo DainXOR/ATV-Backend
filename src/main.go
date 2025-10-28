@@ -14,8 +14,8 @@ import (
 
 func init() {
 	logger.SetVersion(configs.App.ApiVersion())
-	if configs.DB.Start() != nil {
-		logger.Fatal("Failed to connect to the database")
+	if err := configs.DB.Start(); err != nil {
+		logger.Fatal("Failed to connect to the database:", err)
 	}
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
