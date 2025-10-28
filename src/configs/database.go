@@ -22,7 +22,9 @@ var accessors = make(map[string]InterfaceDBAccessor)
 func init() {
 	DB.DefineAccessor("MONGO", NewMongoAccessor())
 
-	DB.LoadEnv()
+	if err := DB.LoadEnv(); err != nil {
+		logger.Error("Failed to load DB config from environment:", err)
+	}
 }
 
 // DefineAccessor registers a new database accessor for a given database type
@@ -84,7 +86,10 @@ func (dbNS) LoadEnv() error {
 // ReloadConnection reloads the database connection using the current environment variables
 func (dbNS) ReloadConnection() error {
 	DB.Close()
-	DB.LoadEnv()
+	if err := DB.LoadEnv(); err != nil {
+		logger.Error("Failed to load DB config from environment:", err)
+		return err
+	}
 	if err := DB.Start(); err != nil {
 		logger.Error("Failed to reload DB connection:", err)
 		return err

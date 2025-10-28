@@ -43,6 +43,9 @@ func (appEnvNS) APIVersion() string {
 func (appEnvNS) RouteVersion() string {
 	return "APP_ROUTE_VERSION"
 }
+func (appEnvNS) Address() string {
+	return "SERVER_ADDRESS"
+}
 
 func (appModeNS) Production() string {
 	return "prod"
@@ -97,28 +100,25 @@ func envInit() {
 	}
 	App.routesVersion = uint32(routeVersion)
 
-	appVersion, err := types.VersionFrom(cmp.Or(os.Getenv("ATV_API_VERSION"), DEFAULT_API_VERSION))
+	appVersion, err := types.VersionFrom(cmp.Or(os.Getenv(App.Env().APIVersion()), DEFAULT_API_VERSION))
 	if err != nil {
 		logger.Warningf("Invalid API version: %v, falling back to default '%s'", err, DEFAULT_API_VERSION)
 		appVersion = types.V(DEFAULT_API_VERSION)
 	}
 	App.apiVersion = appVersion
 
-	App.address = cmp.Or(os.Getenv("SERVER_ADDRESS"), DEFAULT_ADDRESS)
+	App.address = cmp.Or(os.Getenv(App.Env().Address()), DEFAULT_ADDRESS)
 }
 
 func (appNS) Environment() string {
 	return App.environment
 }
-
 func (appNS) RoutesVersion() uint32 {
 	return App.routesVersion
 }
-
 func (appNS) ApiVersion() types.Version {
 	return App.apiVersion
 }
-
 func (appNS) Address() string {
 	return App.address
 }
