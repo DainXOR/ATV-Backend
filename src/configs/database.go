@@ -4,6 +4,7 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 	"errors"
 
 	"os"
@@ -38,8 +39,13 @@ func (dbNS) DefineAccessor(dbType string, accessor InterfaceDBAccessor) error {
 		return errors.New("Database accessor is nil")
 	}
 
+	dbType = utils.ToScreamingSnakeCase(dbType)
 	logger.Debug("Defining database accessor for type:", dbType)
+	if _, exists := accessors[dbType]; exists {
+		logger.Warning("Overwriting existing accessor for type:", dbType)
+	}
 	accessors[dbType] = accessor
+
 	return nil
 }
 

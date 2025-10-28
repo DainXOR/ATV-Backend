@@ -171,3 +171,14 @@ func Join(v []any, sep string) string {
 
 	return strings.TrimSpace(joinedArgs)
 }
+func ToScreamingSnakeCase(input string) string {
+	words := []rune{}
+	for i, r := range input {
+		if i > 0 && r == ' ' {
+			words = append(words, '_')
+		} else {
+			words = append(words, r)
+		}
+	}
+	return strings.TrimSpace(strings.ToUpper(string(words)))
+}
