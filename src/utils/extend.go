@@ -51,6 +51,7 @@ func Extract(prefix string, text string, suffix string) string {
 
 /* Functional utilities for slices */
 
+// Removes elements that predicate returns false
 func Filter[T any](slice []T, predicate func(T) bool) []T {
 	result := make([]T, 0, len(slice))
 

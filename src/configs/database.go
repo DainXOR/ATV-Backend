@@ -9,42 +9,80 @@ import (
 	"os"
 )
 
-type dbType struct {
+type dbNS struct {
+	dbType           string
 	accessor         InterfaceDBAccessor
 	name             string
 	connectionString string
 }
 
-var DB dbType
+var DB dbNS
+var accessors = make(map[string]InterfaceDBAccessor)
 
 func init() {
+	DB.DefineAccessor("MONGO", NewMongoAccessor())
+
 	DB.LoadEnv()
+}
+
+// DefineAccessor registers a new database accessor for a given database type
+func (dbNS) DefineAccessor(dbType string, accessor InterfaceDBAccessor) error {
+	if dbType == "" {
+		logger.Error("Database type is empty")
+		return errors.New("Database type is empty")
+	}
+	if accessor == nil {
+		logger.Error("Database accessor is nil")
+		return errors.New("Database accessor is nil")
+	}
+
+	logger.Debug("Defining database accessor for type:", dbType)
+	accessors[dbType] = accessor
+	return nil
 }
 
 // LoadDBConfig loads the database configuration from environment variables
 // and sets the default values if not found. It also sets the database type.
-func (dbType) LoadEnv() {
-	useTesting, exist := os.LookupEnv("DB_TESTING")
+func (dbNS) LoadEnv() error {
+	var present bool
+	var err error
 
-	if exist || useTesting == "TRUE" {
-		logger.Debug("Using testing database")
-		DB.connectionString = os.Getenv("CONNECTION_STRING_TEST")
-		DB.name = os.Getenv("DB_NAME_TEST")
+	DB.dbType, present = os.LookupEnv("DB_TYPE")
+	if !present {
+		logger.Error("Database type is not set in environment variables")
+		err = errors.New("Database type is not set")
+	}
+	logger.Debug("Using database type:", DB.dbType)
+
+	DB.connectionString, present = os.LookupEnv(DB.dbType + "_STRING")
+	if !present {
+		logger.Error("Database connection string is not set in environment variables")
+		err = errors.New("Database connection string is not set")
+	}
+	logger.Debug("Using database connection string:", DB.connectionString)
+
+	DB.name, present = os.LookupEnv("DB_NAME")
+	if !present {
+		logger.Error("Database name is not set in environment variables")
+		err = errors.New("Database name is not set")
+
 	} else {
-		logger.Debug("Using production database")
-		DB.connectionString = os.Getenv("CONNECTION_STRING")
-		DB.name = os.Getenv("DB_NAME")
+		dbEnvName := App.Environment()
+
+		// In case of debug mode, use development database
+		if dbEnvName == App.Mode().Debug() {
+			dbEnvName = App.Mode().Development()
+		}
+
+		DB.name = DB.name + "-" + dbEnvName
+		logger.Debug("Using database name:", DB.name)
 	}
 
-	if DB.connectionString == "" {
-		logger.Error("Database connection string is not set")
-	}
-	if DB.name == "" {
-		logger.Error("Database name is not set")
-	}
-
+	return err
 }
-func (dbType) ReloadConnection() error {
+
+// ReloadConnection reloads the database connection using the current environment variables
+func (dbNS) ReloadConnection() error {
 	DB.Close()
 	DB.LoadEnv()
 	if err := DB.Start(); err != nil {
@@ -54,14 +92,27 @@ func (dbType) ReloadConnection() error {
 	return nil
 }
 
-func (dbType) Use(db InterfaceDBAccessor) *dbType {
+/*
+	Database accessor management
+*/
+
+func (dbNS) Use(db InterfaceDBAccessor) *dbNS {
 	DB.accessor = db
 	return &DB
 }
-func (dbType) Start() error {
+
+/*
+	Database connection management
+*/
+
+func (dbNS) Start() error {
 	if DB.accessor == nil {
-		logger.Error("Database accessor is not set")
-		return errors.New("Database accessor is not set")
+		if len(accessors) == 0 || accessors[DB.dbType] == nil {
+			logger.Error("Database accessor is not set")
+			return errors.New("Database accessor is not set")
+		}
+
+		DB.accessor = accessors[DB.dbType]
 	}
 
 	if DB.connectionString == "" || DB.name == "" {
@@ -69,9 +120,23 @@ func (dbType) Start() error {
 		return errors.New("Database connection string or name is not set")
 	}
 
+	logger.Debug("Connecting to database:", DB.name)
+	logger.Debug("Using connection string:", DB.connectionString)
+	logger.Debug("Using accessor type:", DB.dbType)
 	return DB.accessor.Connect(DB.name, DB.connectionString)
 }
-func (dbType) ConnectTo(dbName, connectionString string) error {
+func (dbNS) ConnectTo(dbName, connectionString string) error {
+	if DB.accessor == nil {
+		logger.Error("Database accessor is not set")
+		return errors.New("Database accessor is not set")
+	}
+
+	DB.connectionString = connectionString
+	DB.name = dbName
+
+	return DB.Start()
+}
+func (dbNS) ConnectOnce(dbName, connectionString string) error {
 	if DB.accessor == nil {
 		logger.Error("Database accessor is not set")
 		return errors.New("Database accessor is not set")
@@ -80,51 +145,55 @@ func (dbType) ConnectTo(dbName, connectionString string) error {
 	return DB.accessor.Connect(dbName, connectionString)
 }
 
-func (dbType) InsertOne(document models.DBModelInterface) types.Result[models.DBID] {
+/*
+	Database operations
+*/
+
+func (dbNS) InsertOne(document models.DBModelInterface) types.Result[models.DBID] {
 	return DB.accessor.InsertOne(document)
 }
-func (dbType) InsertMany(documents ...models.DBModelInterface) types.Result[[]models.DBID] {
+func (dbNS) InsertMany(documents ...models.DBModelInterface) types.Result[[]models.DBID] {
 	return DB.accessor.InsertMany(documents...)
 }
 
-func (dbType) FindOne(filter any, result models.DBModelInterface) types.Result[models.DBModelInterface] {
+func (dbNS) FindOne(filter any, result models.DBModelInterface) types.Result[models.DBModelInterface] {
 	return DB.accessor.FindOne(filter, result)
 }
-func (dbType) FindAll(filter any, result models.DBModelInterface) types.Result[[]models.DBModelInterface] {
+func (dbNS) FindAll(filter any, result models.DBModelInterface) types.Result[[]models.DBModelInterface] {
 	return DB.accessor.FindMany(filter, result)
 }
 
-func (dbType) UpdateOne(filter any, update models.DBModelInterface) error {
+func (dbNS) UpdateOne(filter any, update models.DBModelInterface) error {
 	return DB.accessor.UpdateOne(filter, update)
 }
-func (dbType) UpdateMany(filter any, update models.DBModelInterface) error {
+func (dbNS) UpdateMany(filter any, update models.DBModelInterface) error {
 	return DB.accessor.UpdateMany(filter, update)
 }
 
-func (dbType) PatchOne(filter any, update models.DBModelInterface) error {
+func (dbNS) PatchOne(filter any, update models.DBModelInterface) error {
 	return DB.accessor.PatchOne(filter, update)
 }
-func (dbType) PatchMany(filter any, update models.DBModelInterface) error {
+func (dbNS) PatchMany(filter any, update models.DBModelInterface) error {
 	return DB.accessor.PatchMany(filter, update)
 }
 
-func (dbType) SoftDeleteOne(filter any, model models.DBModelInterface) error {
+func (dbNS) SoftDeleteOne(filter any, model models.DBModelInterface) error {
 	return DB.accessor.SoftDeleteOne(filter, model)
 }
-func (dbType) SoftDeleteMany(filter any, model models.DBModelInterface) error {
+func (dbNS) SoftDeleteMany(filter any, model models.DBModelInterface) error {
 	return DB.accessor.SoftDeleteMany(filter, model)
 }
 
-func (dbType) PermanentDeleteOne(filter any, model models.DBModelInterface) error {
+func (dbNS) PermanentDeleteOne(filter any, model models.DBModelInterface) error {
 	return DB.accessor.PermanentDeleteOne(filter, model)
 }
-func (dbType) PermanentDeleteMany(filter any, model models.DBModelInterface) error {
+func (dbNS) PermanentDeleteMany(filter any, model models.DBModelInterface) error {
 	return DB.accessor.PermanentDeleteMany(filter, model)
 }
 
 // Migrate performs database migrations for the provided models
 // It uses the gorm library to automatically migrate the models to the database
-func (dbType) Migrate(models ...models.DBModelInterface) {
+func (dbNS) Migrate(models ...models.DBModelInterface) {
 	logger.Info("Starting migrations")
 
 	if err := DB.accessor.Migrate(models...); err != nil {
@@ -135,7 +204,7 @@ func (dbType) Migrate(models ...models.DBModelInterface) {
 	logger.Info("Migrations completed")
 }
 
-func (dbType) Close() error {
+func (dbNS) Close() error {
 	if DB.accessor == nil {
 		logger.Error("Database accessor is not set")
 		return errors.New("Database accessor is not set")

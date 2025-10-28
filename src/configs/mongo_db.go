@@ -20,11 +20,9 @@ type mongoType struct {
 	db     *mongo.Database
 }
 
-var mongoT mongoType
-
 var _ InterfaceDBAccessor = (*mongoType)(nil)
 
-func GetMongoAccessor() *mongoType {
+func NewMongoAccessor() *mongoType {
 	return &mongoType{}
 }
 

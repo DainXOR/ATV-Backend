@@ -14,7 +14,7 @@ import (
 
 func init() {
 	logger.SetVersion(configs.App.ApiVersion())
-	if configs.DB.Use(configs.GetMongoAccessor()).Start() != nil {
+	if configs.DB.Start() != nil {
 		logger.Fatal("Failed to connect to the database")
 	}
 	// configs.DB.Migrate(&models.StudentDBMongo{})
