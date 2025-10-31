@@ -134,8 +134,10 @@ func panicOrError(msg string, condition bool) error {
 	}
 }
 func (i *dnxLogger) logLevelsNames() string {
-	contained := Level.ContainedIn(i.LogLevels())
+	urgencyLevels := Level.InterpretCode(i.LogLevels().UrgencyLevels())
+	contained := Level.ContainedIn(urgencyLevels)
 	names := utils.Map(contained, logLevel.Name)
+
 	return "| " + strings.Join(names, " | ") + " |"
 }
 

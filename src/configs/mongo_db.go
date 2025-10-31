@@ -20,11 +20,9 @@ type mongoType struct {
 	db     *mongo.Database
 }
 
-var mongoT mongoType
-
 var _ InterfaceDBAccessor = (*mongoType)(nil)
 
-func GetMongoAccessor() *mongoType {
+func NewMongoAccessor() *mongoType {
 	return &mongoType{}
 }
 
@@ -32,16 +30,14 @@ func (m *mongoType) Connect(dbName, connectionString string) error {
 	clientOpts := options.Client().ApplyURI(connectionString)
 	client, err := mongo.Connect(clientOpts)
 	if err != nil {
-		logger.Error("Failed to connect to MongoDB:", err)
-		logger.Debug("Connection string used:", connectionString)
-		logger.Debug("Database name used:", dbName)
+		logger.Error("Failed to connect to DB:", err)
 		return err
 	}
 
 	ctx, cancel := m.Context()
 	defer cancel()
 	if err = client.Ping(ctx, readpref.Primary()); err != nil {
-		logger.Error("Failed to ping MongoDB:", err)
+		logger.Error("Failed to ping DB:", err)
 		return err
 	}
 

@@ -51,6 +51,7 @@ func Extract(prefix string, text string, suffix string) string {
 
 /* Functional utilities for slices */
 
+// Removes elements that predicate returns false
 func Filter[T any](slice []T, predicate func(T) bool) []T {
 	result := make([]T, 0, len(slice))
 
@@ -169,4 +170,15 @@ func Join(v []any, sep string) string {
 	joinedArgs := strings.Join(values, sep)
 
 	return strings.TrimSpace(joinedArgs)
+}
+func ToScreamingSnakeCase(input string) string {
+	words := []rune{}
+	for i, r := range input {
+		if i > 0 && r == ' ' {
+			words = append(words, '_')
+		} else {
+			words = append(words, r)
+		}
+	}
+	return strings.TrimSpace(strings.ToUpper(string(words)))
 }
