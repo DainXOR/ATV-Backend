@@ -20,6 +20,13 @@ type dbNS struct {
 var DB dbNS
 var accessors = make(map[string]InterfaceDBAccessor)
 
+func (dbNS) Info() string {
+	return "Database Configuration:\n" +
+		"- Type: " + DB.dbType + "\n" +
+		"- Name: " + DB.name + "\n" +
+		"- Connection String: " + DB.connectionString + "\n"
+}
+
 func init() {
 	DB.DefineAccessor("MONGO", NewMongoAccessor())
 
@@ -59,13 +66,16 @@ func (dbNS) LoadEnv() error {
 	if !present {
 		logger.Error("Database type is not set in environment variables")
 		err = errors.New("Database type is not set")
+	} else {
+		logger.Debug("Using database type:", DB.dbType)
 	}
-	logger.Debug("Using database type:", DB.dbType)
 
 	DB.connectionString, present = os.LookupEnv(DB.dbType + "_STRING")
 	if !present {
 		logger.Error("Database connection string is not set in environment variables")
 		err = errors.New("Database connection string is not set")
+	} else {
+		logger.Debug("Using database connection string from env var:", DB.dbType+"_STRING")
 	}
 	logger.Debug("Using database connection string:", DB.connectionString)
 
@@ -86,12 +96,15 @@ func (dbNS) LoadEnv() error {
 		logger.Debug("Using database name:", DB.name)
 	}
 
+	logger.Lava(types.V("0.2.1"), "Not merging errors in DB LoadEnv")
 	return err
 }
 
 // ReloadConnection reloads the database connection using the current environment variables
 func (dbNS) ReloadConnection() error {
+	logger.Debug("Reloading database connection")
 	DB.Close()
+
 	if err := DB.LoadEnv(); err != nil {
 		logger.Error("Failed to load DB config from environment:", err)
 		return err
@@ -130,9 +143,6 @@ func (dbNS) Start() error {
 		return errors.New("Database connection string or name is not set")
 	}
 
-	logger.Debug("Connecting to database:", DB.name)
-	logger.Debug("Using connection string:", DB.connectionString)
-	logger.Debug("Using accessor type:", DB.dbType)
 	return DB.accessor.Connect(DB.name, DB.connectionString)
 }
 func (dbNS) ConnectTo(dbName, connectionString string) error {
@@ -212,8 +222,8 @@ func (dbNS) Migrate(models ...models.DBModelInterface) error {
 
 func (dbNS) Close() error {
 	if DB.accessor == nil {
-		logger.Error("Database accessor is not set")
-		return errors.New("Database accessor is not set")
+		logger.Error("Closing with database accessor not set")
+		return errors.New("Closing with database accessor not set")
 	}
 
 	return DB.accessor.Disconnect()

@@ -71,10 +71,10 @@ func NewDefault() *dnxLogger {
 }
 func NewWithEnv() *dnxLogger {
 	logger := NewDefault()
-	LoadEnv(logger)
+	LoadEnvFor(logger)
 	return logger
 }
-func LoadEnv(logger *dnxLogger) {
+func LoadEnvFor(logger *dnxLogger) {
 	logger.Debug("Loading environment variables for logger")
 
 	minLogLevel, existMinLevel := os.LookupEnv("DNX_LOG_MIN_LEVEL")
@@ -99,7 +99,7 @@ func LoadEnv(logger *dnxLogger) {
 	if existLogConsole && logConsole == "FALSE" {
 		logger.RemoveWriter("console")
 	}
-	if existLogFile && logFile == "TRUE" {
+	if existLogFile && logFile == "TRUE" && !logger.HasWriter("file") {
 		if !existLogFilePath {
 			logFilePath = ""
 		}
@@ -110,6 +110,13 @@ func LoadEnv(logger *dnxLogger) {
 	}
 
 	logger.Debug("Logger environment variables loaded")
+}
+
+func ReloadEnv() {
+	get().ReloadEnv()
+}
+func (i *dnxLogger) ReloadEnv() {
+	LoadEnvFor(i)
 }
 
 func (i *dnxLogger) Close() {
@@ -174,7 +181,7 @@ func (i *dnxLogger) resetLogAttempts() bool {
 
 func (i *dnxLogger) SetVersion(version types.Version) {
 	i.appVersion = version
-	i.Debug("App version changed to: ", version.String(),
+	i.Debug("App version changed to:", version.String(),
 		internal.CallOriginOffset().Value("1"),
 	)
 }
@@ -307,7 +314,7 @@ func (i *dnxLogger) internalWrite(record Record) {
 
 		if str, err := f.Format(&record); err == nil {
 			if err = w.Write(str); err != nil {
-				record := i.generateRecord(Level.Error(), "Error during write:", err.Error())
+				record := i.generateRecord(Level.Error(), "Error during write with", p+":", err.Error())
 				i.internalAbnormalWrite(record)
 			}
 

@@ -66,7 +66,7 @@ func (appModeNS) Default() string {
 func init() {
 	envInit()
 }
-func ReloadAppEnv() {
+func (appNS) ReloadEnv() {
 	envInit()
 }
 

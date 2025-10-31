@@ -8,18 +8,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
-	var _ = godotenv.Overload("../.env", "../.env.test")
+func TestMain(m *testing.M) {
+	godotenv.Overload("../.env", "../.env.test")
+
+	logger.ReloadEnv()
+	configs.App.ReloadEnv()
 	logger.SetVersion(configs.App.ApiVersion())
-	if configs.DB.Use(configs.GetMongoAccessor()).Start() != nil {
-		logger.Fatal("Failed to connect to the database")
+
+	if err := configs.DB.ReloadConnection(); err != nil {
+		logger.Fatal("Failed to reload DB config from environment:", err)
 	}
-	// configs.DB.Migrate(&models.StudentDBMongo{})
-	logger.Info("Env configurations loaded")
-	logger.Debug("Starting server")
+
+	m.Run()
 }
 
-func TestCompanionService_Create(t *testing.T)     {}
+func TestCompanionService_Create(t *testing.T) {
+}
 func TestCompanionService_GetByID(t *testing.T)    {}
 func TestCompanionService_GetAll(t *testing.T)     {}
 func TestCompanionService_UpdateByID(t *testing.T) {}

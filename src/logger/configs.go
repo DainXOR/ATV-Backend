@@ -95,3 +95,18 @@ func (c *configurations) Writer(nameID string) (*Writer, *Formatter) {
 func (c *configurations) Writers() map[string]outputBinding {
 	return c.writers
 }
+
+func (c *configurations) HasWriter(nameID string) bool {
+	_, exists := c.writers[nameID]
+	return exists
+}
+func (c *configurations) WritersCount() int {
+	return len(c.writers)
+}
+func (c *configurations) ClearWriters() *configurations {
+	for nameID, binding := range c.writers {
+		binding.writer.Close()
+		delete(c.writers, nameID)
+	}
+	return c
+}
