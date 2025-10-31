@@ -119,10 +119,9 @@ func (dbNS) Use(db InterfaceDBAccessor) *dbNS {
 func (dbNS) Start() error {
 	if DB.accessor == nil {
 		if len(accessors) == 0 || accessors[DB.dbType] == nil {
-			logger.Error("Database accessor is not set")
-			return errors.New("Database accessor is not set")
+			logger.Error("Database accessor is not registered for type", DB.dbType)
+			return errors.New("database accessor not registered for type " + DB.dbType)
 		}
-
 		DB.accessor = accessors[DB.dbType]
 	}
 
