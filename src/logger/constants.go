@@ -2,6 +2,7 @@ package logger
 
 import (
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 	"fmt"
 )
 
@@ -41,7 +42,9 @@ func createLogLevels() map[string]logLevel {
 
 	LEVEL_ALL := logLevel{code: ^uint16(0), name: "ALL", codeName: "all"}
 	LEVEL_NONE := logLevel{code: 0, name: "NONE", codeName: "none"}
+
 	LEVEL_URGENCY := logLevel{code: LEVEL_DEBUG.code | LEVEL_INFO.code | LEVEL_WARNING.code | LEVEL_ERROR.code | LEVEL_FATAL.code, name: "URGENCY", codeName: "urgency"}
+	LEVEL_TYPES := logLevel{code: LEVEL_DEPRECATE.code | LEVEL_LAVA.code, name: "TYPES", codeName: "types"}
 
 	return map[string]logLevel{
 		LEVEL_DEBUG.codeName:   LEVEL_DEBUG,
@@ -60,9 +63,11 @@ func createLogLevels() map[string]logLevel {
 		LEVEL_LAVA_COLD.codeName: LEVEL_LAVA_COLD,
 		LEVEL_LAVA_DRY.codeName:  LEVEL_LAVA_DRY,
 
-		LEVEL_ALL.codeName:     LEVEL_ALL,
-		LEVEL_NONE.codeName:    LEVEL_NONE,
+		LEVEL_ALL.codeName:  LEVEL_ALL,
+		LEVEL_NONE.codeName: LEVEL_NONE,
+
 		LEVEL_URGENCY.codeName: LEVEL_URGENCY,
+		LEVEL_TYPES.codeName:   LEVEL_TYPES,
 	}
 }
 
@@ -73,6 +78,12 @@ func (l logLevel) Has(level logLevel) bool {
 }
 func (l logLevel) Is(level logLevel) bool {
 	return l.code == level.code
+}
+func (l logLevel) IsLowerThan(level logLevel) bool {
+	return l.code < level.code
+}
+func (l logLevel) IsHigherThan(level logLevel) bool {
+	return l.code > level.code
 }
 
 func (l logLevel) And(level logLevel) logLevel {
@@ -130,6 +141,9 @@ func (l *logLevel) Select(level logLevel) logLevel {
 
 func (l logLevel) UrgencyLevels() uint16 {
 	return logLevels["urgency"].code & l.code
+}
+func (l logLevel) TypeLevels() uint16 {
+	return uint16(utils.BoolToInt(l.Has(Level.Lava())))*Level.Lava().code | uint16(utils.BoolToInt(l.Has(Level.Deprecate())))*Level.Deprecate().code
 }
 func (l logLevel) IsValid() bool {
 	return l.Is(Level.None()) || Level.All().Has(l)
@@ -267,6 +281,25 @@ func (iLevel) Dominant(l logLevel) logLevel {
 		return Level.Debug()
 	}
 	return Level.None()
+}
+
+func (iLevel) FromCode(code uint16) (logLevel, error) {
+	for _, level := range logLevels {
+		if level.code == code {
+			return level, nil
+		}
+	}
+	return Level.None(), fmt.Errorf("Invalid log level code: %d", code)
+}
+func (iLevel) InterpretCode(code uint16) logLevel {
+	combined := Level.None()
+
+	for _, level := range logLevels {
+		if code&level.code == level.code {
+			combined = combined.And(level)
+		}
+	}
+	return combined
 }
 
 type logFlag uint16

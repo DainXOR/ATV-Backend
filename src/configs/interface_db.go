@@ -27,6 +27,15 @@ func (dbError) InvalidInput() error   { return errInvalidInput }
 func (dbError) Internal() error       { return errInternal }
 func (dbError) NotImplemented() error { return errNotImplemented }
 
+/*
+Database Accessor Interface
+
+Provides a standard interface for database operations.
+This interface outlines the methods required for handling a database
+through the common DB object in configs package.
+
+You can check the implementation of the mongo accessor (mongo_db.go) as an example.
+*/
 type InterfaceDBAccessor interface {
 	Connect(dbName, connectionString string) error
 	Disconnect() error
