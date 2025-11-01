@@ -19,7 +19,7 @@ func FormsRoutes(router *gin.Engine) {
 	//{ }
 	companionRouter := router.Group(lastRoute)
 	{
-		companionRouter.GET("/:id/questions", func(c *gin.Context) {
+		companionRouter.GET("/questions/all", func(c *gin.Context) {
 			// TO DO: implement pagination, filtering, etc.
 			c.JSON(200, types.Response(
 				gin.H{
@@ -59,7 +59,7 @@ func FormsRoutes(router *gin.Engine) {
 			))
 		})
 
-		companionRouter.POST("/:id/questions", func(c *gin.Context) {
+		companionRouter.POST("/questions", func(c *gin.Context) {
 			// TO DO: implement validation, authorization, etc.
 			service.FormQuestions.Create(c)
 		})
