@@ -2,7 +2,6 @@ package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"fmt"
@@ -13,8 +12,8 @@ import (
 
 func InfoRoutes(router *gin.Engine) {
 	availableRoutes := BuildRoutesInfo(router)
-	availableRoutes["info"] = gin.H{
-		"root":          "/api/info/",
+	availableRoutes["api"].(gin.H)["info"] = gin.H{
+		"info":          "/api/info/",
 		"ping":          "/api/info/ping",
 		"api version":   "/api/info/api-version",
 		"route version": "/api/info/route-version",
@@ -49,9 +48,9 @@ func InfoRoutes(router *gin.Engine) {
 var includeMethods = []string{
 	"POST",
 	"GET",
-	"put",
-	"patch",
-	"delete",
+	"PUT",
+	"PATCH",
+	"DELETE",
 }
 
 func BuildRoutesInfo(router *gin.Engine) gin.H {
@@ -66,10 +65,11 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 		}
 
 		pathParts := strings.Split(path, "/")[1:]
+		pathLen := len(pathParts)
 		current := result
 
-		if pathLen := len(pathParts) - 1; pathLen > 1 && pathParts[pathLen] == "" {
-			pathParts[pathLen] = pathParts[pathLen-1]
+		if pathLen > 1 && pathParts[pathLen-1] == "" {
+			pathParts[pathLen-1] = strings.ReplaceAll(pathParts[pathLen-2], "-", " ")
 		}
 
 		for len(pathParts) > 1 {
@@ -84,7 +84,7 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 		var opName string
 		var ok bool
 
-		if len(pathParts) != 0 {
+		if pathLen != 1 {
 			opName, ok = operationName(method, pathParts[0])
 		} else {
 			current["root"] = gin.H{}
@@ -122,7 +122,6 @@ func operationName(method, rest string) (string, bool) {
 		return fmt.Sprintf("%s %s", operation, rest), true
 
 	} else {
-		logger.Warningf("No rest: %s, %s", method, rest)
 		return fmt.Sprintf("%s %s", operation, rest), false
 	}
 }
