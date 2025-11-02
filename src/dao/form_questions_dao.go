@@ -1,10 +1,11 @@
-package db
+package dao
 
 import (
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 )
 
 type formQuestionsNS struct{}
@@ -62,4 +63,19 @@ func (formQuestionsNS) GetByID(id string, filter models.FilterObject) types.Resu
 	}
 	questionType = resultGet.Value().(models.FormQuestionDB)
 	return types.ResultOk(questionType)
+}
+
+func (formQuestionsNS) GetAll(filter models.FilterObject) types.Result[[]models.FormQuestionDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+
+	resultObjects := configs.DB.FindAll(filter, models.FormQuestionDB{})
+	if resultObjects.IsErr() {
+		logger.Warning("Failed to get all objects: ", resultObjects.Error())
+		return types.ResultErr[[]models.FormQuestionDB](resultObjects.Error())
+	}
+
+	objectsDB := utils.Map(resultObjects.Value(), models.InterfaceTo[models.FormQuestionDB])
+	logger.Debug("Retrieved", len(objectsDB), "objects from db")
+
+	return types.ResultOk(objectsDB)
 }

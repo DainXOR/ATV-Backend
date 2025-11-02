@@ -2,6 +2,7 @@ package controller
 
 import (
 	"dainxor/atv/configs"
+	"dainxor/atv/logger"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
 	"fmt"
@@ -45,11 +46,12 @@ func InfoRoutes(router *gin.Engine) {
 	}
 }
 
-var omitMethods = []string{
-	"connect",
-	"options",
-	"trace",
-	"head",
+var includeMethods = []string{
+	"POST",
+	"GET",
+	"put",
+	"patch",
+	"delete",
 }
 
 func BuildRoutesInfo(router *gin.Engine) gin.H {
@@ -59,12 +61,16 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 		path := routeInfo.Path // e.g. /api/v1/companion/:id
 		method := routeInfo.Method
 
-		if utils.Any(omitMethods, func(m string) bool { return m == method }) || path == "/" {
+		if !utils.Any(includeMethods, func(m string) bool { return m == method }) {
 			continue
 		}
 
-		pathParts := strings.Split(strings.Trim(path, "/"), "/")[1:]
+		pathParts := strings.Split(path, "/")[1:]
 		current := result
+
+		if pathLen := len(pathParts) - 1; pathLen > 1 && pathParts[pathLen] == "" {
+			pathParts[pathLen] = pathParts[pathLen-1]
+		}
 
 		for len(pathParts) > 1 {
 			if _, ok := current[pathParts[0]]; !ok {
@@ -75,11 +81,22 @@ func BuildRoutesInfo(router *gin.Engine) gin.H {
 			pathParts = pathParts[1:]
 		}
 
-		opName, ok := operationName(method, pathParts[0])
-		if !ok {
-			continue
+		var opName string
+		var ok bool
+
+		if len(pathParts) != 0 {
+			opName, ok = operationName(method, pathParts[0])
+		} else {
+			current["root"] = gin.H{}
+			current = current["root"].(gin.H)
+			opName = strings.ToLower(method)
+
+			ok = true
 		}
-		current[opName] = path
+
+		if ok {
+			current[opName] = path
+		}
 	}
 
 	return result
@@ -101,7 +118,11 @@ func operationName(method, rest string) (string, bool) {
 		}
 		return fmt.Sprintf("%s by %s", operation, strings.ReplaceAll(pathVariable, "_", " ")), true
 
+	} else if operation == "post" {
+		return fmt.Sprintf("%s %s", operation, rest), true
+
 	} else {
+		logger.Warningf("No rest: %s, %s", method, rest)
 		return fmt.Sprintf("%s %s", operation, rest), false
 	}
 }

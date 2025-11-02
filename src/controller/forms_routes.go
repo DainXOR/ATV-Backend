@@ -2,9 +2,7 @@ package controller
 
 import (
 	"dainxor/atv/configs"
-	"dainxor/atv/models"
 	"dainxor/atv/service"
-	"dainxor/atv/types"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -17,51 +15,27 @@ func FormsRoutes(router *gin.Engine) {
 
 	//companionRouterOld := router.Group(beforeRoute)
 	//{ }
-	companionRouter := router.Group(lastRoute)
+	formsRouter := router.Group(lastRoute)
 	{
-		companionRouter.GET("/questions/all", func(c *gin.Context) {
-			// TO DO: implement pagination, filtering, etc.
-			c.JSON(200, types.Response(
-				gin.H{
-					"id":   "97sdha7hd983h9h98hd9283hd981h3d",
-					"name": "Sample Form Question",
-					"questions": []models.FormQuestionResponse{
-						{
-							ID:             "q1",
-							Name:           "Question 1",
-							Question:       "What is your favorite color?",
-							Options:        []string{"Red", "Blue", "Green", "Yellow"},
-							IDQuestionType: "type1",
-							CreatedAt:      models.Time.Now(),
-							UpdatedAt:      models.Time.Now(),
-						},
-						{
-							ID:             "q2",
-							Name:           "Question 2",
-							Question:       "What is your preferred mode of transport?",
-							Options:        []string{"Car", "Bike", "Public Transport", "Walking"},
-							IDQuestionType: "type2",
-							CreatedAt:      models.Time.Now(),
-							UpdatedAt:      models.Time.Now(),
-						},
-						{
-							ID:             "q3",
-							Name:           "Question 3",
-							Question:       "Which cuisine do you like the most?",
-							Options:        []string{"Italian", "Chinese", "Mexican", "Indian"},
-							IDQuestionType: "type3",
-							CreatedAt:      models.Time.Now(),
-							UpdatedAt:      models.Time.Now(),
-						},
-					},
-				},
-				"",
-			))
-		})
+		formsRouter.POST("/", service.Forms.Create)
 
-		companionRouter.POST("/questions", func(c *gin.Context) {
-			// TO DO: implement validation, authorization, etc.
-			service.FormQuestions.Create(c)
-		})
+		formsRouter.GET("/:id", service.Forms.GetByID)
+		formsRouter.GET("/all", service.Forms.GetAll)
+
+	}
+	formQuestionsRouter := formsRouter.Group("/questions")
+	{
+		formQuestionsRouter.POST("/", service.FormQuestions.Create)
+
+		formQuestionsRouter.GET("/:id", service.FormQuestions.GetByID)
+		formQuestionsRouter.GET("/all", service.FormQuestions.GetAll)
+
+	}
+	formQuestionTypesRouter := formQuestionsRouter.Group("/types")
+	{
+		formQuestionTypesRouter.POST("/", service.FormQuestionTypes.Create)
+
+		formQuestionTypesRouter.GET("/:id", service.FormQuestionTypes.GetByID)
+		formQuestionTypesRouter.GET("/all", service.FormQuestionTypes.GetAll)
 	}
 }

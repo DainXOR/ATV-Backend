@@ -10,17 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type formQuestionsNS struct{}
+type formsNS struct{}
 
-var FormQuestions formQuestionsNS
+var Forms formsNS
 
-func (formQuestionsNS) Create(c *gin.Context) {
-	var body models.FormQuestionCreate
+func (formsNS) Create(c *gin.Context) {
+	var body models.FormCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
 		logger.Error(err.Error())
-		logger.Error("Failed to create form question: JSON request body is invalid")
+		logger.Error("Failed to create form: JSON request body is invalid")
 		logger.Error("Expected body: ", expected)
 
 		c.JSON(types.Http.C400().BadRequest(),
@@ -32,12 +32,12 @@ func (formQuestionsNS) Create(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating form question in MongoDB: ", body)
+	logger.Debug("Creating form in MongoDB: ", body)
 
-	result := dao.FormQuestions.Create(body)
+	result := dao.Forms.Create(body)
 
 	if result.IsErr() {
-		logger.Error("Failed to create form question in MongoDB: ", result.Error())
+		logger.Error("Failed to create form in MongoDB: ", result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,
@@ -58,12 +58,12 @@ func (formQuestionsNS) Create(c *gin.Context) {
 	)
 }
 
-func (formQuestionsNS) GetByID(c *gin.Context) {
+func (formsNS) GetByID(c *gin.Context) {
 	id := c.Param("id")
-	logger.Debug("Getting question by ID: ", id)
+	logger.Debug("Getting form by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := dao.FormQuestions.GetByID(id, filter)
+	result := dao.Forms.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -77,18 +77,20 @@ func (formQuestionsNS) GetByID(c *gin.Context) {
 		return
 	}
 
-	question := result.Value()
+	form := result.Value()
 	c.JSON(types.Http.C200().Ok(),
 		types.Response(
-			question.ToResponse(),
+			form.ToResponse(),
 			"",
 		),
 	)
 }
-func (formQuestionsNS) GetAll(c *gin.Context) {}
+func (formsNS) GetAll(c *gin.Context) {
 
-func (formQuestionsNS) UpdateByID(c *gin.Context) {}
+}
 
-func (formQuestionsNS) PatchByID(c *gin.Context) {}
+func (formsNS) UpdateByID(c *gin.Context) {}
 
-func (formQuestionsNS) DeleteByID(c *gin.Context) {}
+func (formsNS) PatchByID(c *gin.Context) {}
+
+func (formsNS) DeleteByID(c *gin.Context) {}

@@ -10,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type formQuestionsNS struct{}
+type formQuestionTypesNS struct{}
 
-var FormQuestions formQuestionsNS
+var FormQuestionTypes formQuestionTypesNS
 
-func (formQuestionsNS) Create(c *gin.Context) {
-	var body models.FormQuestionCreate
+func (formQuestionTypesNS) Create(c *gin.Context) {
+	var body models.FormQuestionTypeCreate
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		expected := utils.StructToString(body)
@@ -34,7 +34,7 @@ func (formQuestionsNS) Create(c *gin.Context) {
 
 	logger.Debug("Creating form question in MongoDB: ", body)
 
-	result := dao.FormQuestions.Create(body)
+	result := dao.FormQuestionTypes.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create form question in MongoDB: ", result.Error())
@@ -58,12 +58,12 @@ func (formQuestionsNS) Create(c *gin.Context) {
 	)
 }
 
-func (formQuestionsNS) GetByID(c *gin.Context) {
+func (formQuestionTypesNS) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	logger.Debug("Getting question by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := dao.FormQuestions.GetByID(id, filter)
+	result := dao.FormQuestionTypes.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -85,10 +85,10 @@ func (formQuestionsNS) GetByID(c *gin.Context) {
 		),
 	)
 }
-func (formQuestionsNS) GetAll(c *gin.Context) {}
+func (formQuestionTypesNS) GetAll(c *gin.Context) {}
 
-func (formQuestionsNS) UpdateByID(c *gin.Context) {}
+func (formQuestionTypesNS) UpdateByID(c *gin.Context) {}
 
-func (formQuestionsNS) PatchByID(c *gin.Context) {}
+func (formQuestionTypesNS) PatchByID(c *gin.Context) {}
 
-func (formQuestionsNS) DeleteByID(c *gin.Context) {}
+func (formQuestionTypesNS) DeleteByID(c *gin.Context) {}

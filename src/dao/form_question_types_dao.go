@@ -1,10 +1,11 @@
-package db
+package dao
 
 import (
 	"dainxor/atv/configs"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
+	"dainxor/atv/utils"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -32,6 +33,7 @@ func (formQuestionTypesNS) Create(t models.FormQuestionTypeCreate) types.Result[
 	typeDB.ID = resultCreate.Value()
 	return types.ResultOk(typeDB)
 }
+
 func (formQuestionTypesNS) GetByID(id string, filter models.FilterObject) types.Result[models.FormQuestionTypeDB] {
 	oid, err := models.ID.ToBson(id)
 
@@ -58,4 +60,17 @@ func (formQuestionTypesNS) GetByID(id string, filter models.FilterObject) types.
 	}
 	questionType = resultGet.Value().(models.FormQuestionTypeDB)
 	return types.ResultOk(questionType)
+}
+func (formQuestionTypesNS) GetAll(filter models.FilterObject) types.Result[[]models.FormQuestionTypeDB] {
+	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
+
+	resultTypes := configs.DB.FindAll(filter, models.FormQuestionTypeDB{})
+	if resultTypes.IsErr() {
+		logger.Warning("Failed to get all form question types: ", resultTypes.Error())
+		return types.ResultErr[[]models.FormQuestionTypeDB](resultTypes.Error())
+	}
+
+	typesDB := utils.Map(resultTypes.Value(), models.InterfaceTo[models.FormQuestionTypeDB])
+	logger.Debug("Retrieved", len(typesDB), "form question types from db")
+	return types.ResultOk(typesDB)
 }

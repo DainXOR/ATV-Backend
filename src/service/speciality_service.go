@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -34,7 +34,7 @@ func (specialityType) Create(c *gin.Context) {
 
 	logger.Debug("Creating speciality in MongoDB: ", body)
 
-	result := db.Speciality.Create(body)
+	result := dao.Speciality.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create speciality in MongoDB: ", result.Error())
@@ -63,7 +63,7 @@ func (specialityType) GetByID(c *gin.Context) {
 	logger.Debug("Getting speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.GetByID(id, filter)
+	result := dao.Speciality.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -87,7 +87,7 @@ func (specialityType) GetByID(c *gin.Context) {
 }
 func (specialityType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Speciality.GetAll(filter)
+	result := dao.Speciality.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -139,7 +139,7 @@ func (specialityType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.UpdateByID(id, body, filter)
+	result := dao.Speciality.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -177,7 +177,7 @@ func (specialityType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.PatchByID(id, body, filter)
+	result := dao.Speciality.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -205,7 +205,7 @@ func (specialityType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting speciality by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Speciality.DeleteByID(id, filter)
+	result := dao.Speciality.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
