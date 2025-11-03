@@ -27,13 +27,6 @@ func (formsNS) Create(t models.FormCreate) types.Result[models.FormDB] {
 		return types.ResultErr[models.FormDB](resultCreate.Error())
 	}
 
-	resultGet := configs.DB.FindOne(models.Filter.ID(resultCreate.Value()), &formDB)
-
-	if resultGet.IsErr() {
-		logger.Warning("Failed to get created form in MongoDB:", resultGet.Error())
-		return types.ResultErr[models.FormDB](resultGet.Error())
-	}
-
 	formDB.ID = resultCreate.Value()
 	return types.ResultOk(formDB)
 }

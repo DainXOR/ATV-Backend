@@ -85,7 +85,31 @@ func (formQuestionTypesNS) GetByID(c *gin.Context) {
 		),
 	)
 }
-func (formQuestionTypesNS) GetAll(c *gin.Context) {}
+func (formQuestionTypesNS) GetAll(c *gin.Context) {
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := dao.FormQuestionTypes.GetAll(filter)
+
+	if result.IsErr() {
+		handleErrorAnswer(c, result.Error())
+		return
+	}
+
+	objects := utils.Map(result.Value(), models.FormQuestionTypeDB.ToResponse)
+	if len(objects) == 0 {
+		logger.Warning("No question types found")
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No question types found",
+			))
+		return
+	}
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			objects,
+			"",
+		),
+	)
+}
 
 func (formQuestionTypesNS) UpdateByID(c *gin.Context) {}
 

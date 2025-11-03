@@ -32,27 +32,20 @@ func (formsNS) Create(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating form in MongoDB: ", body)
+	logger.Debug("Creating form in db: ", body)
 
 	result := dao.Forms.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create form in MongoDB: ", result.Error())
-		err := result.Error()
-		httpErr := err.(*types.HttpError)
-		c.JSON(httpErr.Code,
-			types.EmptyResponse(
-				httpErr.Msg(),
-				httpErr.Details(),
-			),
-		)
+		handleErrorAnswer(c, result.Error())
 		return
 	}
 
-	companion := result.Value()
+	object := result.Value()
 	c.JSON(types.Http.C200().Created(),
 		types.Response(
-			companion.ToResponse(),
+			object.ToResponse(),
 			"",
 		),
 	)
@@ -66,14 +59,7 @@ func (formsNS) GetByID(c *gin.Context) {
 	result := dao.Forms.GetByID(id, filter)
 
 	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code,
-			types.EmptyResponse(
-				cerror.Msg(),
-				cerror.Details(),
-			),
-		)
+		handleErrorAnswer(c, result.Error())
 		return
 	}
 
@@ -86,7 +72,29 @@ func (formsNS) GetByID(c *gin.Context) {
 	)
 }
 func (formsNS) GetAll(c *gin.Context) {
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := dao.Forms.GetAll(filter)
 
+	if result.IsErr() {
+		handleErrorAnswer(c, result.Error())
+		return
+	}
+
+	objects := utils.Map(result.Value(), models.FormDB.ToResponse)
+	if len(objects) == 0 {
+		logger.Warning("No form found")
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No form found",
+			))
+		return
+	}
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			objects,
+			"",
+		),
+	)
 }
 
 func (formsNS) UpdateByID(c *gin.Context) {}

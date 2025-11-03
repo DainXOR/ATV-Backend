@@ -27,18 +27,12 @@ func (formQuestionsNS) Create(t models.FormQuestionCreate) types.Result[models.F
 		return types.ResultErr[models.FormQuestionDB](resultCreate.Error())
 	}
 
-	resultGet := configs.DB.FindOne(models.Filter.ID(resultCreate.Value()), &questionDB)
-
-	if resultGet.IsErr() {
-		logger.Warning("Failed to get created form question in MongoDB:", resultGet.Error())
-		return types.ResultErr[models.FormQuestionDB](resultGet.Error())
-	}
-
 	questionDB.ID = resultCreate.Value()
 	return types.ResultOk(questionDB)
 }
+
 func (formQuestionsNS) GetByID(id string, filter models.FilterObject) types.Result[models.FormQuestionDB] {
-	oid, err := models.ID.ToBson(id)
+	oid, err := models.ID.ToDB(id)
 
 	if err != nil {
 		logger.Warning("Failed to convert ID to ObjectID: ", err)
@@ -64,7 +58,6 @@ func (formQuestionsNS) GetByID(id string, filter models.FilterObject) types.Resu
 	questionType = resultGet.Value().(models.FormQuestionDB)
 	return types.ResultOk(questionType)
 }
-
 func (formQuestionsNS) GetAll(filter models.FilterObject) types.Result[[]models.FormQuestionDB] {
 	filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 

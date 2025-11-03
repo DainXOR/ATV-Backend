@@ -32,27 +32,20 @@ func (formQuestionsNS) Create(c *gin.Context) {
 		return
 	}
 
-	logger.Debug("Creating form question in MongoDB: ", body)
+	logger.Debug("Creating form question in db: ", body)
 
 	result := dao.FormQuestions.Create(body)
 
 	if result.IsErr() {
-		logger.Error("Failed to create form question in MongoDB: ", result.Error())
-		err := result.Error()
-		httpErr := err.(*types.HttpError)
-		c.JSON(httpErr.Code,
-			types.EmptyResponse(
-				httpErr.Msg(),
-				httpErr.Details(),
-			),
-		)
+		logger.Error("Failed to create form question in db: ", result.Error())
+		handleErrorAnswer(c, result.Error())
 		return
 	}
 
-	companion := result.Value()
+	object := result.Value()
 	c.JSON(types.Http.C200().Created(),
 		types.Response(
-			companion.ToResponse(),
+			object.ToResponse(),
 			"",
 		),
 	)
@@ -66,14 +59,7 @@ func (formQuestionsNS) GetByID(c *gin.Context) {
 	result := dao.FormQuestions.GetByID(id, filter)
 
 	if result.IsErr() {
-		err := result.Error()
-		cerror := err.(*types.HttpError)
-		c.JSON(cerror.Code,
-			types.EmptyResponse(
-				cerror.Msg(),
-				cerror.Details(),
-			),
-		)
+		handleErrorAnswer(c, result.Error())
 		return
 	}
 
@@ -85,7 +71,31 @@ func (formQuestionsNS) GetByID(c *gin.Context) {
 		),
 	)
 }
-func (formQuestionsNS) GetAll(c *gin.Context) {}
+func (formQuestionsNS) GetAll(c *gin.Context) {
+	filter := models.Filter.Create(c.Request.URL.Query())
+	result := dao.FormQuestions.GetAll(filter)
+
+	if result.IsErr() {
+		handleErrorAnswer(c, result.Error())
+		return
+	}
+
+	objects := utils.Map(result.Value(), models.FormQuestionDB.ToResponse)
+	if len(objects) == 0 {
+		logger.Warning("No question found")
+		c.JSON(types.Http.C400().NotFound(),
+			types.EmptyResponse(
+				"No question found",
+			))
+		return
+	}
+	c.JSON(types.Http.C200().Ok(),
+		types.Response(
+			objects,
+			"",
+		),
+	)
+}
 
 func (formQuestionsNS) UpdateByID(c *gin.Context) {}
 
