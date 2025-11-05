@@ -25,7 +25,7 @@ func (t FormQuestionTypeCreate) ToInsert() FormQuestionTypeDB {
 		DeletedAt: Time.Zero(),
 	}
 }
-func (t FormQuestionTypeDB) ToUpdate() FormQuestionTypeDB {
+func (t FormQuestionTypeCreate) ToUpdate() FormQuestionTypeDB {
 	return FormQuestionTypeDB{
 		Name:      t.Name,
 		UpdatedAt: Time.Now(),
