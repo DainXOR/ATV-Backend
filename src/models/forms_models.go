@@ -13,17 +13,17 @@ import (
 type questionInfo[ID any] struct {
 	Position         uint8 `json:"position" bson:"position"`
 	Section          uint8 `json:"section" bson:"section"`
-	IDParentQuestion ID    `json:"id_parent_question" bson:"id_parent_question"`
-	IDQuestion       ID    `json:"id_question" bson:"id_question"`
+	IDParentQuestion ID    `json:"id_parent_question" bson:"id_parent_question,omitempty"`
+	IDQuestion       ID    `json:"id_question" bson:"id_question,omitempty"`
 	Optional         bool  `json:"optional" bson:"optional"`
 }
 
-func questionFrom[IID, OID any](other questionInfo[IID], transformFunc func(IID) OID) questionInfo[OID] {
+func questionFrom[IID, OID any](other questionInfo[IID], mapper func(IID) OID) questionInfo[OID] {
 	return questionInfo[OID]{
-		IDQuestion:       transformFunc(other.IDQuestion),
+		IDQuestion:       mapper(other.IDQuestion),
 		Position:         other.Position,
 		Section:          other.Section,
-		IDParentQuestion: transformFunc(other.IDParentQuestion),
+		IDParentQuestion: mapper(other.IDParentQuestion),
 		Optional:         other.Optional,
 	}
 }
@@ -76,7 +76,7 @@ func (q FormCreate) ToInsert() types.Result[FormDB] {
 			return questionEmpty[DBID](), errors.New("Invalid IDQuestion: " + v.IDQuestion)
 		}
 		if !ID.OmitEmpty(v.IDParentQuestion, &oidParent, "IDParentQuestion") {
-			return questionEmpty[DBID](), errors.New("Invalid IDQuestion: " + v.IDParentQuestion)
+			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.IDParentQuestion)
 		}
 
 		return questionFrom(v, func(id string) DBID {
@@ -94,13 +94,41 @@ func (q FormCreate) ToInsert() types.Result[FormDB] {
 	obj.QuestionsInfo = questions
 	return types.ResultOk(obj)
 }
-func (q FormDB) ToUpdate() FormDB {
-	return FormDB{
+func (q FormCreate) ToUpdate() types.Result[FormDB] {
+	obj := FormDB{
 		Name:          q.Name,
 		Description:   q.Description,
-		QuestionsInfo: q.QuestionsInfo,
+		QuestionsInfo: nil,
 		UpdatedAt:     Time.Now(),
 	}
+
+	l := logger.Lava(types.V("0.2.1"), "Using not standarized error")
+	l.LavaStart()
+	questions, err := utils.MapE(q.QuestionsInfo, func(v questionInfo[string]) (questionInfo[DBID], error) {
+		var oid DBID
+		var oidParent DBID
+
+		if !ID.OmitEmpty(v.IDQuestion, &oid, "IDQuestion") {
+			return questionEmpty[DBID](), errors.New("Invalid IDQuestion: " + v.IDQuestion)
+		}
+		if !ID.OmitEmpty(v.IDParentQuestion, &oidParent, "IDParentQuestion") {
+			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.IDParentQuestion)
+		}
+
+		return questionFrom(v, func(id string) DBID {
+			oid, _ := ID.ToDB(id)
+			return oid
+		}), nil
+	})
+	l.LavaEnd()
+
+	if err != nil {
+		obj.QuestionsInfo = make([]questionInfo[DBID], 0)
+		return types.ResultErr[FormDB](err)
+	}
+
+	obj.QuestionsInfo = questions
+	return types.ResultOk(obj)
 }
 func (q FormDB) ToResponse() FormResponse {
 	return FormResponse{
@@ -124,14 +152,11 @@ func (q FormDB) IsEmpty() bool {
 		q.CreatedAt.Equal(zeroObj.CreatedAt) &&
 		q.UpdatedAt.Equal(zeroObj.UpdatedAt) &&
 		q.DeletedAt.Equal(zeroObj.DeletedAt) &&
-		(len(q.QuestionsInfo) == 0 ||
-			utils.All(q.QuestionsInfo, func(q questionInfo[DBID]) bool {
-				return q == (questionInfo[DBID]{})
-			}))
+		len(q.QuestionsInfo) == 0
 
 	if comp {
-		for i, o := range q.QuestionsInfo {
-			comp = comp && (o == zeroObj.QuestionsInfo[i])
+		for _, o := range q.QuestionsInfo {
+			comp = comp && (o == questionInfo[DBID]{})
 		}
 	}
 

@@ -38,4 +38,12 @@ func FormsRoutes(router *gin.Engine) {
 		formQuestionTypesRouter.GET("/:id", service.FormQuestionTypes.GetByID)
 		formQuestionTypesRouter.GET("/all", service.FormQuestionTypes.GetAll)
 	}
+
+	formAnswersRouter := formsRouter.Group("/answers")
+	{
+		formAnswersRouter.POST("/", service.FormQuestions.Create)
+
+		formAnswersRouter.GET("/:id", service.FormQuestions.GetByID)
+		formAnswersRouter.GET("/all", service.FormQuestions.GetAll)
+	}
 }

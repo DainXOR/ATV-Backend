@@ -23,7 +23,7 @@ func (formQuestionsNS) Create(t models.FormQuestionCreate) types.Result[models.F
 	resultCreate := configs.DB.InsertOne(questionDB)
 
 	if resultCreate.IsErr() {
-		logger.Warning("Failed to create form question in MongoDB:", resultCreate.Error())
+		logger.Warning("Failed to create form question in DB:", resultCreate.Error())
 		return types.ResultErr[models.FormQuestionDB](resultCreate.Error())
 	}
 
