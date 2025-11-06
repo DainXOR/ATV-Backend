@@ -41,9 +41,9 @@ func FormsRoutes(router *gin.Engine) {
 
 	formAnswersRouter := formsRouter.Group("/answers")
 	{
-		formAnswersRouter.POST("/", service.FormQuestions.Create)
+		formAnswersRouter.POST("/", service.FormAnswers.Create)
 
-		formAnswersRouter.GET("/:id", service.FormQuestions.GetByID)
-		formAnswersRouter.GET("/all", service.FormQuestions.GetAll)
+		formAnswersRouter.GET("/:id", service.FormAnswers.GetByID)
+		formAnswersRouter.GET("/all", service.FormAnswers.GetAll)
 	}
 }
