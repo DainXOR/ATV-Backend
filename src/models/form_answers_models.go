@@ -8,8 +8,8 @@ import (
 )
 
 type answer[ID any] struct {
-	IDQuestion ID     `json:"id_question" bson:"id_question,omitempty"`
-	Answer     string `json:"answer" bson:"answer,omitempty"`
+	IDQuestion ID       `json:"id_question" bson:"id_question,omitempty"`
+	Answers    []string `json:"answers" bson:"answers,omitempty"`
 }
 type FormAnswerDB struct {
 	ID        DBID           `json:"id" bson:"_id,omitempty"`
@@ -43,13 +43,14 @@ func (o FormAnswerCreate) ToInsert() types.Result[FormAnswerDB] {
 		return types.ResultErr[FormAnswerDB](errors.New("Invalid IDForm"))
 	}
 
+	obj.Answers = make([]answer[DBID], len(o.Answers))
 	for i, answer := range o.Answers {
-		questionID := answer.IDQuestion
-
-		if !ID.Ensure(questionID, &obj.Answers[i].IDQuestion, "IDQuestionType") {
+		if !ID.Ensure(answer.IDQuestion, &obj.Answers[i].IDQuestion, "IDQuestionType") {
 			logger.Lava(types.V("0.2.1"), "Using not standarized error")
 			return types.ResultErr[FormAnswerDB](errors.New("Invalid IDQuestionType"))
 		}
+
+		obj.Answers[i].Answers = answer.Answers
 	}
 
 	return types.ResultOk(obj)
@@ -82,7 +83,7 @@ func (o FormAnswerDB) ToResponse() FormAnswerResponse {
 		Answers: utils.Map(o.Answers, func(a answer[DBID]) answer[string] {
 			return answer[string]{
 				IDQuestion: a.IDQuestion.Hex(),
-				Answer:     a.Answer,
+				Answers:    a.Answers,
 			}
 		}),
 		CreatedAt: o.CreatedAt,
@@ -100,11 +101,12 @@ func (o FormAnswerDB) IsEmpty() bool {
 		o.DeletedAt.Equal(zeroObj.DeletedAt) &&
 		len(o.Answers) == 0
 
-	if comp {
-		for _, o := range o.Answers {
-			comp = comp && (o == (answer[DBID]{}))
-		}
-	}
+	//if comp {
+	//	for _, o := range o.Answers {
+	//		comp = comp && o.IDQuestion.IsZero()
+	//		comp = comp && (len(o.Answers) == 0)
+	//	}
+	//}
 
 	return comp
 }
