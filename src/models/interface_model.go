@@ -217,6 +217,16 @@ func (iFilters) dateFormatLetters() string {
 func (iFilters) parse(name string, values []string) (FilterPart, error) {
 	logger.Debugf("Filter for %s: %#v", name, values)
 
+	if name == "_id" || strings.HasPrefix(name, "id_") {
+		oid, err := ID.ToDB(values[0])
+
+		if err != nil {
+			return FilterPart{}, err
+		} else {
+			return FilterPart{Key: name, Value: oid}, nil
+		}
+	}
+
 	if len(values) == 1 {
 		return FilterPart{Key: name, Value: values[0]}, nil
 	}

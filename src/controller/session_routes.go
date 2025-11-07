@@ -26,6 +26,20 @@ func SessionsRoutes(router *gin.Engine) {
 		sessionRouter.PATCH("/:id", service.Session.PatchByID)
 
 		sessionRouter.DELETE("/:id", service.Session.DeleteByID)
+
+		sessionTypeRouterOld := sessionRouter.Group("/type")
+		{
+			sessionTypeRouterOld.POST("/", service.SessionType.Create)
+
+			sessionTypeRouterOld.GET("/:id", service.SessionType.GetByID)
+			sessionTypeRouterOld.GET("/all", service.SessionType.GetAll)
+
+			sessionTypeRouterOld.PUT("/:id", service.SessionType.UpdateByID)
+
+			sessionTypeRouterOld.PATCH("/:id", service.SessionType.PatchByID)
+
+			sessionTypeRouterOld.DELETE("/:id", service.SessionType.DeleteByID)
+		}
 	}
 
 	//router.Group(beforeRoute).Any("", func(ctx *gin.Context) {
@@ -50,5 +64,19 @@ func SessionsRoutes(router *gin.Engine) {
 		sessionRouter.PATCH("/:id", service.Session.PatchByID)
 
 		sessionRouter.DELETE("/:id", service.Session.DeleteByID)
+
+		sessionTypeRouter := sessionRouter.Group("/types")
+		{
+			sessionTypeRouter.POST("/", service.SessionType.Create)
+
+			sessionTypeRouter.GET("/:id", service.SessionType.GetByID)
+			sessionTypeRouter.GET("/all", service.SessionType.GetAll)
+
+			sessionTypeRouter.PUT("/:id", service.SessionType.UpdateByID)
+
+			sessionTypeRouter.PATCH("/:id", service.SessionType.PatchByID)
+
+			sessionTypeRouter.DELETE("/:id", service.SessionType.DeleteByID)
+		}
 	}
 }

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -34,7 +34,7 @@ func (contactReasonType) Create(c *gin.Context) {
 
 	logger.Debug("Creating contact reason in MongoDB: ", body)
 
-	result := db.ContactReason.Create(body)
+	result := dao.ContactReason.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create contact reason in MongoDB: ", result.Error())
@@ -63,7 +63,7 @@ func (contactReasonType) GetByID(c *gin.Context) {
 	logger.Debug("Getting contact reason by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.ContactReason.GetByID(id, filter)
+	result := dao.ContactReason.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -87,7 +87,7 @@ func (contactReasonType) GetByID(c *gin.Context) {
 }
 func (contactReasonType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.ContactReason.GetAll(filter)
+	result := dao.ContactReason.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -139,7 +139,7 @@ func (contactReasonType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating contact reason by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.ContactReason.UpdateByID(id, body, filter)
+	result := dao.ContactReason.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -177,7 +177,7 @@ func (contactReasonType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.ContactReason.PatchByID(id, body, filter)
+	result := dao.ContactReason.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -205,7 +205,7 @@ func (contactReasonType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting contact reason by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.ContactReason.DeleteByID(id, filter)
+	result := dao.ContactReason.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

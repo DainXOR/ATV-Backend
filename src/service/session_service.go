@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -35,7 +35,7 @@ func (sessionType) Create(c *gin.Context) {
 
 	logger.Debug("Creating session in MongoDB: ", body)
 
-	result := db.Session.Create(body)
+	result := dao.Session.Create(body)
 
 	if result.IsErr() {
 		logger.Warning("Failed to create session in MongoDB: ", result.Error())
@@ -64,7 +64,7 @@ func (sessionType) GetByID(c *gin.Context) {
 	logger.Debug("Getting session by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.GetByID(id, filter)
+	result := dao.Session.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -91,7 +91,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 	logger.Debug("Getting all sessions by student ID: ", studentID)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.GetAllByStudentID(studentID, filter)
+	result := dao.Session.GetAllByStudentID(studentID, filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -123,7 +123,7 @@ func (sessionType) GetAllByStudentID(c *gin.Context) {
 }
 func (sessionType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Session.GetAll(filter)
+	result := dao.Session.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -175,7 +175,7 @@ func (sessionType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating session by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.UpdateByID(id, body, filter)
+	result := dao.Session.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -213,7 +213,7 @@ func (sessionType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.PatchByID(id, body, filter)
+	result := dao.Session.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -241,7 +241,7 @@ func (sessionType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting session by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Session.DeleteByID(id, filter)
+	result := dao.Session.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

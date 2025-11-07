@@ -1,4 +1,4 @@
-package db
+package dao
 
 import (
 	"dainxor/atv/configs"
@@ -11,6 +11,7 @@ import (
 type alertType struct{}
 
 var Alert alertType
+var _ DAOInterface[models.AlertDB, models.AlertCreate] = (*alertType)(&Alert)
 
 func (alertType) Create(u models.AlertCreate) types.Result[models.AlertDB] {
 	resultAlertDB := u.ToInsert()

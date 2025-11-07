@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -34,7 +34,7 @@ func (alertsType) Create(c *gin.Context) {
 
 	logger.Debug("Creating alerts in MongoDB: ", body)
 
-	result := db.Alert.Create(body)
+	result := dao.Alert.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create alerts in MongoDB: ", result.Error())
@@ -63,7 +63,7 @@ func (alertsType) GetByID(c *gin.Context) {
 	logger.Debug("Getting alerts by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Alert.GetByID(id, filter)
+	result := dao.Alert.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -87,7 +87,7 @@ func (alertsType) GetByID(c *gin.Context) {
 }
 func (alertsType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Alert.GetAll(filter)
+	result := dao.Alert.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -138,7 +138,7 @@ func (alertsType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating alerts by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Alert.UpdateByID(id, body, filter)
+	result := dao.Alert.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -175,7 +175,7 @@ func (alertsType) PatchByID(c *gin.Context) {
 
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Alert.PatchByID(id, body, filter)
+	result := dao.Alert.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -203,7 +203,7 @@ func (alertsType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting alerts by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Alert.DeleteByID(id, filter)
+	result := dao.Alert.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

@@ -92,7 +92,7 @@ func LoadEnvFor(logger *dnxLogger) {
 	}
 	if existDisableLevels {
 		levelsIDs := strings.Split(strings.ToLower(disableLevels), "|")
-		lvls := utils.MapE(levelsIDs, Level.Get)
+		lvls, _ := utils.MapE(levelsIDs, Level.Get, true)
 
 		logger.DisableLogLevels(Level.Combine(lvls...))
 	}
