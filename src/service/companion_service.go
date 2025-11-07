@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -35,7 +35,7 @@ func (companionType) Create(c *gin.Context) {
 
 	logger.Debug("Creating companion in MongoDB: ", body)
 
-	result := db.Companion.Create(body)
+	result := dao.Companion.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create companion in MongoDB: ", result.Error())
@@ -64,7 +64,7 @@ func (companionType) GetByID(c *gin.Context) {
 	logger.Debug("Getting companion by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.GetByID(id, filter)
+	result := dao.Companion.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -88,7 +88,7 @@ func (companionType) GetByID(c *gin.Context) {
 }
 func (companionType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Companion.GetAll(filter)
+	result := dao.Companion.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -141,7 +141,7 @@ func (companionType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating companion by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.UpdateByID(id, body, filter)
+	result := dao.Companion.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -179,7 +179,7 @@ func (companionType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.PatchByID(id, body, filter)
+	result := dao.Companion.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -208,7 +208,7 @@ func (companionType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting companion by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.DeleteByID(id, filter)
+	result := dao.Companion.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -247,7 +247,7 @@ func (companionType) ForceDeleteByID(c *gin.Context) {
 	logger.Info("Force deleting companion by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Companion.DeletePermanentByID(id, filter)
+	result := dao.Companion.DeletePermanentByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

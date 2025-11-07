@@ -47,6 +47,9 @@ func main() {
 	controller.AlertsRoutes(router)
 	controller.ContactReasonsRoutes(router)
 	controller.VulnerabilityTypesRoutes(router)
+	controller.FormsRoutes(router)
+	//controller.FormQuestionsRoutes(router)
+	//controller.FormQuestionTypesRoutes(router)
 
 	// Api informative routes
 	controller.TestRoutes(router) // Routes for testing purposes

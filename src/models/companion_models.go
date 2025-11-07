@@ -15,8 +15,8 @@ type CompanionDB struct {
 	InstitutionEmail string     `json:"institution_email,omitempty" bson:"institution_email,omitempty"`
 	PhoneNumber      string     `json:"phone_number" bson:"phone_number"`
 	IDSpeciality     DBID       `json:"id_speciality" bson:"id_speciality"`
-	CreatedAt        DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdatedAt        DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	CreatedAt        DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt        DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
 	DeletedAt        DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 type CompanionCreate struct {

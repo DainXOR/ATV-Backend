@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -35,7 +35,7 @@ func (studentType) Create(c *gin.Context) {
 
 	logger.Debug("Creating student in MongoDB: ", body)
 
-	result := db.Student.Create(body)
+	result := dao.Student.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create student in MongoDB: ", result.Error())
@@ -64,7 +64,7 @@ func (studentType) GetByID(c *gin.Context) {
 	logger.Debug("Getting student by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.GetByID(id, filter)
+	result := dao.Student.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -88,7 +88,7 @@ func (studentType) GetByID(c *gin.Context) {
 }
 func (studentType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Student.GetAll(filter)
+	result := dao.Student.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -140,7 +140,7 @@ func (studentType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating student by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.UpdateByID(id, body, filter)
+	result := dao.Student.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -178,7 +178,7 @@ func (studentType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.PatchByID(id, body, filter)
+	result := dao.Student.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -206,7 +206,7 @@ func (studentType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting student by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.DeleteByID(id, filter)
+	result := dao.Student.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -245,7 +245,7 @@ func (studentType) ForceDeleteByID(c *gin.Context) {
 	logger.Info("Force deleting student by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Student.DeletePermanentByID(id, filter)
+	result := dao.Student.DeletePermanentByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

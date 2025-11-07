@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dainxor/atv/db"
+	"dainxor/atv/dao"
 	"dainxor/atv/logger"
 	"dainxor/atv/models"
 	"dainxor/atv/types"
@@ -34,7 +34,7 @@ func (priorityType) Create(c *gin.Context) {
 
 	logger.Debug("Creating priority in MongoDB: ", body)
 
-	result := db.Priority.Create(body)
+	result := dao.Priority.Create(body)
 
 	if result.IsErr() {
 		logger.Error("Failed to create priority in MongoDB: ", result.Error())
@@ -63,7 +63,7 @@ func (priorityType) GetByID(c *gin.Context) {
 	logger.Debug("Getting priority by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Priority.GetByID(id, filter)
+	result := dao.Priority.GetByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -87,7 +87,7 @@ func (priorityType) GetByID(c *gin.Context) {
 }
 func (priorityType) GetAll(c *gin.Context) {
 	filter := models.Filter.Create(c.Request.URL.Query())
-	result := db.Priority.GetAll(filter)
+	result := dao.Priority.GetAll(filter)
 
 	if result.IsErr() {
 		err := result.Error().(*types.HttpError)
@@ -139,7 +139,7 @@ func (priorityType) UpdateByID(c *gin.Context) {
 	logger.Debug("Updating priority by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Priority.UpdateByID(id, body, filter)
+	result := dao.Priority.UpdateByID(id, body, filter)
 	if result.IsErr() {
 		err := result.Error()
 		cerror := err.(*types.HttpError)
@@ -177,7 +177,7 @@ func (priorityType) PatchByID(c *gin.Context) {
 	id := c.Param("id")
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Priority.PatchByID(id, body, filter)
+	result := dao.Priority.PatchByID(id, body, filter)
 
 	if result.IsErr() {
 		err := result.Error()
@@ -205,7 +205,7 @@ func (priorityType) DeleteByID(c *gin.Context) {
 	logger.Debug("Deleting priority by ID: ", id)
 	filter := models.Filter.Create(c.Request.URL.Query())
 
-	result := db.Priority.DeleteByID(id, filter)
+	result := dao.Priority.DeleteByID(id, filter)
 
 	if result.IsErr() {
 		err := result.Error()

@@ -1,4 +1,4 @@
-package db
+package dao
 
 import (
 	"dainxor/atv/configs"
@@ -6,8 +6,6 @@ import (
 	"dainxor/atv/models"
 	"dainxor/atv/types"
 	"dainxor/atv/utils"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type companionType struct{}
@@ -28,7 +26,7 @@ func (companionType) Create(companion models.CompanionCreate) types.Result[model
 		return types.ResultErr[models.CompanionDB](resultCreate.Error())
 	}
 
-	resultGet := configs.DB.FindOne(bson.D{{Key: "_id", Value: resultCreate.Value()}}, &companionDB)
+	resultGet := configs.DB.FindOne(models.Filter.ID(resultCreate.Value()), &companionDB)
 
 	if resultGet.IsErr() {
 		logger.Warning("Failed to get created companion in MongoDB:", resultGet.Error())

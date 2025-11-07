@@ -72,15 +72,28 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 }
 
 // MapE is a variant of Map that drops the elements for which the mapper returns an error.
-func MapE[T, U any](slice []T, mapper func(T) (U, error)) []U {
+func MapE[T, U any](slice []T, mapper func(T) (U, error), options ...bool) ([]U, error) {
 	result := make([]U, 0, len(slice))
+	skipErrs := false
+
+	if len(options) > 0 {
+		skipErrs = options[0]
+	}
 
 	for _, value := range slice {
-		if mappedValue, err := mapper(value); err == nil {
+		mappedValue, err := mapper(value)
+
+		if err != nil {
+			if !skipErrs {
+				continue
+			}
+
+			return result, err
+		} else {
 			result = append(result, mappedValue)
 		}
 	}
-	return result
+	return result, nil
 }
 func ForEach[T any](slice []T, action func(int, T)) {
 	for i, value := range slice {
@@ -95,8 +108,26 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	}
 	return result
 }
+func ReduceE[T, U any](slice []T, reducer func(U, T) (U, error), initial U) (U, error) {
+	result := initial
+
+	for _, value := range slice {
+		if result, err := reducer(result, value); err != nil {
+			return result, err
+		}
+	}
+	return result, nil
+}
 func Any[T any](slice []T, predicate func(T) bool) bool {
 	return slices.ContainsFunc(slice, predicate)
+}
+func All[T any](slice []T, predicate func(T) bool) bool {
+	cmp := true
+	for _, v := range slice {
+		cmp = cmp && predicate(v)
+	}
+
+	return cmp
 }
 
 /* Functional utilities for maps */
