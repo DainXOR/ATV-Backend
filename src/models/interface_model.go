@@ -168,11 +168,11 @@ func (iTime) Zero() DBDateTime {
 }
 
 func (iTime) Format() string {
-	return "02-01-2006T15:04"
+	return "02-01-2006T15:04" // DD-MM-YYYYTHH:MM
 }
 
-func (iTime) Parse(dateStr string, format string) (DBDateTime, error) {
-	parsedTime, err := time.Parse(format, dateStr)
+func (iTime) Parse(date string) (DBDateTime, error) {
+	parsedTime, err := time.Parse(Time.Format(), date)
 	if err != nil {
 		return Time.Zero(), err
 	}
@@ -211,26 +211,33 @@ func (iFilters) dateFormatLetters() string {
 
 	return dateString
 }
-func (iFilters) ParseDate(dateStr string) (DBDateTime, error) {
-	return Time.Parse(dateStr, Filter.dateFormatString())
-}
 
 // If you want to change how the filter key-value pairs are created, modify this function.
 func (iFilters) parse(name string, values []string) (FilterPart, error) {
 	logger.Debugf("Filter for %s: %#v", name, values)
 
+	if name == "_id" || strings.HasPrefix(name, "id_") {
+		oid, err := ID.ToDB(values[0])
+
+		if err != nil {
+			return FilterPart{}, err
+		} else {
+			return FilterPart{Key: name, Value: oid}, nil
+		}
+	}
+
 	if len(values) == 1 {
 		return FilterPart{Key: name, Value: values[0]}, nil
 	}
 
-	dateFirst, err := Filter.ParseDate(values[0])
+	dateFirst, err := Time.Parse(values[0])
 	if err != nil {
 		logger.Warning("Failed to parse date:", err)
 		logger.Warningf("Format should be %s (e.g., 29-06-2025T15:32)", Filter.dateFormatLetters())
 		return FilterPart{}, err
 	}
 
-	dateLast, err := Filter.ParseDate(values[1])
+	dateLast, err := Time.Parse(values[1])
 	if err != nil {
 		logger.Warning("Failed to parse date:", err)
 		logger.Warningf("Format should be %s (e.g., 29-06-2025T15:32)", Filter.dateFormatLetters())

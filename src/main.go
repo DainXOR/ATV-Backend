@@ -5,16 +5,18 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"dainxor/atv/configs"
+	"dainxor/atv/controller"
 	"dainxor/atv/logger"
 	"dainxor/atv/middleware"
-	"dainxor/atv/routes"
 )
 
 //var envErr = godotenv.Load()
 
 func init() {
 	logger.SetVersion(configs.App.ApiVersion())
-	configs.DB.Use(configs.GetMongoAccessor()).Start()
+	if err := configs.DB.Start(); err != nil {
+		logger.Fatal("Failed to connect to the database:", err)
+	}
 	// configs.DB.Migrate(&models.StudentDBMongo{})
 	logger.Info("Env configurations loaded")
 	logger.Debug("Starting server")
@@ -32,19 +34,26 @@ func main() {
 	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
-	routes.MainRoutes(router)
-
-	// Api routes
-	routes.InfoRoutes(router) // Routes for information about the API
-	routes.TestRoutes(router) // Routes for testing purposes
+	controller.MainRoutes(router)
 
 	// Versioned API routes
-	routes.StudentRoutes(router)
-	routes.UniversityRoutes(router)
-	routes.SpecialityRoutes(router)
-	routes.CompanionRoutes(router)
-	routes.SessionTypeRoutes(router)
-	routes.SessionRoutes(router)
+	controller.StudentsRoutes(router)
+	controller.UniversitiesRoutes(router)
+	controller.SpecialitiesRoutes(router)
+	controller.CompanionsRoutes(router)
+	controller.SessionTypesRoutes(router)
+	controller.SessionsRoutes(router)
+	controller.PrioritiesRoutes(router)
+	controller.AlertsRoutes(router)
+	controller.ContactReasonsRoutes(router)
+	controller.VulnerabilityTypesRoutes(router)
+	controller.FormsRoutes(router)
+	//controller.FormQuestionsRoutes(router)
+	//controller.FormQuestionTypesRoutes(router)
+
+	// Api informative routes
+	controller.TestRoutes(router) // Routes for testing purposes
+	controller.InfoRoutes(router) // Routes for information about the API
 
 	router.Run(configs.App.Address()) // listen and serve on 0.0.0.0:8080 (for windows ":8080")
 }

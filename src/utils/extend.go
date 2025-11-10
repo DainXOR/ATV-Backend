@@ -51,6 +51,7 @@ func Extract(prefix string, text string, suffix string) string {
 
 /* Functional utilities for slices */
 
+// Removes elements that predicate returns false
 func Filter[T any](slice []T, predicate func(T) bool) []T {
 	result := make([]T, 0, len(slice))
 
@@ -71,15 +72,28 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 }
 
 // MapE is a variant of Map that drops the elements for which the mapper returns an error.
-func MapE[T, U any](slice []T, mapper func(T) (U, error)) []U {
+func MapE[T, U any](slice []T, mapper func(T) (U, error), options ...bool) ([]U, error) {
 	result := make([]U, 0, len(slice))
+	skipErrs := false
+
+	if len(options) > 0 {
+		skipErrs = options[0]
+	}
 
 	for _, value := range slice {
-		if mappedValue, err := mapper(value); err == nil {
+		mappedValue, err := mapper(value)
+
+		if err != nil {
+			if !skipErrs {
+				continue
+			}
+
+			return result, err
+		} else {
 			result = append(result, mappedValue)
 		}
 	}
-	return result
+	return result, nil
 }
 func ForEach[T any](slice []T, action func(int, T)) {
 	for i, value := range slice {
@@ -94,8 +108,26 @@ func Reduce[T, U any](slice []T, reducer func(U, T) U, initial U) U {
 	}
 	return result
 }
+func ReduceE[T, U any](slice []T, reducer func(U, T) (U, error), initial U) (U, error) {
+	result := initial
+
+	for _, value := range slice {
+		if result, err := reducer(result, value); err != nil {
+			return result, err
+		}
+	}
+	return result, nil
+}
 func Any[T any](slice []T, predicate func(T) bool) bool {
 	return slices.ContainsFunc(slice, predicate)
+}
+func All[T any](slice []T, predicate func(T) bool) bool {
+	cmp := true
+	for _, v := range slice {
+		cmp = cmp && predicate(v)
+	}
+
+	return cmp
 }
 
 /* Functional utilities for maps */
@@ -145,6 +177,14 @@ func DZip[K comparable, V1, V2 any](mainMap map[K]V1, zippedMap map[K]V2, defaul
 	}
 	return result
 }
+func DReduce[K comparable, V, R any](m map[K]V, reducer func(R, K, V) R, initial R) R {
+	result := initial
+
+	for k, v := range m {
+		result = reducer(result, k, v)
+	}
+	return result
+}
 
 /* Functional utilities for strings */
 
@@ -161,4 +201,15 @@ func Join(v []any, sep string) string {
 	joinedArgs := strings.Join(values, sep)
 
 	return strings.TrimSpace(joinedArgs)
+}
+func ToScreamingSnakeCase(input string) string {
+	words := []rune{}
+	for i, r := range input {
+		if i > 0 && r == ' ' {
+			words = append(words, '_')
+		} else {
+			words = append(words, r)
+		}
+	}
+	return strings.TrimSpace(strings.ToUpper(string(words)))
 }

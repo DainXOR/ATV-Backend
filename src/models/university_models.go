@@ -4,8 +4,8 @@ type UniversityDB struct {
 	ID        DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name      string     `json:"name,omitempty" bson:"name,omitempty"`
 	Location  string     `json:"location,omitempty" bson:"location,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	CreatedAt DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdatedAt DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 	DeletedAt DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
@@ -17,11 +17,11 @@ type UniversityCreate struct {
 
 // UniversityResponse represents the response body for a university
 type UniversityResponse struct {
-	ID        string     `json:"id,omitempty"`
-	Name      string     `json:"name,omitempty"`
-	Location  string     `json:"location,omitempty"`
-	CreatedAt DBDateTime `json:"created_at,omitzero"`
-	UpdatedAt DBDateTime `json:"updated_at,omitzero"`
+	ID        string     `json:"id"`
+	Name      string     `json:"name"`
+	Location  string     `json:"location"`
+	CreatedAt DBDateTime `json:"created_at"`
+	UpdatedAt DBDateTime `json:"updated_at"`
 }
 
 func (u UniversityCreate) ToInsert() UniversityDB {
