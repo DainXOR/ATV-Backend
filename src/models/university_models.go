@@ -50,7 +50,7 @@ func (u UniversityDB) ToResponse() UniversityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u UniversityDB) IsEmpty() bool {
+func (u UniversityDB) IsZero() bool {
 	return u == (UniversityDB{})
 }
 

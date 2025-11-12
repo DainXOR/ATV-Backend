@@ -43,7 +43,7 @@ func (u SpecialityDB) ToResponse() SpecialityResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u SpecialityDB) IsEmpty() bool {
+func (u SpecialityDB) IsZero() bool {
 	return u == (SpecialityDB{})
 }
 

@@ -91,7 +91,7 @@ func (o FormAnswerDB) ToResponse() FormAnswerResponse {
 	}
 }
 
-func (o FormAnswerDB) IsEmpty() bool {
+func (o FormAnswerDB) IsZero() bool {
 	zeroObj := FormAnswerDB{}
 
 	comp := o.ID == zeroObj.ID &&

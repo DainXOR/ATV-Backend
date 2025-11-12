@@ -70,7 +70,7 @@ func (q FormQuestionDB) ToResponse() FormQuestionResponse {
 	}
 }
 
-func (q FormQuestionDB) IsEmpty() bool {
+func (q FormQuestionDB) IsZero() bool {
 	zeroObj := FormQuestionDB{}
 
 	cmp := q.ID == zeroObj.ID &&

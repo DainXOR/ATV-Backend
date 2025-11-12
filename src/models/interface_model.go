@@ -24,7 +24,7 @@ import (
 // Yes, that's it, nothing else is required.
 type DBModelInterface interface {
 	TableName() string
-	IsEmpty() bool
+	IsZero() bool
 	//CreationDate() DBDateTime
 	//UpdateDate() DBDateTime
 	//DeleteDate() DBDateTime

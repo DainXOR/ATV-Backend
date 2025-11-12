@@ -81,7 +81,7 @@ func (a AlertDB) ToResponse() AlertResponse {
 	}
 }
 
-func (a AlertDB) IsEmpty() bool {
+func (a AlertDB) IsZero() bool {
 	return a == (AlertDB{})
 }
 

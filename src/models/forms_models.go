@@ -143,7 +143,7 @@ func (q FormDB) ToResponse() FormResponse {
 	}
 }
 
-func (q FormDB) IsEmpty() bool {
+func (q FormDB) IsZero() bool {
 	zeroObj := FormDB{}
 
 	comp := q.ID == zeroObj.ID &&

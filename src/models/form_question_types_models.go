@@ -40,7 +40,7 @@ func (t FormQuestionTypeDB) ToResponse() FormQuestionTypeResponse {
 	}
 }
 
-func (t FormQuestionTypeDB) IsEmpty() bool {
+func (t FormQuestionTypeDB) IsZero() bool {
 	return t == (FormQuestionTypeDB{})
 }
 

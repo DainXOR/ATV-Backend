@@ -93,7 +93,7 @@ func (c CompanionDB) ToResponse() CompanionResponse {
 	}
 }
 
-func (c CompanionDB) IsEmpty() bool {
+func (c CompanionDB) IsZero() bool {
 	return c == (CompanionDB{})
 }
 

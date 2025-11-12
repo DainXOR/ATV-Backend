@@ -43,7 +43,7 @@ func (u SessionTypeDB) ToResponse() SessionTypeResponse {
 		UpdatedAt: u.UpdatedAt,
 	}
 }
-func (u SessionTypeDB) IsEmpty() bool {
+func (u SessionTypeDB) IsZero() bool {
 	return u == (SessionTypeDB{})
 }
 
