@@ -325,9 +325,9 @@ func (iUpdate) Delete() UpdateType {
 	return UpdateType{"$set": bson.M{"deleted_at": Time.Now()}} // Soft delete
 }
 
-func InterfaceTo[C, R any, M DBModelInterface[C, R]](a DBModelInterface[C, R]) M {
+func InterfaceTo[M DBModelInterface[any, any]](a DBModelInterface[any, any]) M {
 	return a.(M)
 }
-func ToInterface[C, R any, M DBModelInterface[C, R]](a M) DBModelInterface[C, R] {
+func ToInterface[C, R any, M DBModelInterface[any, any]](a M) DBModelInterface[any, any] {
 	return a
 }
