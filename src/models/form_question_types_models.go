@@ -48,4 +48,4 @@ func (t FormQuestionTypeDB) TableName() string {
 	return "form_question_types"
 }
 
-var _ DBModelInterface = (*FormQuestionTypeDB)(nil)
+var _ DBModelInterface[FormQuestionTypeCreate, FormQuestionTypeResponse] = (*FormQuestionTypeDB)(nil)

@@ -25,6 +25,9 @@ type dnxLogger struct {
 
 var dnxGlobalLogger *dnxLogger
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Internal creation interface
+
 func init() {
 	dnxGlobalLogger = NewWithEnv()
 }
@@ -50,6 +53,9 @@ func clone(original *dnxLogger) *dnxLogger {
 	logger.Debug("Logger cloned")
 	return logger
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Creation, preparation and closing interface
 
 func NewClone() *dnxLogger {
 	return clone(get())
@@ -126,6 +132,9 @@ func Close() {
 	get().Close()
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Logging error safeguard
+
 func panicOrError(msg string, condition bool) error {
 	if condition {
 		panic(msg)
@@ -133,14 +142,6 @@ func panicOrError(msg string, condition bool) error {
 		return errors.New(msg)
 	}
 }
-func (i *dnxLogger) logLevelsNames() string {
-	urgencyLevels := Level.InterpretCode(i.LogLevels().UrgencyLevels())
-	contained := Level.ContainedIn(urgencyLevels)
-	names := utils.Map(contained, logLevel.Name)
-
-	return "| " + strings.Join(names, " | ") + " |"
-}
-
 func (i *dnxLogger) registerLogAttempt() bool {
 	i.logAttempts++
 
@@ -172,6 +173,9 @@ func (i *dnxLogger) resetLogAttempts() bool {
 	return false
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Logger information
+
 func (i *dnxLogger) SetVersion(version types.Version) {
 	i.appVersion = version
 	i.Debug("App version changed to: ", version.String(),
@@ -197,6 +201,16 @@ func (i *dnxLogger) LogLevels() logLevel {
 func LogLevels() logLevel {
 	return get().LogLevels()
 }
+func (i *dnxLogger) logLevelsNames() string {
+	urgencyLevels := Level.InterpretCode(i.LogLevels().UrgencyLevels())
+	contained := Level.ContainedIn(urgencyLevels)
+	names := utils.Map(contained, logLevel.Name)
+
+	return "| " + strings.Join(names, " | ") + " |"
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Configuration options
 
 func (i *dnxLogger) SetLogLevels(options logLevel) bool {
 	if !options.IsValid() {
@@ -258,6 +272,9 @@ func SetMinLogLevel(level logLevel) bool {
 	return get().SetMinLogLevel(level)
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Special logging methods
+
 func (i *dnxLogger) EnableDeprecate() bool {
 	return i.EnableLogLevels(Level.Deprecate())
 }
@@ -283,9 +300,14 @@ func DisableLava() bool {
 	return get().DisableLava()
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+
 func (i *dnxLogger) canLog(level logLevel) bool {
 	return i.LogLevels().Has(level)
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Internal data preparation
 
 func (i *dnxLogger) internalWrite(record Record) {
 	if !i.canLog(record.LogLevel) {
@@ -381,6 +403,9 @@ func (i *dnxLogger) generateRecord(level logLevel, v ...any) Record {
 	return record
 }
 
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Internal writing interface
+
 func (i *dnxLogger) iWrite(l logLevel, v ...any) {
 	record := i.generateRecord(l, v...)
 	i.internalWrite(record)
@@ -398,6 +423,9 @@ func (i *dnxLogger) iWriter(r Record) {
 	}
 	i.internalWrite(r)
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------
+// Logging interface
 
 func (i *dnxLogger) Debug(v ...any) {
 	i.iWrite(Level.Debug(), v...)

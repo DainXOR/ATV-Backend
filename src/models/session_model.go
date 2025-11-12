@@ -192,4 +192,4 @@ func (SessionDB) TableName() string {
 	return "sessions"
 }
 
-var _ DBModelInterface = (*SessionDB)(nil)
+var _ DBModelInterface[SessionCreate, SessionResponse] = (*SessionDB)(nil)

@@ -8,7 +8,7 @@ import (
 	"dainxor/atv/utils"
 )
 
-func genericGetAllOf[M models.DBModelInterface](model M) func(models.FilterObject) types.Result[[]M] {
+func genericGetAllOf[C, R any, M models.DBModelInterface[C, R]](model M) func(models.FilterObject) types.Result[[]M] {
 	return func(filter models.FilterObject) types.Result[[]M] {
 		filter = models.Filter.AddPart(filter, models.Filter.NotDeleted())
 

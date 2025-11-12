@@ -10,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type alertsType struct{}
+type alertsType struct {
+}
 
 var Alert alertsType
 
@@ -38,6 +39,7 @@ func (alertsType) Create(c *gin.Context) {
 
 	if result.IsErr() {
 		logger.Error("Failed to create alerts in MongoDB: ", result.Error())
+		handleErrorAnswer(c, result.Error())
 		err := result.Error()
 		httpErr := err.(*types.HttpError)
 		c.JSON(httpErr.Code,

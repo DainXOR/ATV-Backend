@@ -89,4 +89,5 @@ func (AlertDB) TableName() string {
 	return "alerts"
 }
 
-var _ DBModelInterface = (*AlertDB)(nil)
+var _ DBModelInterface[AlertCreate, AlertResponse] = (*AlertDB)(nil)
+var _ CreateModelInterface[AlertResponse, AlertDB] = (*AlertCreate)(nil)

@@ -63,4 +63,4 @@ func (PriorityDB) TableName() string {
 	return "priorities"
 }
 
-var _ DBModelInterface = (*PriorityDB)(nil)
+var _ DBModelInterface[PriorityCreate, PriorityResponse] = (*PriorityDB)(nil)

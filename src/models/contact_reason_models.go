@@ -46,9 +46,12 @@ func (p ContactReasonDB) ToResponse() ContactReasonResponse {
 func (p ContactReasonDB) IsEmpty() bool {
 	return p.ID == (DBID{})
 }
+func (p ContactReasonDB) IsZero() bool {
+	return p.ID == (DBID{})
+}
 
 func (ContactReasonDB) TableName() string {
 	return "contact_reasons"
 }
 
-var _ DBModelInterface = (*ContactReasonDB)(nil)
+var _ DBModelInterface[ContactReasonCreate, ContactReasonResponse] = (*ContactReasonDB)(nil)

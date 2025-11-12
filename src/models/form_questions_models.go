@@ -94,4 +94,4 @@ func (FormQuestionDB) TableName() string {
 	return "form_questions"
 }
 
-var _ DBModelInterface = (*FormQuestionDB)(nil)
+var _ DBModelInterface[FormQuestionCreate, FormQuestionResponse] = (*FormQuestionDB)(nil)

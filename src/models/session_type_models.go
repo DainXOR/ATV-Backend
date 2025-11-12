@@ -51,4 +51,4 @@ func (SessionTypeDB) TableName() string {
 	return "session_types"
 }
 
-var _ DBModelInterface = (*SessionTypeDB)(nil)
+var _ DBModelInterface[SessionTypeCreate, SessionTypeResponse] = (*SessionTypeDB)(nil)

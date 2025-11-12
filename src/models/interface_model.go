@@ -22,28 +22,18 @@ import (
 // define a method TableName that returns the name of the database table
 // and a method IsEmpty that checks if the object is empty.
 // Yes, that's it, nothing else is required.
-type DBModelInterface interface {
+type DBModelInterface[C, R any] interface {
 	TableName() string
 	IsEmpty() bool
-	//CreationDate() DBDateTime
-	//UpdateDate() DBDateTime
-	//DeleteDate() DBDateTime
+	ToResponse() R
+}
+type CreateModelInterface[R any, DBM DBModelInterface[any, R]] interface {
+	ToInsert() types.Result[DBM]
+	ToUpdate() types.Result[DBM]
 }
 
 type DBID = bson.ObjectID
 type DBDateTime = time.Time
-
-//func (m DBModelBase) CreationDate() DBDateTime {
-//	return m.CreatedAt
-//}
-//
-//func (m DBModelBase) UpdateDate() DBDateTime {
-//	return m.UpdatedAt
-//}
-//
-//func (m DBModelBase) DeleteDate() DBDateTime {
-//	return m.DeletedAt
-//}
 
 // Deprecated: Use models.ID.ToPrimitive() instead.
 func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
@@ -335,9 +325,9 @@ func (iUpdate) Delete() UpdateType {
 	return UpdateType{"$set": bson.M{"deleted_at": Time.Now()}} // Soft delete
 }
 
-func InterfaceTo[T DBModelInterface](a DBModelInterface) T {
-	return a.(T)
+func InterfaceTo[C, R any, M DBModelInterface[C, R]](a DBModelInterface[C, R]) M {
+	return a.(M)
 }
-func ToInterface[T DBModelInterface](a T) DBModelInterface {
+func ToInterface[C, R any, M DBModelInterface[C, R]](a M) DBModelInterface[C, R] {
 	return a
 }

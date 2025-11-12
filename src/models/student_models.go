@@ -134,4 +134,4 @@ func (StudentDB) TableName() string {
 
 // Explicitly checking if the structs implement the DBModelInterface
 // This will error in compile time if the structs do not implement the interface
-var _ DBModelInterface = (*StudentDB)(nil)
+var _ DBModelInterface[StudentCreate, StudentResponse] = (*StudentDB)(nil)

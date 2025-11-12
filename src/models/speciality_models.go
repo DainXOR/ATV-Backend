@@ -51,4 +51,4 @@ func (SpecialityDB) TableName() string {
 	return "specialities"
 }
 
-var _ DBModelInterface = (*SpecialityDB)(nil)
+var _ DBModelInterface[SpecialityCreate, SpecialityResponse] = (*SpecialityDB)(nil)

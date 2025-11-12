@@ -11,7 +11,7 @@ import (
 type alertType struct{}
 
 var Alert alertType
-var _ DAOInterface[models.AlertDB, models.AlertCreate] = (*alertType)(&Alert)
+var _ DAOInterface[models.AlertCreate, models.AlertResponse, models.AlertDB] = (*alertType)(&Alert)
 
 func (alertType) Create(u models.AlertCreate) types.Result[models.AlertDB] {
 	resultAlertDB := u.ToInsert()
@@ -29,6 +29,10 @@ func (alertType) Create(u models.AlertCreate) types.Result[models.AlertDB] {
 
 	alertDB.ID = resultID.Value()
 	return types.ResultOk(alertDB)
+}
+func (alertType) CreateAll(b []models.AlertCreate) types.Result[[]models.AlertDB] {
+	logger.Error(Error.NotImplemented())
+	return types.ResultErr[[]models.AlertDB](Error.NotImplemented())
 }
 
 func (alertType) GetByID(id string, filter models.FilterObject) types.Result[models.AlertDB] {
@@ -176,6 +180,10 @@ func (alertType) UpdateByID(id string, alert models.AlertCreate, filter models.F
 
 	return types.ResultOk(resultAlertDB.Value().(models.AlertDB))
 }
+func (alertType) UpdateAll(alert models.AlertCreate, filter models.FilterObject) types.Result[[]models.AlertDB] {
+	logger.Error(Error.NotImplemented())
+	return types.ResultErr[[]models.AlertDB](Error.NotImplemented())
+}
 
 func (alertType) PatchByID(id string, alert models.AlertCreate, filter models.FilterObject) types.Result[models.AlertDB] {
 	oid, err := models.ID.ToDB(id)
@@ -252,6 +260,10 @@ func (alertType) PatchByID(id string, alert models.AlertCreate, filter models.Fi
 
 	return types.ResultOk(resultAlertDB.Value().(models.AlertDB))
 }
+func (alertType) PatchAll(alert models.AlertCreate, filter models.FilterObject) types.Result[[]models.AlertDB] {
+	logger.Error(Error.NotImplemented())
+	return types.ResultErr[[]models.AlertDB](Error.NotImplemented())
+}
 
 func (alertType) DeleteByID(id string, filter models.FilterObject) types.Result[models.AlertDB] {
 	oid, err := models.ID.ToDB(id)
@@ -324,6 +336,11 @@ func (alertType) DeleteByID(id string, filter models.FilterObject) types.Result[
 
 	return types.ResultOk(deletedAlert)
 }
+func (alertType) DeleteAll(filter models.FilterObject) types.Result[[]models.AlertDB] {
+	logger.Error(Error.NotImplemented())
+	return types.ResultErr[[]models.AlertDB](Error.NotImplemented())
+}
+
 func (alertType) DeletePermanentByID(id string, filter models.FilterObject) types.Result[models.AlertDB] {
 	logger.Warning("Permanently deleting alert by ID: ", id)
 	oid, err := models.ID.ToDB(id)

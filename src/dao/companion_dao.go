@@ -12,6 +12,8 @@ type companionType struct{}
 
 var Companion companionType
 
+var _ DAOInterface[models.CompanionCreate, models.CompanionResponse, models.CompanionDB] = (*companionType)(&Companion)
+
 func (companionType) Create(companion models.CompanionCreate) types.Result[models.CompanionDB] {
 	resultCompanionDB := companion.ToInsert()
 	if resultCompanionDB.IsErr() {
@@ -35,6 +37,10 @@ func (companionType) Create(companion models.CompanionCreate) types.Result[model
 
 	companionDB.ID = resultCreate.Value()
 	return types.ResultOk(companionDB)
+}
+func (companionType) CreateAll(companion []models.CompanionCreate) types.Result[[]models.CompanionDB] {
+	logger.Fatal(Error.NotImplemented())
+	return types.ResultErr[[]models.CompanionDB](Error.NotImplemented())
 }
 
 func (companionType) GetByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
@@ -149,6 +155,10 @@ func (companionType) UpdateByID(id string, companion models.CompanionCreate, fil
 
 	return Companion.GetByID(id, models.Filter.Empty())
 }
+func (companionType) UpdateAll(companion models.CompanionCreate, filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	logger.Fatal(Error.NotImplemented())
+	return types.ResultErr[[]models.CompanionDB](Error.NotImplemented())
+}
 
 func (companionType) PatchByID(id string, companion models.CompanionCreate, filter models.FilterObject) types.Result[models.CompanionDB] {
 	oid, err := models.ID.ToDB(id)
@@ -190,6 +200,10 @@ func (companionType) PatchByID(id string, companion models.CompanionCreate, filt
 	}
 
 	return Companion.GetByID(id, models.Filter.Empty())
+}
+func (companionType) PatchAll(companion models.CompanionCreate, filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	logger.Fatal(Error.NotImplemented())
+	return types.ResultErr[[]models.CompanionDB](Error.NotImplemented())
 }
 
 func (companionType) DeleteByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
@@ -234,6 +248,10 @@ func (companionType) DeleteByID(id string, filter models.FilterObject) types.Res
 	}
 
 	return types.ResultOk(companion)
+}
+func (companionType) DeleteAll(filter models.FilterObject) types.Result[[]models.CompanionDB] {
+	logger.Fatal(Error.NotImplemented())
+	return types.ResultErr[[]models.CompanionDB](Error.NotImplemented())
 }
 func (companionType) DeletePermanentByID(id string, filter models.FilterObject) types.Result[models.CompanionDB] {
 	logger.Warning("Permanently deleting companion by ID: ", id)

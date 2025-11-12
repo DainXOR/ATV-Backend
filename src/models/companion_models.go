@@ -96,9 +96,13 @@ func (c CompanionDB) ToResponse() CompanionResponse {
 func (c CompanionDB) IsEmpty() bool {
 	return c == (CompanionDB{})
 }
+func (c CompanionDB) IsZero() bool {
+	return c.IsEmpty()
+}
 
 func (CompanionDB) TableName() string {
 	return "companions"
 }
 
-var _ DBModelInterface = (*CompanionDB)(nil)
+var _ DBModelInterface[CompanionCreate, CompanionResponse] = (*CompanionDB)(nil)
+var _ CreateModelInterface[CompanionResponse, CompanionDB] = (*CompanionCreate)(nil)

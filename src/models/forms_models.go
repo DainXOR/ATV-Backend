@@ -167,4 +167,4 @@ func (FormDB) TableName() string {
 	return "forms"
 }
 
-var _ DBModelInterface = (*FormDB)(nil)
+var _ DBModelInterface[FormCreate, FormResponse] = (*FormDB)(nil)

@@ -58,4 +58,4 @@ func (UniversityDB) TableName() string {
 	return "universities"
 }
 
-var _ DBModelInterface = (*UniversityDB)(nil)
+var _ DBModelInterface[UniversityCreate, UniversityResponse] = (*UniversityDB)(nil)

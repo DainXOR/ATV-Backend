@@ -115,4 +115,4 @@ func (FormAnswerDB) TableName() string {
 	return "form_answers"
 }
 
-var _ DBModelInterface = (*FormAnswerDB)(nil)
+var _ DBModelInterface[FormAnswerCreate, FormAnswerResponse] = (*FormAnswerDB)(nil)
