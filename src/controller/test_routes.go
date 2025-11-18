@@ -28,7 +28,7 @@ func TestRoutes(router *gin.Engine) {
 			msg := c.Param("msg")
 			logger.Info("Got:", msg)
 
-			configs.TestWH(msg)
+			configs.WebHooks.SendTo("fatv.test", msg)
 
 			c.JSON(types.Http.C200().Created(),
 				types.EmptyResponse("all good"),
