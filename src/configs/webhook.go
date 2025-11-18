@@ -271,7 +271,7 @@ func (wh *webhookNS) SendTo(routing string, data any) error {
 
 	body, err := json.Marshal(Payload{Data: data, SentAt: time.Now()})
 	if err != nil {
-		logger.Errorf("webhook marshal: %w", err)
+		logger.Errorf("webhook marshal: %v", err)
 		return fmt.Errorf("webhook marshal: %w", err)
 	}
 
