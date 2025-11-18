@@ -22,28 +22,29 @@ func FormsRoutes(router *gin.Engine) {
 		formsRouter.GET("/:id", service.Forms.GetByID)
 		formsRouter.GET("/all", service.Forms.GetAll)
 
+		formQuestionsRouter := formsRouter.Group("/questions")
+		{
+			formQuestionsRouter.POST("/", service.FormQuestions.Create)
+
+			formQuestionsRouter.GET("/:id", service.FormQuestions.GetByID)
+			formQuestionsRouter.GET("/all", service.FormQuestions.GetAll)
+
+			formQuestionTypesRouter := formQuestionsRouter.Group("/types")
+			{
+				formQuestionTypesRouter.POST("/", service.FormQuestionTypes.Create)
+
+				formQuestionTypesRouter.GET("/:id", service.FormQuestionTypes.GetByID)
+				formQuestionTypesRouter.GET("/all", service.FormQuestionTypes.GetAll)
+			}
+		}
+
+		formAnswersRouter := formsRouter.Group("/answers")
+		{
+			formAnswersRouter.POST("/", service.FormAnswers.Create)
+
+			formAnswersRouter.GET("/:id", service.FormAnswers.GetByID)
+			formAnswersRouter.GET("/all", service.FormAnswers.GetAll)
+		}
 	}
-	formQuestionsRouter := formsRouter.Group("/questions")
-	{
-		formQuestionsRouter.POST("/", service.FormQuestions.Create)
 
-		formQuestionsRouter.GET("/:id", service.FormQuestions.GetByID)
-		formQuestionsRouter.GET("/all", service.FormQuestions.GetAll)
-
-	}
-	formQuestionTypesRouter := formQuestionsRouter.Group("/types")
-	{
-		formQuestionTypesRouter.POST("/", service.FormQuestionTypes.Create)
-
-		formQuestionTypesRouter.GET("/:id", service.FormQuestionTypes.GetByID)
-		formQuestionTypesRouter.GET("/all", service.FormQuestionTypes.GetAll)
-	}
-
-	formAnswersRouter := formsRouter.Group("/answers")
-	{
-		formAnswersRouter.POST("/", service.FormAnswers.Create)
-
-		formAnswersRouter.GET("/:id", service.FormAnswers.GetByID)
-		formAnswersRouter.GET("/all", service.FormAnswers.GetAll)
-	}
 }

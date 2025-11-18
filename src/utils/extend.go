@@ -72,6 +72,7 @@ func Map[T, U any](slice []T, mapper func(T) U) []U {
 }
 
 // MapE is a variant of Map that drops the elements for which the mapper returns an error.
+// First option: Skip errors, keeps mapping even if any value returns an error. Returns the last error.
 func MapE[T, U any](slice []T, mapper func(T) (U, error), options ...bool) ([]U, error) {
 	result := make([]U, 0, len(slice))
 	skipErrs := false
@@ -80,11 +81,14 @@ func MapE[T, U any](slice []T, mapper func(T) (U, error), options ...bool) ([]U,
 		skipErrs = options[0]
 	}
 
+	var lastError error
+	lastError = nil
 	for _, value := range slice {
 		mappedValue, err := mapper(value)
 
 		if err != nil {
-			if !skipErrs {
+			if skipErrs {
+				lastError = err
 				continue
 			}
 
@@ -93,7 +97,7 @@ func MapE[T, U any](slice []T, mapper func(T) (U, error), options ...bool) ([]U,
 			result = append(result, mappedValue)
 		}
 	}
-	return result, nil
+	return result, lastError
 }
 func ForEach[T any](slice []T, action func(int, T)) {
 	for i, value := range slice {

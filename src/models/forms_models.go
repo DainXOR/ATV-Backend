@@ -11,11 +11,12 @@ import (
 //type section = uint8
 
 type questionInfo[ID any] struct {
-	Position         uint8 `json:"position" bson:"position"`
-	Section          uint8 `json:"section" bson:"section"`
-	IDParentQuestion ID    `json:"id_parent_question" bson:"id_parent_question,omitempty"`
-	IDQuestion       ID    `json:"id_question" bson:"id_question,omitempty"`
-	Optional         bool  `json:"optional" bson:"optional"`
+	Position         uint8    `json:"position" bson:"position"`
+	Section          uint8    `json:"section" bson:"section"`
+	IDParentQuestion ID       `json:"id_parent_question" bson:"id_parent_question"`
+	NeededAnswers    []string `json:"needed_answers" bson:"needed_answers"`
+	IDQuestion       ID       `json:"id_question" bson:"id_question,omitempty"`
+	Optional         bool     `json:"optional" bson:"optional"`
 }
 
 func questionFrom[IID, OID any](other questionInfo[IID], mapper func(IID) OID) questionInfo[OID] {
@@ -24,6 +25,7 @@ func questionFrom[IID, OID any](other questionInfo[IID], mapper func(IID) OID) q
 		Position:         other.Position,
 		Section:          other.Section,
 		IDParentQuestion: mapper(other.IDParentQuestion),
+		NeededAnswers:    other.NeededAnswers,
 		Optional:         other.Optional,
 	}
 }
@@ -37,6 +39,7 @@ type FormDB struct {
 	ID            DBID                 `json:"id" bson:"_id,omitempty"`
 	Name          string               `json:"name" bson:"name,omitempty"`
 	Description   string               `json:"description" bson:"description,omitempty"`
+	Date          string               `json:"date"`
 	QuestionsInfo []questionInfo[DBID] `json:"questions_info" bson:"questions_info,omitempty"`
 	CreatedAt     DBDateTime           `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt     DBDateTime           `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
@@ -45,12 +48,14 @@ type FormDB struct {
 type FormCreate struct {
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`
+	Date          string                 `json:"date"`
 	QuestionsInfo []questionInfo[string] `json:"questions_info"`
 }
 type FormResponse struct {
 	ID            string                 `json:"id"`
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`
+	Date          string                 `json:"date"`
 	QuestionsInfo []questionInfo[string] `json:"questions_info"`
 	CreatedAt     DBDateTime             `json:"created_at"`
 	UpdatedAt     DBDateTime             `json:"updated_at"`
@@ -60,14 +65,14 @@ func (q FormCreate) ToInsert() types.Result[FormDB] {
 	obj := FormDB{
 		Name:          q.Name,
 		Description:   q.Description,
+		Date:          q.Date,
 		QuestionsInfo: nil,
 		CreatedAt:     Time.Now(),
 		UpdatedAt:     Time.Now(),
 		DeletedAt:     Time.Zero(),
 	}
 
-	l := logger.Lava(types.V("0.2.0"), "Using not standarized error")
-	l.LavaStart()
+	logger.Lava(types.V("0.2.0"), "Using not standarized error")
 	questions, err := utils.MapE(q.QuestionsInfo, func(v questionInfo[string]) (questionInfo[DBID], error) {
 		var oid DBID
 		var oidParent DBID
@@ -83,10 +88,10 @@ func (q FormCreate) ToInsert() types.Result[FormDB] {
 			oid, _ := ID.ToDB(id)
 			return oid
 		}), nil
-	})
-	l.LavaEnd()
+	}, true) // Keeps mapping even if any element errors
 
 	if err != nil {
+		logger.Error("Failed mapping the question info values:", err)
 		obj.QuestionsInfo = make([]questionInfo[DBID], 0)
 		return types.ResultErr[FormDB](err)
 	}
@@ -98,12 +103,12 @@ func (q FormCreate) ToUpdate() types.Result[FormDB] {
 	obj := FormDB{
 		Name:          q.Name,
 		Description:   q.Description,
+		Date:          q.Date,
 		QuestionsInfo: nil,
 		UpdatedAt:     Time.Now(),
 	}
 
-	l := logger.Lava(types.V("0.2.1"), "Using not standarized error")
-	l.LavaStart()
+	logger.Lava(types.V("0.2.1"), "Using not standarized error")
 	questions, err := utils.MapE(q.QuestionsInfo, func(v questionInfo[string]) (questionInfo[DBID], error) {
 		var oid DBID
 		var oidParent DBID
@@ -119,10 +124,10 @@ func (q FormCreate) ToUpdate() types.Result[FormDB] {
 			oid, _ := ID.ToDB(id)
 			return oid
 		}), nil
-	})
-	l.LavaEnd()
+	}, true)
 
 	if err != nil {
+		logger.Warning("Partial success mapping the question info values:", err)
 		obj.QuestionsInfo = make([]questionInfo[DBID], 0)
 		return types.ResultErr[FormDB](err)
 	}
@@ -135,6 +140,7 @@ func (q FormDB) ToResponse() FormResponse {
 		ID:          q.ID.Hex(),
 		Name:        q.Name,
 		Description: q.Description,
+		Date:        q.Date,
 		QuestionsInfo: utils.Map(q.QuestionsInfo, func(v questionInfo[DBID]) questionInfo[string] {
 			return questionFrom(v, DBID.Hex)
 		}),
@@ -146,21 +152,14 @@ func (q FormDB) ToResponse() FormResponse {
 func (q FormDB) IsZero() bool {
 	zeroObj := FormDB{}
 
-	comp := q.ID == zeroObj.ID &&
+	return q.ID == zeroObj.ID &&
 		q.Name == zeroObj.Name &&
 		q.Description == zeroObj.Description &&
+		q.Date == zeroObj.Date &&
 		q.CreatedAt.Equal(zeroObj.CreatedAt) &&
 		q.UpdatedAt.Equal(zeroObj.UpdatedAt) &&
 		q.DeletedAt.Equal(zeroObj.DeletedAt) &&
 		len(q.QuestionsInfo) == 0
-
-	if comp {
-		for _, o := range q.QuestionsInfo {
-			comp = comp && (o == questionInfo[DBID]{})
-		}
-	}
-
-	return comp
 }
 
 func (FormDB) TableName() string {

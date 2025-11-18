@@ -33,48 +33,6 @@ type DBModelInterface interface {
 type DBID = bson.ObjectID
 type DBDateTime = time.Time
 
-//func (m DBModelBase) CreationDate() DBDateTime {
-//	return m.CreatedAt
-//}
-//
-//func (m DBModelBase) UpdateDate() DBDateTime {
-//	return m.UpdatedAt
-//}
-//
-//func (m DBModelBase) DeleteDate() DBDateTime {
-//	return m.DeletedAt
-//}
-
-// Deprecated: Use models.ID.ToPrimitive() instead.
-func PrimitiveIDFrom(id any) (primitive.ObjectID, error) {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToPrimitive() instead")
-	return ID.ToPrimitive(id)
-}
-
-// Deprecated: Use models.ID.ToBson() instead.
-func BsonIDFrom(id any) (bson.ObjectID, error) {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToBson() instead")
-	return ID.ToBson(id)
-}
-
-// Deprecated: Use models.ID.ToDB() instead.
-func DBIDFrom(id any) (DBID, error) {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.ToDB() instead")
-	return ID.ToDB(id)
-}
-
-// Deprecated: Use models.ID.OmitEmpty() instead.
-func OmitEmptyID(id string, result *DBID, idName string) bool {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.OmitEmpty() instead")
-	return ID.OmitEmpty(id, result, idName)
-}
-
-// Deprecated: Use models.ID.Ensure() instead.
-func EnsureID(id string, result *DBID, idName string) bool {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.ID.Ensure() instead")
-	return ID.Ensure(id, result, idName)
-}
-
 type iID struct{}
 
 var ID iID
@@ -137,18 +95,6 @@ func (iID) OmitEmpty(id string, result *DBID, idName string) bool {
 
 	*result = idObj
 	return true
-}
-
-// Deprecated: Use models.Time.Now() instead.
-func TimeNow() DBDateTime {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Now() instead")
-	return Time.Now()
-}
-
-// Deprecated: Use models.Time.Zero() instead.
-func TimeZero() DBDateTime {
-	logger.Deprecate(types.V("0.1.0"), types.V("0.1.3"), "Use models.Time.Zero() instead")
-	return Time.Zero()
 }
 
 type iTime struct{}
