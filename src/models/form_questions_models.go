@@ -17,8 +17,8 @@ type FormQuestionDB struct {
 	DeletedAt      DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 type FormQuestionCreate struct {
-	Name           string   `json:"name"`
-	Question       string   `json:"question"`
+	Name           string   `json:"name"`     // Para previsualizacion o explicacion de que se trata. Esto no se debe usar dentro del formulario
+	Question       string   `json:"question"` // La pregunta que aparece dentro del formulario
 	Options        []string `json:"options"`
 	IDQuestionType string   `json:"id_question_type"`
 }
