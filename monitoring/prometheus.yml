@@ -2,7 +2,14 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: "gin-backend"
+  - job_name: "fatv-local"
     metrics_path: "/api/info/metrics"
     static_configs:
       - targets: ["host.docker.internal:8080"]   # change port to your app's port
+
+  - job_name: "fatv-dev"
+    metrics_path: "/api/info/metrics"
+    static_configs:
+      - targets: ["atv-backend-jvho.onrender.com"]   # change port to your app's port
+  
+# "j5ml7cps-8080.use2.devtunnels.ms", "", "atv-back-263877317682.us-central1.run.app"
