@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "gin-backend"
+    metrics_path: "/api/info/metrics"
+    static_configs:
+      - targets: ["host.docker.internal:8080"]   # change port to your app's port

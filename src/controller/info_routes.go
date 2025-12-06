@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func InfoRoutes(router *gin.Engine) {
@@ -17,6 +18,7 @@ func InfoRoutes(router *gin.Engine) {
 		"ping":          "/api/info/ping",
 		"api version":   "/api/info/api-version",
 		"route version": "/api/info/route-version",
+		"metrics":       "/api/info/metrics",
 	}
 
 	infoRouter := router.Group("api/info")
@@ -42,6 +44,7 @@ func InfoRoutes(router *gin.Engine) {
 				"version": configs.App.RoutesVersion(),
 			})
 		})
+		infoRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	}
 }
 

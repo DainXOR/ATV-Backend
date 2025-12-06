@@ -36,6 +36,7 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middleware.Recovery()) // Middleware to recover from panics and logs a small trace
 	router.Use(middleware.CORS())
+	router.Use(middleware.Prometheus())
 	//router.Use(middleware.TokenMiddleware())
 
 	// Root level routes
