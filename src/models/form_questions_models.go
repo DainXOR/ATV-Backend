@@ -6,27 +6,32 @@ import (
 	"errors"
 )
 
+type Option struct {
+	Text   string `json:"text" bson:"text,omitempty"`
+	Weight uint8  `json:"weight" bson:"weight,omitempty"`
+}
+
 type FormQuestionDB struct {
 	ID             DBID       `json:"id" bson:"_id,omitempty"`
 	Name           string     `json:"name" bson:"name,omitempty"`
 	Question       string     `json:"question" bson:"question,omitempty"`
-	Options        []string   `json:"options" bson:"options,omitempty"`
+	Options        []Option   `json:"options" bson:"options,omitempty"`
 	IDQuestionType DBID       `json:"id_question_type" bson:"id_question_type,omitempty"`
 	CreatedAt      DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
 	UpdatedAt      DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
 	DeletedAt      DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 type FormQuestionCreate struct {
-	Name           string   `json:"name"`
-	Question       string   `json:"question"`
-	Options        []string `json:"options"`
+	Name           string   `json:"name"`     // Para previsualizacion o explicacion de que se trata. Esto no se debe usar dentro del formulario
+	Question       string   `json:"question"` // La pregunta que aparece dentro del formulario
+	Options        []Option `json:"options"`
 	IDQuestionType string   `json:"id_question_type"`
 }
 type FormQuestionResponse struct {
 	ID             string     `json:"id"`
 	Name           string     `json:"name"`
 	Question       string     `json:"question"`
-	Options        []string   `json:"options"`
+	Options        []Option   `json:"options"`
 	IDQuestionType string     `json:"id_question_type"`
 	CreatedAt      DBDateTime `json:"created_at"`
 	UpdatedAt      DBDateTime `json:"updated_at"`

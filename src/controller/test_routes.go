@@ -5,10 +5,6 @@ import (
 	"dainxor/atv/logger"
 	"dainxor/atv/service"
 	"dainxor/atv/types"
-	"encoding/base64"
-	"encoding/json"
-	"io"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,17 +24,18 @@ func TestRoutes(router *gin.Engine) {
 			msg := c.Param("msg")
 			logger.Info("Got:", msg)
 
-			configs.WebHooks.SendTo("fatv.test", msg)
+			configs.WebHooks.SendTo("fatv.test", msg) // Ver q pongo pa q le llegue al acompañante correspondiente
 
 			c.JSON(types.Http.C200().Created(),
 				types.EmptyResponse("all good"),
 			)
 		})
 
-		testRouter.POST("/wh/receive", myWHReceiver)
+		//testRouter.POST("/wh/receive", myWHReceiver)
 	}
 }
 
+/*
 func myWHReceiver(c *gin.Context) {
 	key := c.Query("key")
 	logger.Info("Got:", key)
@@ -167,3 +164,4 @@ func keysOfMap(m map[string]any) []string {
 	}
 	return keys
 }
+*/

@@ -10,23 +10,28 @@ import (
 //type position = uint8
 //type section = uint8
 
+type parentQuestion[ID any] struct {
+	IDQuestion    ID       `json:"id_question" bson:"id_question"`
+	NeededAnswers []string `json:"needed_answers" bson:"needed_answers"`
+}
+
 type questionInfo[ID any] struct {
-	Position         uint8    `json:"position" bson:"position"`
-	Section          uint8    `json:"section" bson:"section"`
-	IDParentQuestion ID       `json:"id_parent_question" bson:"id_parent_question"`
-	NeededAnswers    []string `json:"needed_answers" bson:"needed_answers"`
-	IDQuestion       ID       `json:"id_question" bson:"id_question,omitempty"`
-	Optional         bool     `json:"optional" bson:"optional"`
+	IDQuestion ID                 `json:"id_question" bson:"id_question,omitempty"`
+	Position   uint8              `json:"position" bson:"position"`
+	Section    uint8              `json:"section" bson:"section"`
+	Weight     uint8              `json:"weight" bson:"weight"`
+	Optional   bool               `json:"optional" bson:"optional"`
+	Parent     parentQuestion[ID] `json:"parent" bson:"parent"`
 }
 
 func questionFrom[IID, OID any](other questionInfo[IID], mapper func(IID) OID) questionInfo[OID] {
 	return questionInfo[OID]{
-		IDQuestion:       mapper(other.IDQuestion),
-		Position:         other.Position,
-		Section:          other.Section,
-		IDParentQuestion: mapper(other.IDParentQuestion),
-		NeededAnswers:    other.NeededAnswers,
-		Optional:         other.Optional,
+		IDQuestion: mapper(other.IDQuestion),
+		Position:   other.Position,
+		Section:    other.Section,
+		Weight:     other.Weight,
+		Optional:   other.Optional,
+		Parent:     parentQuestion[OID]{IDQuestion: mapper(other.Parent.IDQuestion), NeededAnswers: other.Parent.NeededAnswers},
 	}
 }
 func questionEmpty[ID any]() questionInfo[ID] {
@@ -80,8 +85,8 @@ func (q FormCreate) ToInsert() types.Result[FormDB] {
 		if !ID.Ensure(v.IDQuestion, &oid, "IDQuestion") {
 			return questionEmpty[DBID](), errors.New("Invalid IDQuestion: " + v.IDQuestion)
 		}
-		if !ID.OmitEmpty(v.IDParentQuestion, &oidParent, "IDParentQuestion") {
-			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.IDParentQuestion)
+		if !ID.OmitEmpty(v.Parent.IDQuestion, &oidParent, "IDParentQuestion") {
+			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.Parent.IDQuestion)
 		}
 
 		return questionFrom(v, func(id string) DBID {
@@ -116,8 +121,8 @@ func (q FormCreate) ToUpdate() types.Result[FormDB] {
 		if !ID.OmitEmpty(v.IDQuestion, &oid, "IDQuestion") {
 			return questionEmpty[DBID](), errors.New("Invalid IDQuestion: " + v.IDQuestion)
 		}
-		if !ID.OmitEmpty(v.IDParentQuestion, &oidParent, "IDParentQuestion") {
-			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.IDParentQuestion)
+		if !ID.OmitEmpty(v.Parent.IDQuestion, &oidParent, "IDParentQuestion") {
+			return questionEmpty[DBID](), errors.New("Invalid IDParentQuestion: " + v.Parent.IDQuestion)
 		}
 
 		return questionFrom(v, func(id string) DBID {

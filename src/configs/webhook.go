@@ -21,7 +21,7 @@ import (
 // ───────────────────────────────────────────────────
 //
 
-type Payload struct {
+type payload struct {
 	Data   any       `json:"data"`
 	SentAt time.Time `json:"sent_at"`
 }
@@ -254,13 +254,16 @@ func (wh *webhookNS) IsReady() bool {
 	return st.open
 }
 
-//
-// ───────────────────────────────────────────────────
-//   SEND MESSAGE (SAFE / AUTO-RETRY)
 // ───────────────────────────────────────────────────
 //
-
+//	SEND MESSAGE (SAFE / AUTO-RETRY)
+//
+// ───────────────────────────────────────────────────
 func (wh *webhookNS) SendTo(routing string, data any) error {
+	return wh.SendTo(routing, data)
+}
+
+func (wh *webhookNS) internalSend(routing string, data any) error {
 	state := wh.state
 	if state == nil {
 		logger.Error("webhook: state not initialized")
@@ -269,7 +272,7 @@ func (wh *webhookNS) SendTo(routing string, data any) error {
 
 	// Encode payload
 
-	body, err := json.Marshal(Payload{Data: data, SentAt: time.Now()})
+	body, err := json.Marshal(payload{Data: data, SentAt: time.Now()})
 	if err != nil {
 		logger.Errorf("webhook marshal: %v", err)
 		return fmt.Errorf("webhook marshal: %w", err)

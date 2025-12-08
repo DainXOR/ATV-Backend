@@ -42,13 +42,45 @@ func (formAnswersNS) Create(c *gin.Context) {
 		return
 	}
 
-	object := result.Value()
-	c.JSON(types.Http.C200().Created(),
+	answers := result.Value()
+	c.JSON(
+		types.Http.C200().Created(),
 		types.Response(
-			object.ToResponse(),
+			answers.ToResponse(),
 			"",
 		),
 	)
+
+	go func(answerID string) {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("panic in background worker: ", r)
+			}
+		}()
+
+		formResult := dao.Forms.GetByID(answers.ID.Hex(), models.Filter.Empty())
+		if formResult.IsErr() {
+			logger.Error("Failed to get form in db: ", formResult.Error())
+			handleErrorAnswer(c, formResult.Error())
+		}
+		form := formResult.Value()
+
+		for _, q := range form.QuestionsInfo {
+			questionResult := dao.FormQuestions.GetByID(q.IDQuestion.Hex(), models.Filter.Empty())
+			if questionResult.IsErr() {
+				logger.Error("Failed to get form in db: ", questionResult.Error())
+
+			}
+			question := questionResult.Value()
+			qOID := q.IDQuestion
+			qWeight := q.Weight
+			aWeights := question.Options
+
+		}
+
+		//configs.WebHooks.SendTo("", "")
+	}(answers.ID.Hex())
+
 }
 
 func (formAnswersNS) GetByID(c *gin.Context) {
