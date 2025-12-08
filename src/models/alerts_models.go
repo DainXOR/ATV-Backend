@@ -10,24 +10,28 @@ type AlertDB struct {
 	ID              DBID       `json:"_id,omitempty" bson:"_id,omitempty"`
 	IDPriority      DBID       `json:"id_priority,omitempty" bson:"id_priority,omitempty"`
 	IDStudent       DBID       `json:"id_student,omitempty" bson:"id_student,omitempty"`
+	IDCompanion     DBID       `json:"id_companion" bson:"id_companion"`
 	IDVulnerability DBID       `json:"id_vulnerability,omitempty" bson:"id_vulnerability,omitempty"`
 	Message         string     `json:"message,omitempty" bson:"message,omitempty"`
-	CreatedAt       DBDateTime `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdatedAt       DBDateTime `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	CreatedAt       DBDateTime `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt       DBDateTime `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
 	DeletedAt       DBDateTime `json:"deleted_at" bson:"deleted_at"`
 }
 
 type AlertCreate struct {
 	IDPriority      string `json:"id_priority"`
 	IDStudent       string `json:"id_student"`
+	IDCompanion     string `json:"id_companion"`
 	IDVulnerability string `json:"id_vulnerability"`
 	Message         string `json:"message"`
 }
 
 type AlertResponse struct {
-	ID              string     `json:"id"`
-	IDPriority      string     `json:"id_priority"`
-	IDStudent       string     `json:"id_student"`
+	ID          string `json:"id"`
+	IDPriority  string `json:"id_priority"`
+	IDStudent   string `json:"id_student"`
+	IDCompanion string `json:"id_companion"`
+	CompanionName
 	IDVulnerability string     `json:"id_vulnerability"`
 	Message         string     `json:"message"`
 	CreatedAt       DBDateTime `json:"created_at"`
@@ -44,6 +48,7 @@ func (a AlertCreate) ToInsert() types.Result[AlertDB] {
 
 	if !ID.Ensure(a.IDPriority, &obj.IDPriority, "IDPriority") ||
 		!ID.Ensure(a.IDStudent, &obj.IDStudent, "IDStudent") ||
+		!ID.Ensure(a.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.Ensure(a.IDVulnerability, &obj.IDVulnerability, "IDVulnerability") {
 
 		logger.Lava(types.V("0.2.0"), "Using not standarized error")
@@ -60,6 +65,7 @@ func (a AlertCreate) ToUpdate() types.Result[AlertDB] {
 
 	if !ID.OmitEmpty(a.IDPriority, &obj.IDPriority, "IDPriority") ||
 		!ID.OmitEmpty(a.IDStudent, &obj.IDStudent, "IDStudent") ||
+		!ID.OmitEmpty(a.IDCompanion, &obj.IDCompanion, "IDCompanion") ||
 		!ID.OmitEmpty(a.IDVulnerability, &obj.IDVulnerability, "IDVulnerability") {
 
 		logger.Lava(types.V("0.2.0"), "Using not standarized error")
