@@ -51,35 +51,7 @@ func (formAnswersNS) Create(c *gin.Context) {
 		),
 	)
 
-	go func(answerID string) {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Error("panic in background worker: ", r)
-			}
-		}()
-
-		formResult := dao.Forms.GetByID(answers.ID.Hex(), models.Filter.Empty())
-		if formResult.IsErr() {
-			logger.Error("Failed to get form in db: ", formResult.Error())
-			handleErrorAnswer(c, formResult.Error())
-		}
-		form := formResult.Value()
-
-		for _, q := range form.QuestionsInfo {
-			questionResult := dao.FormQuestions.GetByID(q.IDQuestion.Hex(), models.Filter.Empty())
-			if questionResult.IsErr() {
-				logger.Error("Failed to get form in db: ", questionResult.Error())
-
-			}
-			question := questionResult.Value()
-			qOID := q.IDQuestion
-			qWeight := q.Weight
-			aWeights := question.Options
-
-		}
-
-		//configs.WebHooks.SendTo("", "")
-	}(answers.ID.Hex())
+	go generateAlert(answers)
 
 }
 
@@ -134,3 +106,46 @@ func (formAnswersNS) UpdateByID(c *gin.Context) {}
 func (formAnswersNS) PatchByID(c *gin.Context) {}
 
 func (formAnswersNS) DeleteByID(c *gin.Context) {}
+
+func generateAlert(answers models.FormAnswerDB) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic in background worker: ", r)
+		}
+	}()
+
+	formResult := dao.Forms.GetByID(answers.ID.Hex(), models.Filter.Empty())
+	if formResult.IsErr() {
+		logger.Error("Failed to get form in db: ", formResult.Error())
+		// Send error data
+		return
+	}
+
+	form := formResult.Value()
+	riskValue := 0
+
+	for _, questionInfo := range form.QuestionsInfo {
+		questionResult := dao.FormQuestions.GetByID(questionInfo.IDQuestion.Hex(), models.Filter.Empty())
+
+		if questionResult.IsErr() {
+			logger.Error("Failed to get question in db: ", questionResult.Error())
+			logger.Error("Question ID:", questionInfo.IDQuestion.Hex())
+			continue
+		}
+
+		question := questionResult.Value()
+		questionWeight := questionInfo.Weight
+		answersWeights := question.Options
+
+		riskValue = utils.Reduce(answersWeights, func(acc int, o models.Option) int {
+			utils.Map(answers.Answers, func(a models.Answers[models.DBID]) string {
+				return a.ProvidedAnswers
+			})
+			//utils.Contains(, o.Text)
+			return 0
+		}, riskValue)
+
+	}
+
+	//configs.WebHooks.SendTo("", "")
+}

@@ -7,28 +7,30 @@ import (
 	"errors"
 )
 
-type answer[ID any] struct {
-	IDQuestion ID       `json:"id_question" bson:"id_question,omitempty"`
-	Answers    []string `json:"answers" bson:"answers,omitempty"`
-}
+type Answers[ID comparable] map[ID]string
+
+//	type Answer[ID any] struct {
+//		IDQuestion      ID       `json:"id_question" bson:"id_question,omitempty"`
+//		ProvidedAnswers []string `json:"answers" bson:"answers,omitempty"`
+//	}
 type FormAnswerDB struct {
-	ID        DBID           `json:"id" bson:"_id,omitempty"`
-	IDForm    DBID           `json:"id_form" bson:"id_form,omitempty"`
-	Answers   []answer[DBID] `json:"answers" bson:"answers,omitempty"`
-	CreatedAt DBDateTime     `json:"created_at,omitzero" bson:"created_at,omitempty"`
-	UpdatedAt DBDateTime     `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
-	DeletedAt DBDateTime     `json:"deleted_at" bson:"deleted_at"`
+	ID        DBID          `json:"id" bson:"_id,omitempty"`
+	IDForm    DBID          `json:"id_form" bson:"id_form,omitempty"`
+	Answers   Answers[DBID] `json:"answers" bson:"answers,omitempty"`
+	CreatedAt DBDateTime    `json:"created_at,omitzero" bson:"created_at,omitempty"`
+	UpdatedAt DBDateTime    `json:"updated_at,omitzero" bson:"updated_at,omitempty"`
+	DeletedAt DBDateTime    `json:"deleted_at" bson:"deleted_at"`
 }
 type FormAnswerCreate struct {
-	IDForm  string           `json:"id_form"`
-	Answers []answer[string] `json:"answers"`
+	IDForm  string          `json:"id_form"`
+	Answers Answers[string] `json:"answers"`
 }
 type FormAnswerResponse struct {
-	ID        string           `json:"id"`
-	IDForm    string           `json:"id_form"`
-	Answers   []answer[string] `json:"answers"`
-	CreatedAt DBDateTime       `json:"created_at,omitzero"`
-	UpdatedAt DBDateTime       `json:"updated_at,omitzero"`
+	ID        string          `json:"id"`
+	IDForm    string          `json:"id_form"`
+	Answers   Answers[string] `json:"answers"`
+	CreatedAt DBDateTime      `json:"created_at,omitzero"`
+	UpdatedAt DBDateTime      `json:"updated_at,omitzero"`
 }
 
 func (o FormAnswerCreate) ToInsert() types.Result[FormAnswerDB] {
@@ -43,14 +45,15 @@ func (o FormAnswerCreate) ToInsert() types.Result[FormAnswerDB] {
 		return types.ResultErr[FormAnswerDB](errors.New("Invalid IDForm"))
 	}
 
-	obj.Answers = make([]answer[DBID], len(o.Answers))
-	for i, answer := range o.Answers {
-		if !ID.Ensure(answer.IDQuestion, &obj.Answers[i].IDQuestion, "IDQuestionType") {
+	obj.Answers = make(Answers[DBID], len(o.Answers))
+	var oid DBID
+	for id, answer := range o.Answers {
+		if !ID.Ensure(id, &oid, "IDQuestionType") {
 			logger.Lava(types.V("0.2.1"), "Using not standarized error")
 			return types.ResultErr[FormAnswerDB](errors.New("Invalid IDQuestionType"))
 		}
 
-		obj.Answers[i].Answers = answer.Answers
+		obj.Answers[oid] = answer
 	}
 
 	return types.ResultOk(obj)
@@ -65,13 +68,17 @@ func (o FormAnswerCreate) ToUpdate() types.Result[FormAnswerDB] {
 		return types.ResultErr[FormAnswerDB](errors.New("Invalid IDForm"))
 	}
 
-	for i, answer := range o.Answers {
-		questionID := answer.IDQuestion
+	obj.Answers = make(Answers[DBID], len(o.Answers))
 
-		if !ID.OmitEmpty(questionID, &obj.Answers[i].IDQuestion, "IDQuestionType") {
+	for id, answer := range o.Answers {
+		var oid DBID
+
+		if !ID.OmitEmpty(id, &oid, "IDQuestionType") {
 			logger.Lava(types.V("0.2.1"), "Using not standarized error")
 			return types.ResultErr[FormAnswerDB](errors.New("Invalid IDQuestionType"))
 		}
+
+		obj.Answers[oid] = answer
 	}
 
 	return types.ResultOk(obj)
@@ -80,10 +87,10 @@ func (o FormAnswerDB) ToResponse() FormAnswerResponse {
 	return FormAnswerResponse{
 		ID:     o.ID.Hex(),
 		IDForm: o.IDForm.Hex(),
-		Answers: utils.Map(o.Answers, func(a answer[DBID]) answer[string] {
-			return answer[string]{
-				IDQuestion: a.IDQuestion.Hex(),
-				Answers:    a.Answers,
+		Answers: utils.Map(o.Answers, func(a Answers[DBID]) Answers[string] {
+			return Answers[string]{
+				IDQuestion:      a.IDQuestion.Hex(),
+				ProvidedAnswers: a.ProvidedAnswers,
 			}
 		}),
 		CreatedAt: o.CreatedAt,

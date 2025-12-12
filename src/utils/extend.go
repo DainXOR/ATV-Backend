@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 /* Functional utilities for single values */
@@ -132,6 +134,11 @@ func All[T any](slice []T, predicate func(T) bool) bool {
 	}
 
 	return cmp
+}
+func Contains[S ~[]T, T any](slice S, value T) bool {
+	return slices.ContainsFunc(slice, func(e T) bool {
+		return cmp.Equal(e, value)
+	})
 }
 
 /* Functional utilities for maps */

@@ -31,7 +31,7 @@ type AlertResponse struct {
 	IDPriority  string `json:"id_priority"`
 	IDStudent   string `json:"id_student"`
 	IDCompanion string `json:"id_companion"`
-	CompanionName
+	// CompanionName
 	IDVulnerability string     `json:"id_vulnerability"`
 	Message         string     `json:"message"`
 	CreatedAt       DBDateTime `json:"created_at"`
