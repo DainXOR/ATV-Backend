@@ -85,14 +85,9 @@ func (o FormAnswerCreate) ToUpdate() types.Result[FormAnswerDB] {
 }
 func (o FormAnswerDB) ToResponse() FormAnswerResponse {
 	return FormAnswerResponse{
-		ID:     o.ID.Hex(),
-		IDForm: o.IDForm.Hex(),
-		Answers: utils.Map(o.Answers, func(a Answers[DBID]) Answers[string] {
-			return Answers[string]{
-				IDQuestion:      a.IDQuestion.Hex(),
-				ProvidedAnswers: a.ProvidedAnswers,
-			}
-		}),
+		ID:        o.ID.Hex(),
+		IDForm:    o.IDForm.Hex(),
+		Answers:   utils.DMap(o.Answers, func(id DBID, val string) (string, string) { return id.Hex(), val }),
 		CreatedAt: o.CreatedAt,
 		UpdatedAt: o.UpdatedAt,
 	}

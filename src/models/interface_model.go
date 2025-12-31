@@ -125,8 +125,7 @@ func (iTime) Parse(date string) (DBDateTime, error) {
 	return parsedTime, nil
 }
 
-type iFilters struct {
-}
+type iFilters struct{}
 
 var Filter iFilters
 
